@@ -3,8 +3,8 @@ from flask_jwt_extended import create_access_token, jwt_required, JWTManager, ge
 from App.models import User
 from App.database import db
 
-def login(username, password):
-  result = db.session.execute(db.select(User).filter_by(username=username))
+def login(name, password):
+  result = db.session.execute(db.select(User).filter_by(name=name))
   user = result.scalar_one_or_none()
   if user and user.check_password(password):
     # Store ONLY the user id as a string in JWT 'sub'
