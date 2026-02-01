@@ -23,11 +23,23 @@
 
 <!-- The Actual Homepage Content-->
 {% endblock %} {{ super() }} {% block content %}
+<div class="header">
+  Welcome, {{ driver_name }}! 
+</div>
 <div class="page-container">
   <!-- This is used to set a height for the map container on this page, you dont need it on others-->
   <div id="map-container" class="map-container">
     <!-- This is the element for the map to be instantiated in-->
     <div id="map" class="map"></div>
+  </div>
+</div>
+
+<div class=".button-container">
+    <button class="bottom-btn" onclick="location.href='/driver/requests'">Requests</button>
+    <button class="bottom-btn" onclick="location.href='/driver/inventory'">Inventory</button>
+    <button class="bottom-btn" onclick="location.href='/driver/orders'">Orders</button>
+    <button class="bottom-btn" onclick="location.href='/driver/stops'">Stops</button>
+    <button class="bottom-btn" onclick="location.href='/driver/transactions'">Transaction</button>
   </div>
 </div>
 
