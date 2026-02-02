@@ -1,34 +1,65 @@
 from App.models import User
+from App.models.driver import Driver
+from App.models.customer import Customer
+from App.models.owner import Owner
 from App.database import db
 
-def create_user(username, password):
-    newuser = User(username=username, password=password)
+def create_user(name, email, password, address, role="customer"):  # Added address parameter
+    """Create a new user with the specified role"""
+    existing_user = get_user_by_username(name)
+    if existing_user:
+        return None
+    
+    newuser = User(name=name, email=email, password=password, address=address, role=role)
     db.session.add(newuser)
     db.session.commit()
     return newuser
 
-def get_user_by_username(username):
-    result = db.session.execute(db.select(User).filter_by(username=username))
+def create_driver(name, email, password, address):  # Removed default None
+    """Create a driver user with address"""
+    existing_user = get_user_by_username(name)
+    if existing_user:
+        return None
+    
+    new_driver = Driver(name=name, email=email, password=password, address=address)
+    db.session.add(new_driver)
+    db.session.commit()
+    return new_driver
+
+def create_customer(name, email, password, address):  # Added address parameter
+    """Create a customer user"""
+    return create_user(name, email, password, address, role="customer")
+
+def create_owner(name, email, password, address):  # Added address parameter
+    """Create an owner user"""
+    return create_user(name, email, password, address, role="owner")
+
+def get_user_by_username(name):
+    """Get user by username"""
+    result = db.session.execute(db.select(User).filter_by(name=name))
     return result.scalar_one_or_none()
 
 def get_user(id):
+    """Get user by ID"""
     return db.session.get(User, id)
 
 def get_all_users():
+    """Get all users"""
     return db.session.scalars(db.select(User)).all()
 
 def get_all_users_json():
+    """Get all users as JSON"""
     users = get_all_users()
     if not users:
         return []
     users = [user.get_json() for user in users]
     return users
 
-def update_user(id, username):
+def update_user(id, name):
+    """Update user's name"""
     user = get_user(id)
     if user:
-        user.username = username
-        # user is already in the session; no need to re-add
+        user.name = name
         db.session.commit()
-        return True
+        return user
     return None

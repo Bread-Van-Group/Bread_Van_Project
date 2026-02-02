@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Bread Van Project</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/login.css') }}">
+</head>
+<body>
+    <div class="login-container">
+        <h1>🚐 Bread Van Login</h1>
+        
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for message in messages %}
+                        <div class="flash error">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <form method="POST" action="{{ url_for('auth_views.login_action') }}">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required autofocus>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <button type="submit">Login</button>
+        </form>
+        
+        <div style="margin-top: 20px; text-align: center; color: #666; font-size: 14px;">
+            <p>Test Accounts:</p>
+            <p><strong>Driver:</strong> John_Driver / password</p>
+            <p><strong>Owner:</strong> Alice_Owner / password</p>
+            <p><strong>Customer:</strong> Bob_Customer / password</p>
+        </div>
+    </div>
+</body>
+</html>

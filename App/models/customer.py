@@ -11,6 +11,5 @@ class Customer(User):
     }
     
     def __init__(self, name, email, password, address):
-        super().__init__(name, email, password, role="customer")
-        self.address = address
+        super().__init__(name=name, email=email, password=password, address=address, role="customer")
     
