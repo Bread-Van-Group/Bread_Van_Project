@@ -23,41 +23,61 @@
 
 <!-- The Actual Homepage Content-->
 {% endblock %} {{ super() }} {% block content %}
-
-<div class="header">Welcome, Driver!
-  <div class="logo">LOGO</div>
-</div>
-
-
-
 <div class="page-container">
   <!-- This is used to set a height for the map container on this page, you dont need it on others-->
   <div id="map-container" class="map-container">
     <!-- This is the element for the map to be instantiated in-->
     <div id="map" class="map"></div>
   </div>
-</div>
-  <div class="button-container">
-    <button class="bottom-btn">Requests</button>
-    <button class="bottom-btn">Inventory</button>
-    <button class="bottom-btn">Orders</button>
-    <button class="bottom-btn">Stops</button>
-    <button class="bottom-btn">Transaction</button>
+  <div class="bottom-btn-container">
+    <button class="bottom-btn">
+      <i class="fa-solid fa-bell"></i>
+      <span>NEW REQUESTS</span>
+    </button>
+    <button class="bottom-btn">
+      <i class="fa-solid fa-box"></i>
+      <span>INVENTORY</span>
+    </button>
+    <button class="bottom-btn">
+      <i class="fa-solid fa-receipt"></i>
+      <span>TRANSACTION</span>
+    </button>
   </div>
 </div>
 
 {% endblock %} {% block scripts %}
 <script>
   //Map initialization
+
+  //Production Map Config
+  // var map = L.map("map", {
+  //   center: [10.234144, -61.43942],
+  //   zoom: 16,
+  //   maxBoundsViscosity: 1.0,
+  //   minZoom: 16,
+  //   maxZoom: 18,
+  //   zoomControl: false,
+  //   scrollWheelZoom: true,
+  //   wheelPxPerZoomLevel: 200,
+  //   maxBounds: [
+  //     [10.24166, -61.45022],
+  //     [10.2274, -61.42478],
+  //   ],
+  // });
+
+  //Testing Map config
   var map = L.map("map", {
-    center: [10.234144, -61.43942],
-    zoom: 16,
-    minZoom: 16,
-    maxZoom: 18,
+    center: [10.64179, -61.400861],
     maxBounds: [
-      [10.24166, -61.45022],
-      [10.2274, -61.42478],
+      [10.63555, -61.38032],
+      [10.64829, -61.41387],
     ],
+    maxBoundsViscosity: 1.0,
+    zoom: 17,
+    minZoom: 17,
+    maxZoom: 18,
+    scrollWheelZoom: true,
+    wheelPxPerZoomLevel: 200,
   });
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 18,

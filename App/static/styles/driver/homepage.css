@@ -1,96 +1,153 @@
-.header {
-  background-color: #ADD8E6; 
-  padding: 10px;
-  text-align: center;
-  font-size: 30px;
-  font-weight: bold;
-  font-family: Arial, Helvetica, sans-serif;
-  border-color: #000000;
-  border: 2px solid;
-}
-
-.logo {
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  width: 100px;
-  height: 50px;
-  background-color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  font-family: Arial, Helvetica, sans-serif;
-  border-color: #000000;
-  border: 2px solid;
-}
-
 * {
   box-sizing: border-box;
 }
 
-body, html {
+body,
+html {
   margin: 0;
   padding: 0;
   height: 100vh;
   overflow: hidden;
-  background-color: #168a06;
+  background-color: #fcfbf5;
 }
 
 .page-container {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 140px);
-  width: 100%;
+  height: 100vh;
 }
 
 .map-container {
   flex: 1;
   width: 100%;
-  padding: 20px;
-  min-height: 0;  
+  padding: 32px;
+  min-height: 0;
 }
 
 .map {
   width: 100%;
   height: 100%;
-  border-radius: 25px;  
+  border-radius: 25px;
+  box-shadow:
+    rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
+    rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
 }
 
-.button-container {
+.bottom-btn-container {
   display: flex;
-  justify-content: space-evenly;  
+  justify-content: center;
   align-items: center;
-  background-color: #168a06;  
-  padding: 15px 20px;
-  box-shadow: 0 -3px 10px rgba(0,0,0,0.1);
-  gap: 10px;
+  padding: 12px 24px;
+  box-shadow:
+    rgba(139, 101, 61, 0.15) 0px -4px 12px 0px,
+    rgba(101, 67, 33, 0.08) 0px -2px 6px 0px;
+  gap: 5vw;
   width: 100%;
-  min-height: 80px;  
+  min-height: 14vh;
+  background: linear-gradient(to bottom, #fffcf5, #f8f0ce);
+  border-top: 1px solid rgba(232, 220, 200, 0.6);
+  position: relative;
+}
+
+.bottom-btn-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(218, 165, 32, 0.3) 20%,
+    rgba(218, 165, 32, 0.3) 80%,
+    transparent
+  );
 }
 
 .bottom-btn {
-  flex: 1;  
-  padding: 15px 20px;
-  background-color: #ADD8E6; 
-  color: #000;  
-  border: 2px solid #333;  
-  border-radius: 15px;  
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: bold;
-  text-transform: uppercase;  
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  min-width: 15vw;
+  border-radius: 15px;
+  font-size: 2.7rem;
+  font-family: "Caveat Brush", cursive;
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: 0.5px;
+  border: none;
+  box-shadow:
+    rgba(139, 101, 61, 0.3) 0px 4px 8px -1px,
+    rgba(101, 67, 33, 0.2) 0px 2px 4px -1px,
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  background: linear-gradient(145deg, #e8a764, #d89752);
+  color: white;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.bottom-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.bottom-btn:hover::before {
+  left: 100%;
+}
+
+.bottom-btn-container .bottom-btn:last-child {
+  background: linear-gradient(145deg, #c23208, #a42802);
+  box-shadow:
+    rgba(164, 40, 2, 0.4) 0px 4px 8px -1px,
+    rgba(101, 30, 2, 0.3) 0px 2px 4px -1px,
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.bottom-btn i {
+  margin-right: 28px;
+  font-size: 3rem;
+  transition: transform 0.3s ease;
 }
 
 .bottom-btn:hover {
-  background-color: #87CEEB;  
+  background: linear-gradient(145deg, #f0b272, #e09a5e);
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  box-shadow:
+    rgba(139, 101, 61, 0.4) 0px 8px 16px -2px,
+    rgba(101, 67, 33, 0.3) 0px 6px 12px -2px,
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
+}
+
+.bottom-btn:hover i {
+  transform: scale(1.05);
+}
+
+.bottom-btn-container .bottom-btn:last-child:hover {
+  background: linear-gradient(145deg, #d44010, #b82f05);
 }
 
 .bottom-btn:active {
   transform: translateY(0);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  box-shadow:
+    rgba(139, 101, 61, 0.3) 0px 3px 6px -1px,
+    rgba(101, 67, 33, 0.2) 0px 2px 4px -1px,
+    inset 0 2px 4px rgba(101, 67, 33, 0.2);
 }
