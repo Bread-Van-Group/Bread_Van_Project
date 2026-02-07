@@ -181,9 +181,14 @@
   function populateSideContent(marker) {
     const sideContentBody = document.getElementById("side-content-body");
 
-    const preOrderHtml = marker.orders
-      .map((item) => {
-        return `
+    let preOrderHtml;
+
+    if (marker.orders.length == 0) {
+      preOrderHtml = `<p>No Order Attached<p>`;
+    } else {
+      preOrderHtml = marker.orders
+        .map((item) => {
+          return `
     <div class="pre-order-item">
       <div>
         <img src="${item.image_url}" alt="${item.name}" />
@@ -192,8 +197,9 @@
       <div>${item.quantity}</div>
     </div>
   `;
-      })
-      .join("");
+        })
+        .join("");
+    }
 
     const html = `<h2>${marker.customer_name}</h2>
         <div class="address-details">

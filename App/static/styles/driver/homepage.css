@@ -111,6 +111,14 @@ html {
   flex-direction: column;
 }
 
+.pre-order-list p {
+  margin-left: 24px;
+  font-family: "Shadows Into Light Two", cursive;
+  font-size: large;
+  font-weight: 400;
+  font-style: oblique;
+}
+
 .address-details p {
   margin-left: 24px;
   font-family: "Shadows Into Light Two", cursive;
