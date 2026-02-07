@@ -4,7 +4,6 @@ from .user import User
 class Customer(User):
     __tablename__ = "customer"
     id = db.Column(db.Integer, db.ForeignKey("users.id"), primary_key=True)
-    address = db.Column(db.String(256), nullable=False)
 
     __mapper_args__ = {
         "polymorphic_identity": "customer"

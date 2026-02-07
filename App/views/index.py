@@ -1,6 +1,6 @@
 from flask import Blueprint, redirect, render_template, request, send_from_directory, jsonify, url_for
 from flask_jwt_extended import jwt_required, current_user, verify_jwt_in_request
-from App.controllers import create_user, initialize
+from App.controllers import create_user, initialize, get_all_pending_stop_requests, get_all_active_stop_requests, get_all_stop_requests
 
 index_views = Blueprint('index_views', __name__, template_folder='../templates')
 
@@ -11,7 +11,7 @@ def index():
         verify_jwt_in_request()
         # User is authenticated, redirect based on role
         if current_user.role == 'driver':
-            return redirect(url_for('index_views.driver_homepage'))
+            return redirect(url_for('driver_views.driver_homepage'))
         elif current_user.role == 'owner':
             return redirect(url_for('index_views.owner_homepage'))
         elif current_user.role == 'customer':
@@ -22,12 +22,6 @@ def index():
     
     return render_template('login.html')
 
-@index_views.route('/driver/home', methods=['GET'])
-@jwt_required()
-def driver_homepage():
-    if current_user.role != 'driver':
-        return redirect(url_for('index_views.index'))
-    return render_template('driver/homepage.html')
 
 @index_views.route('/owner/home', methods=['GET'])
 @jwt_required()
