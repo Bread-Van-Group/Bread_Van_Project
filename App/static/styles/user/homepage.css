@@ -94,3 +94,50 @@ body, html {
   transform: translateY(0);
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
+
+/* using for card in owner */
+.content-card {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 25px;
+  margin: 20px;
+  border: 1px solid #eaeaea;
+}
+
+.section {
+  margin-bottom: 25px;
+}
+
+.section h2 {
+  color: #2c3e50;
+  font-size: 1.4rem;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.route-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #f5f5f5;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.route-item:hover {
+  background-color: #f9f9f9;
+}
+
+.route-item.selected {
+  background-color: #e3f2fd;
+  border-left: 4px solid #2196f3;
+}
+
+.time {
+  color: #7f8c8d;
+  font-weight: 600;
+  min-width: 70px;
+  text-align: right;
+}

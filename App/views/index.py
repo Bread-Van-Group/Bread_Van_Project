@@ -43,6 +43,14 @@ def customer_homepage():
         return redirect(url_for('index_views.index'))
     return render_template('customer/homepage.html')
 
+
+@index_views.route('/owner/report', methods=['GET'])
+@jwt_required()
+def owner_report():
+    if current_user.role != 'owner':
+        return redirect(url_for('index_views.index'))
+    return render_template('owner/report.html')
+
 @index_views.route('/init', methods=['GET'])
 def init():
     initialize()
