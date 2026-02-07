@@ -13,10 +13,12 @@
 }
 
 
+
 .main-content-scrollable {
   flex: 1;
   overflow-y: auto;
   padding: 0 20px;
+  padding-top: 10px;
   display: flex;
   flex-direction: column;
 }
@@ -38,8 +40,10 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 25px;
+  position: relative;
+  z-index: 10; 
+  padding-bottom: 1rem;
 }
-
 .report-header h1 {
   color: #2c3e50;
   font-size: 1.8rem;
