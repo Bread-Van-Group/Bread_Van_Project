@@ -9,6 +9,9 @@ from .user import (
     get_all_users_json,
     update_user
 )
+
+from App.models import StopRequest
+
 from .auth import login, setup_jwt, add_auth_context
 from App.database import db
 
@@ -46,3 +49,13 @@ def initialize():
     )
 
     print(f'Created customer: {customer.name} with Email: {customer.email}')
+
+
+    #Stop Request Creation
+    stop1 = StopRequest(customer.id, driver.id, '123 Main Street, St. Augustine', 10.640808716845667,-61.39583945274354, 'active')
+    stop2 = StopRequest(customer.id, driver.id, '456 Oak Avenue, Toco', 10.64294795513197, -61.395367383956916,  'active' )
+
+    print(f'Stop requests created')
+
+    db.session.add_all([stop1, stop2])
+    db.session.commit()

@@ -26,13 +26,27 @@ def create_driver(name, email, password, address):  # Removed default None
     db.session.commit()
     return new_driver
 
-def create_customer(name, email, password, address):  # Added address parameter
+def create_customer(name, email, password, address):  
     """Create a customer user"""
-    return create_user(name, email, password, address, role="customer")
+    existing_user = get_user_by_username(name)
+    if existing_user:
+        return None
+    
+    new_customer = Customer(name=name, email=email, password=password, address=address)
+    db.session.add(new_customer)
+    db.session.commit()
+    return new_customer
 
-def create_owner(name, email, password, address):  # Added address parameter
+def create_owner(name, email, password, address):  
     """Create an owner user"""
-    return create_user(name, email, password, address, role="owner")
+    existing_user = get_user_by_username(name)
+    if existing_user:
+        return None
+    
+    new_owner = Owner(name=name, email=email, password=password, address=address)
+    db.session.add(new_owner)
+    db.session.commit()
+    return new_owner
 
 def get_user_by_username(name):
     """Get user by username"""
