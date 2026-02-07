@@ -20,8 +20,8 @@ def get_customer_stop_requests(customer_id):
     
     return customer.stop_requests
 
-def create_stop_request(customer_id, address, y_coord, x_coord, orders=None):
-    new_stop_request = StopRequest(customer_id=customer_id, driver_id=None, address=address, y_coord=y_coord, x_coord=x_coord)
+def create_stop_request(customer_id, address, lat, lng, orders=None):
+    new_stop_request = StopRequest(customer_id=customer_id, driver_id=None, address=address,lat=lat, lng=lng)
     db.session.add(new_stop_request)
     db.session.commit()
 

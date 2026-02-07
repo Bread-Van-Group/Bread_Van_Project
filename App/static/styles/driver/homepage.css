@@ -17,10 +17,220 @@ html {
   height: 100vh;
 }
 
-.map-container {
+.top-content-container {
+  display: flex;
+  flex-direction: row;
   flex: 1;
   width: 100%;
-  padding: 32px;
+  padding: 24px;
+  min-height: 0;
+}
+
+.side-content {
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  border-radius: 25px;
+  height: 100%;
+  width: 0%;
+  box-shadow:
+    rgba(0, 0, 0, 0.16) 0px 3px 6px,
+    rgba(0, 0, 0, 0.23) 0px 3px 6px;
+  padding: 0px;
+  margin-right: 0px;
+  gap: 4px;
+  opacity: 0;
+  transition:
+    width 0.3s ease-out 0.1s,
+    padding 0.3s ease-out 0.1s,
+    margin-right 0.3s ease-out 0.1s,
+    opacity 0.5s ease-in-out 0s;
+}
+
+.side-content-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 2vh;
+}
+
+.side-content-header h2 {
+  flex: 1;
+  font-family: "Caveat Brush", cursive;
+  font-weight: 400;
+  font-style: italic;
+  font-size: 3rem;
+  letter-spacing: 0.5px;
+  margin: 0;
+  color: #e07b39;
+}
+
+.side-content-header i {
+  font-size: 2rem;
+  font-style: italic;
+  margin-right: 12px;
+  background-color: #e07b39;
+  border-radius: 50%;
+  color: white;
+  padding: 8px;
+}
+
+.side-content-header i:hover {
+  background-color: #c66a2e;
+  cursor: pointer;
+}
+
+.side-content-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.side-content-body h2 {
+  font-family: "Caveat Brush", cursive;
+  font-weight: 200;
+  font-style: italic;
+  font-size: 2.2rem;
+  letter-spacing: 0.5px;
+  margin: 0;
+  margin-bottom: 2vh;
+}
+
+.side-content-body h3 {
+  font-family: "Caveat Brush", cursive;
+  font-weight: 200;
+  font-style: italic;
+  font-size: 1.8rem;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.address-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.address-details p {
+  margin-left: 24px;
+  font-family: "Shadows Into Light Two", cursive;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.pre-order-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5vh;
+}
+
+.pre-order-list {
+  display: flex;
+  flex-direction: column;
+  margin-left: 4px;
+  gap: 4px;
+}
+
+.pre-order-item {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  font-family: "Shadows Into Light Two", cursive;
+  font-weight: 400;
+  font-style: italic;
+  font-size: large;
+  border-radius: 10px;
+  padding: 8px 16px;
+  box-shadow:
+    rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
+    rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+}
+
+.request-buttons-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  align-items: start;
+  margin-top: auto;
+  padding: 24px;
+  gap: 10px;
+}
+
+.request-btn {
+  flex: 1;
+  font-family: "Caveat Brush", cursive;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 1.4rem;
+  padding: 4px;
+  letter-spacing: 0.5px;
+  border: none;
+  border-radius: 15px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  min-width: 8vw;
+}
+
+/* Cancel Button (Red/Destructive) */
+.accept-btn {
+  background: linear-gradient(145deg, #e74c3c, #c0392b);
+  box-shadow:
+    rgba(231, 76, 60, 0.4) 0px 4px 8px -1px,
+    rgba(192, 57, 43, 0.3) 0px 2px 4px -1px,
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.accept-btn:hover {
+  background: linear-gradient(145deg, #ec7063, #e74c3c);
+  transform: translateY(-2px);
+  box-shadow:
+    rgba(231, 76, 60, 0.5) 0px 8px 16px -2px,
+    rgba(192, 57, 43, 0.4) 0px 6px 12px -2px,
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    rgba(192, 57, 43, 0.35) 0px -2px 6px 0px inset;
+}
+
+.accept-btn:active {
+  transform: translateY(0);
+  box-shadow:
+    rgba(231, 76, 60, 0.3) 0px 3px 6px -1px,
+    rgba(192, 57, 43, 0.2) 0px 2px 4px -1px,
+    inset 0 2px 4px rgba(192, 57, 43, 0.3);
+}
+
+/* Complete Button (Green/Success) */
+.decline-btn {
+  background: linear-gradient(145deg, #27ae60, #229954);
+  box-shadow:
+    rgba(39, 174, 96, 0.4) 0px 4px 8px -1px,
+    rgba(34, 153, 84, 0.3) 0px 2px 4px -1px,
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.decline-btn:hover {
+  background: linear-gradient(145deg, #58d68d, #27ae60);
+  transform: translateY(-2px);
+  box-shadow:
+    rgba(39, 174, 96, 0.5) 0px 8px 16px -2px,
+    rgba(34, 153, 84, 0.4) 0px 6px 12px -2px,
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    rgba(34, 153, 84, 0.35) 0px -2px 6px 0px inset;
+}
+
+.decline-btn:active {
+  transform: translateY(0);
+  box-shadow:
+    rgba(39, 174, 96, 0.3) 0px 3px 6px -1px,
+    rgba(34, 153, 84, 0.2) 0px 2px 4px -1px,
+    inset 0 2px 4px rgba(34, 153, 84, 0.3);
+}
+
+.map-container {
+  height: 100%;
+  width: 100%;
   min-height: 0;
 }
 
@@ -150,4 +360,15 @@ html {
     rgba(139, 101, 61, 0.3) 0px 3px 6px -1px,
     rgba(101, 67, 33, 0.2) 0px 2px 4px -1px,
     inset 0 2px 4px rgba(101, 67, 33, 0.2);
+}
+
+.van-icon {
+  background: transparent;
+  border-radius: 50%;
+  background-color: rgb(251, 159, 102);
+  padding: 4px;
+  box-shadow:
+    rgba(0, 0, 0, 0.4) 0px 2px 4px,
+    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+    rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
 }
