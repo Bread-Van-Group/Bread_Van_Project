@@ -17,3 +17,13 @@ class Order(db.Model):
         self.stop_request_id = stop_request_id
         self.quantity = quantity
         self.description = description
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'iinventory_item_idn': self.inventory_item_id,
+            'stop_request_id': self.stop_request_id,
+            'quantity': self.quantity,
+            'description': self.description,
+            'date': self.date,
+        }

@@ -35,7 +35,7 @@ def login_action():
 
     # Redirect based on role
     if user.role == 'driver':
-        response = redirect(url_for('index_views.driver_homepage'))
+        response = redirect(url_for('driver_views.driver_homepage'))
     elif user.role == 'owner':
         response = redirect(url_for('index_views.owner_homepage'))
     elif user.role == 'customer':
