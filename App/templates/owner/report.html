@@ -3,7 +3,8 @@
 {% block title %}Owner Report{% endblock %}
 
 {% block head %}
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles/user/report.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/owner/report.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/owner/homepage.css') }}">
   
   <!-- FIREBASE SDKS FIRST -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -16,83 +17,87 @@
 {% endblock %}
 
 {% block content %}
-<div class="header">Welcome, Owner!
-  <div class="logo">LOGO</div>
-</div>
+<div class="page-wrapper">
+  <!-- Sidebar Navigation -->
+  <div class="sidebar">
+    <div class="sidebar-logo">LOGO</div>
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_homepage') }}">Dashboard</a>
+    <a class="sidebar-btn active" href="{{ url_for('index_views.owner_report') }}">Reports</a>
+    <a class="sidebar-btn" href="#">Inventory</a>
+    <a class="sidebar-btn" href="#">Routes</a>
+  </div>
 
-<div class="page-container">
-  <div class="report-container">
-    <div class="main-content-scrollable">
-      <div class="content-card">
-        <div class="report-header">
-          <h1>Report</h1>
-          <div class="report-actions">
-            <button class="filter-btn">Filter</button>
-            <button class="export-btn">Export</button>
-            <!-- LOADING INDICATOR MOVED HERE (inside actions container) -->
-            <span id="loading-indicator" style="display:none; margin-left:10px;">⏳ Loading...</span>
-          </div>
-        </div> <!-- report-header -->
+  <!-- Main Content Area -->
+  <div class="content-wrapper">
+    <div class="header">Welcome, Owner!
+    </div>
 
-        <!-- CHARTS (now properly inside content-card) -->
-        <div class="charts-grid">
-          <div class="chart-card">
-            <h2>Average Order Value</h2>
-            <canvas id="orderValueChart" width="400" height="200"></canvas>
-          </div>
-          <div class="chart-card">
-            <h2>Customer Traffic</h2>
-            <canvas id="trafficChart" width="400" height="200"></canvas>
-          </div>
-        </div>
+    <div class="page-container">
+      <div class="report-container">
+        <div class="main-content-scrollable">
+          <div class="content-card">
+            <div class="report-header">
+              <h1>Report</h1>
+              <div class="report-actions">
+                <button class="filter-btn">Filter</button>
+                <button class="export-btn">Export</button>
+                <!-- LOADING INDICATOR MOVED HERE (inside actions container) -->
+                <span id="loading-indicator" style="display:none; margin-left:10px;">⏳ Loading...</span>
+              </div>
+            </div> <!-- report-header -->
 
-        <!-- TABLES (now properly inside content-card) -->
-        <div class="tables-grid">
-          <div class="table-card">
-            <h2>Top-Selling Items</h2>
-            <table>
-              <thead>
-                <tr>
-                  <th>Rank</th>
-                  <th>Item</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td>1</td><td></td></tr>
-                <tr><td>2</td><td></td></tr>
-                <tr><td>3</td><td></td></tr>
-                
-              </tbody>
-            </table>
-          </div>
-          <div class="table-card">
-            <h2>Frequently Bought Together</h2>
-            <table>
-              <thead>
-                <tr>
-                  <th>Item</th>
-                  <th>Quantity</th>
-                  <th>Price</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td>Item1</td><td></td><td></td></tr>
-                <tr><td>Item2</td><td></td><td></td></tr>
-              </tbody>
-            </table>
+            <!-- CHARTS (now properly inside content-card) -->
+            <div class="charts-grid">
+              <div class="chart-card">
+                <h2>Average Order Value</h2>
+                <canvas id="orderValueChart" width="400" height="200"></canvas>
+              </div>
+              <div class="chart-card">
+                <h2>Customer Traffic</h2>
+                <canvas id="trafficChart" width="400" height="200"></canvas>
+              </div>
+            </div>
+
+            <!-- TABLES (now properly inside content-card) -->
+            <div class="tables-grid">
+              <div class="table-card">
+                <h2>Top-Selling Items</h2>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Rank</th>
+                      <th>Item</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>1</td><td></td></tr>
+                    <tr><td>2</td><td></td></tr>
+                    <tr><td>3</td><td></td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="table-card">
+                <h2>Frequently Bought Together</h2>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Item</th>
+                      <th>Quantity</th>
+                      <th>Price</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Item1</td><td></td><td></td></tr>
+                    <tr><td>Item2</td><td></td><td></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
-
-
-<div class="button-container">
-  <a class="bottom-btn" href="{{ url_for('index_views.owner_homepage') }}">Dashboard</a>
-  <a class="bottom-btn" href="{{ url_for('index_views.owner_report') }}">Reports</a>
-  <a class="bottom-btn" href="#">Inventory</a>
-  <a class="bottom-btn" href="#">Routes</a>
 </div>
 {% endblock %}
 
