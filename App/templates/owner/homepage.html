@@ -3,47 +3,51 @@
 {% block title %}Owner Dashboard{% endblock %}
 
 {% block head %}
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles/user/homepage.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/owner/homepage.css') }}">
   {{ super() }}
 {% endblock %}
 
 {% block content %}
-<div class="header">Welcome, Owner!
-  <div class="logo">LOGO</div>
-</div>
+<div class="page-wrapper">
+  <!-- Sidebar Navigation -->
+  <div class="sidebar">
+    <div class="sidebar-logo">LOGO</div>
+    <a class="sidebar-btn active" href="{{ url_for('index_views.owner_homepage') }}">Dashboard</a>
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_report') }}">Reports</a>
+    <a class="sidebar-btn" href="#">Inventory</a>
+    <a class="sidebar-btn" href="#">Routes</a>
+  </div>
 
+  <!-- Main Content Area -->
+  <div class="content-wrapper">
+    <div class="header">Welcome, Owner!
+    </div>
 
-  <div class="main-content">
-    <!-- White card container with shadow and rounded corners -->
-    <div class="content-card">
-      <div class="section daily-summary">
-        <h2>Daily Summary</h2>
-        <p>12-2-2026</p>
-        <p>Best-selling Item: Hops</p>
-        <p>Most Profitable Route: Couva</p>
-        <p>Total daily revenue: $3000</p>
-      </div>
-
-      <div class="section today-routes">
-        <h2>Today's Routes</h2>
-        <div class="route-item">
-          <span>Northville - Kingsly</span>
-          <span class="time">11:00am</span>
+    <div class="main-content">
+      <!-- White card container with shadow and rounded corners -->
+      <div class="content-card">
+        <div class="section daily-summary">
+          <h2>Daily Summary</h2>
+          <p>12-2-2026</p>
+          <p>Best-selling Item: Hops</p>
+          <p>Most Profitable Route: Couva</p>
+          <p>Total daily revenue: $3000</p>
         </div>
-        <div class="route-item">
-          <span>Evertown - Hillstreet</span>
-          <span class="time">2:00pm</span>
+
+        <div class="section today-routes">
+          <h2>Today's Routes</h2>
+          <div class="route-item">
+            <span>Northville - Kingsly</span>
+            <span class="time">11:00am</span>
+          </div>
+          <div class="route-item">
+            <span>Evertown - Hillstreet</span>
+            <span class="time">2:00pm</span>
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
-
-<div class="button-container">
-  <a class="bottom-btn" href="{{ url_for('index_views.owner_homepage') }}">Dashboard</a>
-  <a class="bottom-btn" href="{{ url_for('index_views.owner_report') }}">Reports</a>
-  <a class="bottom-btn" href="#">Inventory</a>
-  <a class="bottom-btn" href="#">Routes</a>
 </div>
 {% endblock %}
 
