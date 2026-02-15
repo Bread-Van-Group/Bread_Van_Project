@@ -1,39 +1,43 @@
-from flask import Blueprint, render_template, jsonify, request, flash, send_from_directory, redirect, url_for
-from flask_jwt_extended import jwt_required, current_user, unset_jwt_cookies, set_access_cookies, decode_token
+from flask import Blueprint, render_template, jsonify, request, flash, redirect, url_for
+from flask_jwt_extended import (
+    jwt_required, current_user, unset_jwt_cookies,
+    set_access_cookies, decode_token
+)
 from App.database import db
 from App.models import User
-
 from App.controllers import login
 
 auth_views = Blueprint('auth_views', __name__, template_folder='../templates')
 
-'''
-Page/Action Routes
-'''    
+
+# ── Page / Action Routes ──────────────────────────────────────────────────────
 
 @auth_views.route('/identify', methods=['GET'])
 @jwt_required()
 def identify_page():
-    return render_template('message.html', title="Identify", message=f"You are logged in as {current_user.id} - {current_user.name}")
-    
+    return render_template(
+        'message.html',
+        title="Identify",
+        message=f"You are logged in as {current_user.user_id} - {current_user.email}"
+    )
+
 
 @auth_views.route('/login', methods=['POST'])
 def login_action():
     data = request.form
-    token = login(data['username'], data['password'])
+    # Login now uses email instead of username
+    token = login(data['email'], data['password'])
 
     if not token:
-        flash('Bad username or password given', 'error')
+        flash('Bad email or password given', 'error')
         return redirect(url_for('index_views.index'))
-    
-    # Decode token to get user
+
     decoded_token = decode_token(token)
     user_id = int(decoded_token['sub'])
     user = db.session.get(User, user_id)
 
     flash('Login Successful', 'success')
 
-    # Redirect based on role
     if user.role == 'driver':
         response = redirect(url_for('driver_views.driver_homepage'))
     elif user.role == 'owner':
@@ -54,24 +58,27 @@ def logout_action():
     unset_jwt_cookies(response)
     return response
 
-'''
-API Routes
-'''
+
+# ── API Routes ────────────────────────────────────────────────────────────────
 
 @auth_views.route('/api/login', methods=['POST'])
 def user_login_api():
     data = request.json
-    token = login(data['username'], data['password'])
+    token = login(data['email'], data['password'])
     if not token:
-        return jsonify(message='bad username or password given'), 401
-    response = jsonify(access_token=token) 
+        return jsonify(message='Bad email or password given'), 401
+    response = jsonify(access_token=token)
     set_access_cookies(response, token)
     return response
+
 
 @auth_views.route('/api/identify', methods=['GET'])
 @jwt_required()
 def identify_user():
-    return jsonify({'message': f"username: {current_user.name}, id : {current_user.id}"})
+    return jsonify({
+        'message': f"email: {current_user.email}, id: {current_user.user_id}, role: {current_user.role}"
+    })
+
 
 @auth_views.route('/api/logout', methods=['GET'])
 def logout_api():
