@@ -1,6 +1,8 @@
 from flask import Blueprint, redirect, render_template, request, jsonify, url_for
 from flask_jwt_extended import jwt_required, current_user, verify_jwt_in_request
 from App.controllers import initialize
+from App.controllers.transaction import get_report_data
+
 
 index_views = Blueprint('index_views', __name__, template_folder='../templates')
 
@@ -43,6 +45,15 @@ def owner_report():
         return redirect(url_for('index_views.index'))
     return render_template('owner/report.html')
 
+@index_views.route('/api/owner/report', methods=['GET'])
+@jwt_required()
+def owner_report_api():
+    """Return report data as JSON. Query param: ?period=week|month|year"""
+    if current_user.role != 'owner':
+        return jsonify(message='Unauthorized'), 403
+    period = request.args.get('period', 'week')
+    data = get_report_data(period)
+    return jsonify(data)
 
 @index_views.route('/init', methods=['GET'])
 def init():

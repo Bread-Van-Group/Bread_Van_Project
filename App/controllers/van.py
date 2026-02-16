@@ -37,7 +37,7 @@ def assign_van_to_route(van_id, route_id):
     return van
 
 
-# ── Daily Inventory ───────────────────────────────────────────────────────────
+# Daily Inventory
 
 def get_van_daily_inventory(van_id, target_date=None):
     """Return today's inventory records for a van (or a specified date)."""
