@@ -30,13 +30,6 @@ def owner_homepage():
         return redirect(url_for('index_views.index'))
     return render_template('owner/homepage.html')
 
-@index_views.route('/customer/home', methods=['GET'])
-@jwt_required()
-def customer_homepage():
-    if current_user.role != 'customer':
-        return redirect(url_for('index_views.index'))
-    return render_template('customer/homepage.html')
-
 
 @index_views.route('/owner/report', methods=['GET'])
 @jwt_required()
@@ -53,3 +46,38 @@ def init():
 @index_views.route('/health', methods=['GET'])
 def health_check():
     return jsonify({'status':'healthy'})
+
+@index_views.route('/customer/home', methods=['GET'])
+@jwt_required()
+def customer_homepage():
+    if current_user.role != 'customer':
+        return redirect(url_for('index_views.index'))
+    return render_template('customer/homepage.html')
+
+@index_views.route('/customer/stock', methods=['GET'])
+@jwt_required()
+def customer_stock():
+    if current_user.role != 'customer':
+        return redirect(url_for('index_views.index'))
+    return render_template('customer/stock.html')
+
+@index_views.route('/customer/schedule', methods=['GET'])
+@jwt_required()
+def customer_schedule():
+    if current_user.role != 'customer':
+        return redirect(url_for('index_views.index'))
+    return render_template('customer/schedule.html')
+
+@index_views.route('/customer/profile', methods=['GET'])
+@jwt_required()
+def customer_profile():
+    if current_user.role != 'customer':
+        return redirect(url_for('index_views.index'))
+    return render_template('customer/profile.html')
+
+@index_views.route('/customer/preorder', methods=['GET'])
+@jwt_required()
+def customer_preorder():
+    if current_user.role != 'customer':
+        return redirect(url_for('index_views.index'))
+    return render_template('customer/preorder.html')
