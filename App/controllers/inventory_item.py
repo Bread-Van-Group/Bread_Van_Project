@@ -45,7 +45,7 @@ def delete_item(item_id):
     return True
 
 
-# ── Product Pairings ──────────────────────────────────────────────────────────
+# Product Pairings 
 
 def get_product_pairings(item_id):
     """Return all pairing records that involve a given item."""

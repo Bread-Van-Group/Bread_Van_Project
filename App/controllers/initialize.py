@@ -5,7 +5,12 @@ from .inventory_item import create_item
 from .route import create_route, add_stop_to_route
 from .van import create_van, assign_van_to_route, set_van_inventory
 from .driver import assign_driver_to_route
-from datetime import time, date
+from .transaction import create_transaction
+from App.models import Transaction
+from datetime import time, date, datetime, timedelta, timezone
+import random
+
+UTC_MINUS_4 = timezone(timedelta(hours=-4))
 
 
 def initialize():
@@ -26,7 +31,7 @@ def initialize():
         email="owner@test.com",
         password="password",
     )
-    print(f"✓ Owner created  : {owner.email}")
+    print(f"✓ Owner created   : {owner.email}")
 
     driver = create_driver(
         email="driver@test.com",
@@ -35,7 +40,7 @@ def initialize():
         address="123 Main Street, Port of Spain",
         phone="868-100-0001",
     )
-    print(f"✓ Driver created : {driver.email}")
+    print(f"✓ Driver created  : {driver.email}")
 
     customer = create_customer(
         email="customer@test.com",
@@ -47,17 +52,13 @@ def initialize():
     print(f"✓ Customer created: {customer.email}")
 
     # ── Inventory Items ───────────────────────────────────────────────────────
-    hops  = create_item("Hops Bread",    price=3.50,  category="bread",
-                        description="Classic hops rolls, baked fresh daily")
-    salt  = create_item("Salt Bread",    price=3.00,  category="bread",
-                        description="Soft salted rolls")
-    whole = create_item("Whole Wheat",   price=4.00,  category="bread",
-                        description="Whole wheat loaf")
-    bara  = create_item("Bara",          price=1.50,  category="fried",
-                        description="Fried bara for doubles")
-    channa = create_item("Channa",       price=5.00,  category="filling",
-                         description="Curried channa filling")
+    hops   = create_item("Hops Bread",  price=3.50, category="bread",   description="Classic hops rolls, baked fresh daily")
+    salt   = create_item("Salt Bread",  price=3.00, category="bread",   description="Soft salted rolls")
+    whole  = create_item("Whole Wheat", price=4.00, category="bread",   description="Whole wheat loaf")
+    bara   = create_item("Bara",        price=1.50, category="fried",   description="Fried bara for doubles")
+    channa = create_item("Channa",      price=5.00, category="filling", description="Curried channa filling")
 
+    items = [hops, salt, whole, bara, channa]
     print("✓ Inventory items created")
 
     # ── Route ─────────────────────────────────────────────────────────────────
@@ -88,7 +89,7 @@ def initialize():
         estimated_arrival_time=time(7, 15),
     )
 
-    print(f"✓ Route created  : {route.name} with {2} stops")
+    print(f"✓ Route created   : {route.name} with 2 stops")
 
     # ── Van ───────────────────────────────────────────────────────────────────
     van = create_van(
@@ -98,18 +99,69 @@ def initialize():
     )
     assign_van_to_route(van.van_id, route.route_id)
 
-    # Seed today's inventory on the van
     today = date.today()
-    set_van_inventory(van.van_id, hops.item_id,  quantity_in_stock=50, target_date=today)
-    set_van_inventory(van.van_id, salt.item_id,  quantity_in_stock=40, target_date=today)
-    set_van_inventory(van.van_id, whole.item_id, quantity_in_stock=20, target_date=today)
-    set_van_inventory(van.van_id, bara.item_id,  quantity_in_stock=80, target_date=today)
-    set_van_inventory(van.van_id, channa.item_id,quantity_in_stock=30, target_date=today)
+    set_van_inventory(van.van_id, hops.item_id,   quantity_in_stock=50, target_date=today)
+    set_van_inventory(van.van_id, salt.item_id,   quantity_in_stock=40, target_date=today)
+    set_van_inventory(van.van_id, whole.item_id,  quantity_in_stock=20, target_date=today)
+    set_van_inventory(van.van_id, bara.item_id,   quantity_in_stock=80, target_date=today)
+    set_van_inventory(van.van_id, channa.item_id, quantity_in_stock=30, target_date=today)
 
-    print(f"✓ Van created    : {van.license_plate}")
+    print(f"✓ Van created     : {van.license_plate}")
 
     # ── Driver Assignment ─────────────────────────────────────────────────────
     assign_driver_to_route(driver.driver_id, route.route_id)
     print(f"✓ Driver assigned to route")
+
+    # ─ Dummy Transactions (last 30 days) AI-generated realistic sales patterns for report testing 
+    # Realistic daily sales patterns — heavier on hops/bara, lighter on whole wheat
+    item_weights = [
+        (hops,   0.35),   # 35% chance of being in an order
+        (bara,   0.30),   # 30%
+        (salt,   0.20),   # 20%
+        (channa, 0.10),   # 10%
+        (whole,  0.05),   # 5%
+    ]
+
+    stops = [stop1, stop2]
+    tx_count = 0
+
+    for days_ago in range(30, 0, -1):
+        # Vary sales volume — busier on weekdays, quieter on weekends
+        tx_date = datetime.now(UTC_MINUS_4) - timedelta(days=days_ago)
+        is_weekend = tx_date.weekday() >= 5
+        daily_orders = random.randint(2, 5) if is_weekend else random.randint(6, 14)
+
+        for _ in range(daily_orders):
+            # Pick 1–3 random items for this transaction
+            chosen = random.sample(item_weights, k=random.randint(1, 3))
+            order_items = []
+            total = 0.0
+
+            for item, _ in chosen:
+                qty = random.randint(1, 4)
+                order_items.append({'item_id': item.item_id, 'quantity': qty})
+                total += round(float(item.price) * qty, 2)
+
+            stop = random.choice(stops)
+            tx = create_transaction(
+                customer_id=customer.customer_id,
+                van_id=van.van_id,
+                total_amount=round(total, 2),
+                items=order_items,
+                stop_id=stop.stop_id,
+                payment_method=random.choice(['cash', 'card']),
+            )
+
+            # Backdate the transaction_time so the report charts show history
+            tx.transaction_time = tx_date.replace(
+                hour=random.randint(6, 10),
+                minute=random.randint(0, 59),
+                second=0,
+            )
+            db.session.add(tx)
+            tx_count += 1
+
+    db.session.commit()
+    print(f"✓ Dummy transactions: {tx_count} transactions seeded over last 30 days")
 
     print("\n✅ Database initialised successfully.")

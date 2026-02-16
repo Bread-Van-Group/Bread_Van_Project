@@ -2,7 +2,7 @@ from App.models import User, Driver, Customer, Owner
 from App.database import db
 
 
-# ── Helpers ──────────────────────────────────────────────────────────────────
+# User queries
 
 def get_user(user_id):
     return db.session.get(User, user_id)
@@ -22,7 +22,7 @@ def get_all_users_json():
     return [u.get_json() for u in get_all_users()]
 
 
-# ── Typed creation helpers ────────────────────────────────────────────────────
+# create users
 
 def create_driver(email, password, name, address=None, phone=None):
     """Create a Driver user. Returns None if the email already exists."""
