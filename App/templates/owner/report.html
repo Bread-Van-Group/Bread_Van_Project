@@ -5,14 +5,7 @@
 {% block head %}
   <link rel="stylesheet" href="{{ url_for('static', filename='styles/owner/report.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='styles/owner/homepage.css') }}">
-  
-  <!-- FIREBASE SDKS FIRST -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-  
-  <!-- CHART.JS -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  
   {{ super() }}
 {% endblock %}
 
@@ -25,28 +18,35 @@
     <a class="sidebar-btn active" href="{{ url_for('index_views.owner_report') }}">Reports</a>
     <a class="sidebar-btn" href="#">Inventory</a>
     <a class="sidebar-btn" href="#">Routes</a>
+    <a class="sidebar-btn sidebar-logout" href="{{ url_for('auth_views.logout_action') }}">Logout</a>
   </div>
 
   <!-- Main Content Area -->
   <div class="content-wrapper">
-    <div class="header">Welcome, Owner!
-    </div>
+    <div class="header">Welcome, Owner!</div>
 
     <div class="page-container">
       <div class="report-container">
         <div class="main-content-scrollable">
           <div class="content-card">
+
             <div class="report-header">
               <h1>Report</h1>
               <div class="report-actions">
-                <button class="filter-btn">Filter</button>
-                <button class="export-btn">Export</button>
-                <!-- LOADING INDICATOR MOVED HERE (inside actions container) -->
-                <span id="loading-indicator" style="display:none; margin-left:10px;">⏳ Loading...</span>
+                <div class="custom-dropdown">
+                  <button class="filter-btn" id="dropdown-toggle">
+                    Last 7 Days <span style="margin-left:6px;">▾</span>
+                  </button>
+                  <ul class="dropdown-menu" id="dropdown-menu">
+                    <li data-value="week">Last 7 Days</li>
+                    <li data-value="month">Last 30 Days</li>
+                    <li data-value="year">Last Year</li>
+                  </ul>
+                </div>
               </div>
-            </div> <!-- report-header -->
+            </div>
 
-            <!-- CHARTS (now properly inside content-card) -->
+            <!-- Charts -->
             <div class="charts-grid">
               <div class="chart-card">
                 <h2>Average Order Value</h2>
@@ -58,21 +58,16 @@
               </div>
             </div>
 
-            <!-- TABLES (now properly inside content-card) -->
+            <!-- Tables -->
             <div class="tables-grid">
               <div class="table-card">
                 <h2>Top-Selling Items</h2>
                 <table>
                   <thead>
-                    <tr>
-                      <th>Rank</th>
-                      <th>Item</th>
-                    </tr>
+                    <tr><th>Rank</th><th>Item</th><th>Units Sold</th></tr>
                   </thead>
-                  <tbody>
-                    <tr><td>1</td><td></td></tr>
-                    <tr><td>2</td><td></td></tr>
-                    <tr><td>3</td><td></td></tr>
+                  <tbody id="top-selling-body">
+                    <tr><td colspan="3">Loading...</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -80,267 +75,135 @@
                 <h2>Frequently Bought Together</h2>
                 <table>
                   <thead>
-                    <tr>
-                      <th>Item</th>
-                      <th>Quantity</th>
-                      <th>Price</th>
-                    </tr>
+                    <tr><th>Item 1</th><th>Item 2</th><th>Times Paired</th></tr>
                   </thead>
-                  <tbody>
-                    <tr><td>Item1</td><td></td><td></td></tr>
-                    <tr><td>Item2</td><td></td><td></td></tr>
+                  <tbody id="pairing-body">
+                    <tr><td colspan="3">Loading...</td></tr>
                   </tbody>
                 </table>
               </div>
             </div>
+
           </div>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<style>
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+  }
+  .sidebar-logout {
+    margin-top: auto;
+    color: #e74c3c !important;
+  }
+  .sidebar-logout:hover {
+    background-color: #e74c3c !important;
+    color: white !important;
+  }
+</style>
 {% endblock %}
 
 {% block scripts %}
 <script>
-  //firebase config
-  const firebaseConfig = {
-    apiKey: "AIzaSyDX_8sH3B2dUoK6nvnxX2iZs3WH9qqWr4w",
-    authDomain: "bvatest-fe63f.firebaseapp.com",
-    projectId: "bvatest-fe63f",
-    storageBucket: "bvatest-fe63f.firebasestorage.app",
-    messagingSenderId: "356628783883",
-    appId: "1:356628783883:web:88440a37939afe3876f80e"
-  };
-
-  // Initialize Firebase
-  if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-  }
-  const db = firebase.firestore();
-  
-  
   let orderValueChart, trafficChart;
-  
-  document.addEventListener('DOMContentLoaded', () => {
-   
-    const initChart = (ctx, type, label, color) => {
-      return new Chart(ctx, {
+
+  // Initialise both Chart.js charts
+  function initCharts() {
+    const makeChart = (id, type, label, color) => new Chart(
+      document.getElementById(id).getContext('2d'),
+      {
         type,
-        data: { labels: [], datasets: [{ label, data: [], backgroundColor: color, borderColor: color }] },
+        data: {
+          labels: [],
+          datasets: [{ label, data: [], backgroundColor: color, borderColor: color, fill: false }]
+        },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           plugins: { legend: { display: false } },
           scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
         }
-      });
-    };
-
-    orderValueChart = initChart(
-      document.getElementById('orderValueChart').getContext('2d'),
-      'bar',
-      'Avg Order Value ($)',
-      'rgba(54, 162, 235, 0.7)'
+      }
     );
-    
-    trafficChart = initChart(
-      document.getElementById('trafficChart').getContext('2d'),
-      'line',
-      'Orders',
-      '#ff6384'
-    );
-    trafficChart.options.scales.y.ticks.precision = 0;
-    
-    
-    const loadData = async (period = 'week') => {
-      const loadingEl = document.getElementById('loading-indicator');
-      loadingEl.style.display = 'inline';
-      
-      try {
-        const orders = await fetchOrders(period);
-        updateCharts(orders);
-        updateTables(orders);
-      } catch (error) {
-        console.error("Data load failed:", error);
-        alert(`⚠️ Report load failed: ${error.message}\nCheck console for details`);
-      } finally {
-        loadingEl.style.display = 'none';
-      }
-    };
 
-    //Fetch orders 
-    const fetchOrders = async (period) => {
-      const now = new Date();
-      let startDate = new Date();
-      
-      // Calculate date range
-      switch(period) {
-        case 'week': startDate.setDate(now.getDate() - 7); break;
-        case 'month': startDate.setMonth(now.getMonth() - 1); break;
-        case 'year': startDate.setFullYear(now.getFullYear() - 1); break;
-      }
-      
-      // Convert to Firestore Timestamp
-      const startTs = firebase.firestore.Timestamp.fromDate(startDate);
-      
-      // Query Firestore
-      const snapshot = await db.collection('orders')
-        .where('date', '>=', startTs)
-        .orderBy('date', 'desc')
-        .limit(500)
-        .get();
-      
-      return snapshot.docs.map(doc => {
-        const data = doc.data();
-        
-        // Calculate total 
-        const items = Array.isArray(data.items) ? data.items.map(i => ({
-          name: i.name || 'Unknown',
-          quantity: parseInt(i.quantity) || 0,
-          price: parseFloat(i.price) || 0
-        })) : [];
-        
-        // Calculate total by summing (quantity × price) for each item
-        const calculatedTotal = items.reduce((sum, item) => {
-          return sum + (item.quantity * item.price);
-        }, 0);
-        
-        return {
-          date: data.date?.toDate() || new Date(),
-          total: parseFloat(calculatedTotal.toFixed(2)),
-          items: items
-        };
-      });
-    };
+    orderValueChart = makeChart('orderValueChart', 'bar',  'Avg Order Value ($)', 'rgba(54,162,235,0.7)');
+    trafficChart    = makeChart('trafficChart',    'line', 'Transactions',         '#ff6384');
+  }
 
-    // Update charts
-    const updateCharts = (orders) => {
-      
-      const labels = [];
-      const avgValues = Array(7).fill(0);
-      const traffic = Array(7).fill(0);
-      const dayTotals = Array(7).fill(0);
-      const dayCounts = Array(7).fill(0);
-      
-      
-      const today = new Date();
-      today.setHours(0,0,0,0);
-      for (let i = 6; i >= 0; i--) {
-        const date = new Date();
-        date.setDate(today.getDate() - i);
-        date.setHours(0,0,0,0);
-        labels.push(date.toLocaleDateString('en-US', { weekday: 'short' }));
-        
-        
-        orders.forEach(order => {
-          const orderDate = new Date(order.date);
-          orderDate.setHours(0,0,0,0);
-          if (orderDate.getTime() === date.getTime()) {
-            const idx = 6 - i;
-            dayTotals[idx] += order.total; 
-            dayCounts[idx] += 1;
-            traffic[idx] += 1;
-          }
-        });
-      }
-      
-      // Calculate averages
-      dayTotals.forEach((total, i) => {
-        avgValues[i] = dayCounts[i] > 0 ? parseFloat((total / dayCounts[i]).toFixed(2)) : 0;
-      });
-      
-      // Update charts
-      orderValueChart.data.labels = labels;
-      orderValueChart.data.datasets[0].data = avgValues;
-      orderValueChart.update();
-      
-      trafficChart.data.labels = labels;
-      trafficChart.data.datasets[0].data = traffic;
-      trafficChart.update();
-    };
+  // Fetch report data from Flask API
+  async function loadReport(period = 'week') {
+    try {
+      const res = await fetch(`/api/owner/report?period=${period}`);
+      if (!res.ok) throw new Error(`Server error ${res.status}`);
+      const data = await res.json();
+      updateCharts(data);
+      updateTables(data);
+    } catch (err) {
+      console.error('Report load failed:', err);
+      alert('Failed to load report data. Check the console for details.');
+    }
+  }
 
-    // Update tables with aggregated data
-    const updateTables = (orders) => {
-      // Aggregate items
-      const itemStats = {};
-      orders.forEach(order => {
-        order.items.forEach(item => {
-          if (!itemStats[item.name]) {
-            itemStats[item.name] = { quantity: 0, revenue: 0 };
-          }
-          itemStats[item.name].quantity += item.quantity;
-          itemStats[item.name].revenue += item.quantity * item.price;
-        });
-      });
-      
-      // TOP SELLING ITEMS (by quantity)
-      const topItems = Object.entries(itemStats)
-        .sort((a, b) => b[1].quantity - a[1].quantity)
-        .slice(0, 5)
-        .map(([name, stats], i) => ({ rank: i+1, name, ...stats }));
-      
-      // Update Top-Selling table
-      const topTable = document.querySelector('.tables-grid .table-card:first-child tbody');
-      topTable.innerHTML = topItems.map(item => 
-        `<tr><td>${item.rank}</td><td>${item.name}</td></tr>`
-      ).join('');
-      
-      // TOP REVENUE ITEMS
-      const topRevenue = Object.entries(itemStats)
-        .sort((a, b) => b[1].revenue - a[1].revenue)
-        .slice(0, 5)
-        .map(([name, stats]) => ({ 
-          name, 
-          quantity: stats.quantity,
-          revenue: stats.revenue.toFixed(2) 
-        }));
-      
-      // Update second table
-      const revenueTable = document.querySelector('.tables-grid .table-card:nth-child(2) tbody');
-      revenueTable.innerHTML = topRevenue.map(item => 
-        `<tr><td>${item.name}</td><td>${item.quantity}</td><td>$${item.revenue}</td></tr>`
-      ).join('');
-    };
+  function updateCharts(data) {
+    orderValueChart.data.labels                  = data.daily_labels;
+    orderValueChart.data.datasets[0].data        = data.avg_order_values;
+    orderValueChart.update();
 
-    
-    // Initial load (last 7 days)
-    loadData('week');
-    
-    // Filter change handler
-    document.getElementById('time-filter').addEventListener('change', (e) => {
-      loadData(e.target.value);
+    trafficChart.data.labels                     = data.daily_labels;
+    trafficChart.data.datasets[0].data           = data.traffic;
+    trafficChart.update();
+  }
+
+  function updateTables(data) {
+    // Top-selling items
+    const topBody = document.getElementById('top-selling-body');
+    if (data.top_selling.length === 0) {
+      topBody.innerHTML = '<tr><td colspan="3">No data yet</td></tr>';
+    } else {
+      topBody.innerHTML = data.top_selling
+        .map(item => `<tr><td>${item.rank}</td><td>${item.name}</td><td>${item.quantity}</td></tr>`)
+        .join('');
+    }
+
+    // Frequently bought together
+    const pairingBody = document.getElementById('pairing-body');
+    if (data.frequently_bought_together.length === 0) {
+      pairingBody.innerHTML = '<tr><td colspan="3">No data yet</td></tr>';
+    } else {
+      pairingBody.innerHTML = data.frequently_bought_together
+        .map(p => `<tr><td>${p.item1}</td><td>${p.item2}</td><td>${p.count}</td></tr>`)
+        .join('');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    initCharts();
+    loadReport('week');
+
+    const toggle = document.getElementById('dropdown-toggle');
+    const menu   = document.getElementById('dropdown-menu');
+
+    // Toggle menu open/closed
+    toggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      menu.classList.toggle('open');
     });
-    
-    // Export button
-    document.querySelector('.export-btn').addEventListener('click', () => {
-      alert("✅ Export feature ready!\n\nIn a real app:\n1. Generate CSV of current table data\n2. Use FileSaver.js to download\n3. Or trigger server-side PDF generation");
+
+    // Pick an option
+    menu.querySelectorAll('li').forEach(li => {
+      li.addEventListener('click', () => {
+        toggle.innerHTML = li.textContent + ' <span style="margin-left:6px;">▾</span>';
+        menu.classList.remove('open');
+        loadReport(li.dataset.value);
+      });
     });
+
+    //Close if clicking outside
+    document.addEventListener('click', () => menu.classList.remove('open'));
   });
-  
-  // ADD THIS VERIFICATION SCRIPT
-  setTimeout(() => {
-    db.collection('orders').limit(1).get().then(snapshot => {
-      if (snapshot.empty) {
-        console.error("❌ NO ORDERS FOUND! Check: 1. Collection name 2. Security rules");
-        alert("⚠️ No orders found in Firestore!\n\n1. Verify you have 'orders' collection\n2. Check Firestore security rules\n3. Make sure you entered sample data");
-      } else {
-        const doc = snapshot.docs[0].data();
-        console.log("✅ Firestore connection successful!");
-        console.log("First order structure:", {
-          hasDate: !!doc.date,
-          hasItems: Array.isArray(doc.items),
-          itemsCount: doc.items?.length || 0
-        });
-        
-        if (!doc.date || !Array.isArray(doc.items)) {
-          alert("⚠️ Data structure mismatch!\n\nYour orders need:\n- 'date' field (Timestamp)\n- 'items' field (Array of objects)");
-        }
-      }
-    }).catch(error => {
-      console.error("❌ Firestore connection failed:", error.message);
-      alert("Firebase connection failed!\n\nCheck:\n1. Firebase config values\n2. Firestore security rules\n3. Network connection");
-    });
-  }, 1500);
 </script>
 {% endblock %}
