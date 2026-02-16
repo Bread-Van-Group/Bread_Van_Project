@@ -9,13 +9,15 @@ from flask_jwt_extended import (
 from App.models import User
 from App.database import db
 
+from datetime import timedelta
+
 
 def login(email, password):
     """Authenticate a user by email and password, return a JWT on success."""
     result = db.session.execute(db.select(User).filter_by(email=email))
     user = result.scalar_one_or_none()
     if user and user.check_password(password):
-        return create_access_token(identity=str(user.user_id))
+        return create_access_token(identity=str(user.user_id), expires_delta= timedelta(hours=3))
     return None
 
 

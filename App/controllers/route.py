@@ -1,5 +1,5 @@
 from App.database import db
-from App.models import Route, RouteStop
+from App.models import Route, RouteStop, CustomerRequest, Status
 
 
 def get_route_by_id(route_id):
@@ -8,6 +8,17 @@ def get_route_by_id(route_id):
 
 def get_all_routes():
     return db.session.scalars(db.select(Route)).all()
+
+def get_pending_stops():
+    pending_stops = db.session.execute(
+        db.select(RouteStop)
+        .join(RouteStop.customer_requests)
+        .join(CustomerRequest.status)
+        .filter(Status.status_name == "pending")
+        .distinct()
+    ).scalars().all()
+
+    return [pending_stop.get_json() for pending_stop in pending_stops]
 
 
 def create_route(name, start_time, end_time, day_of_week, owner_id, description=None):
@@ -45,7 +56,6 @@ def add_stop_to_route(route_id, address, lat, lng, stop_order, estimated_arrival
     db.session.add(stop)
     db.session.commit()
     return stop
-
 
 def remove_stop_from_route(stop_id):
     """Delete a route stop by ID. Returns True on success, False if not found."""

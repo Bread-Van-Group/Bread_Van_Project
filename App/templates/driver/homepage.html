@@ -63,7 +63,10 @@ https://github.com/perliedman/leaflet-routing-machine/releases
       <i class="fa-solid fa-receipt"></i>
       <span>TRANSACTION</span>
     </button>
-    <a href="{{ url_for('auth_views.logout_action') }}" class="bottom-btn bottom-btn-logout">
+    <a
+      href="{{ url_for('auth_views.logout_action') }}"
+      class="bottom-btn bottom-btn-logout"
+    >
       <i class="fa-solid fa-right-from-bracket"></i>
       <span>LOGOUT</span>
     </a>
@@ -163,7 +166,7 @@ https://github.com/perliedman/leaflet-routing-machine/releases
   var markers = [];
 
   async function getActiveMarkers() {
-    const res = await fetch("/api/driver/active-requests");
+    const res = await fetch("/api/driver/active-stops");
     const json = await res.json();
 
     return json;
@@ -171,7 +174,7 @@ https://github.com/perliedman/leaflet-routing-machine/releases
 
   async function initMap() {
     markers = await getActiveMarkers();
-
+    console.log(markers);
     markers.forEach(function (marker) {
       mapMarker = L.marker([marker.lat, marker.lng])
         .addTo(map)
@@ -196,25 +199,25 @@ https://github.com/perliedman/leaflet-routing-machine/releases
 
     let preOrderHtml;
 
-    if (marker.orders.length == 0) {
+    if (marker.customer_requests.length == 0) {
       preOrderHtml = `<p>No Order Attached<p>`;
     } else {
-      preOrderHtml = marker.orders
-        .map((item) => {
+      preOrderHtml = marker.customer_requests
+        .map((customer_request) => {
           return `
       <div class="pre-order-item">
         <div>
-          <img src="${item.image_url}" alt="${item.name}" />
+          <img src="${customer_request.item.image_url}" alt="${customer_request.item.name}" />
         </div>
-        <div>${item.name}</div>
-        <div>${item.quantity}</div>
+        <div>${customer_request.item.name}</div>
+        <div>${customer_request.quantity}</div>
       </div>
     `;
         })
         .join("");
     }
 
-    const html = `<h2>${marker.customer_name}</h2>
+    const html = `
           <div class="address-details">
             <h3>Address:</h3>
             <p>${marker.address}</p>
@@ -284,7 +287,6 @@ https://github.com/perliedman/leaflet-routing-machine/releases
   (async () => {
     await initMap();
     buildRoute();
-    console.log(routingControl.getWaypoints());
   })();
 
   //This code is for testing, remove later

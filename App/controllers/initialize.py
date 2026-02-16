@@ -1,5 +1,6 @@
 from App.database import db
 from .user import create_driver, create_customer, create_owner
+from .customer import create_customer_request
 from .status import create_status
 from .inventory_item import create_item
 from .route import create_route, add_stop_to_route
@@ -108,6 +109,36 @@ def initialize():
 
     print(f"✓ Van created     : {van.license_plate}")
 
+
+    # ── Customer Requests ─────────────────────────────────────────────────────
+    request1 = create_customer_request(
+        customer_id=customer.customer_id,
+        van_id=van.van_id,
+        stop_id=stop1.stop_id,
+        item_id= hops.item_id,
+        quantity= 1,
+        status_id=1
+    )
+
+    request2 = create_customer_request(
+        customer_id=customer.customer_id,
+        van_id=van.van_id,
+        stop_id=stop1.stop_id,
+        item_id= bara.item_id,
+        quantity= 1,
+        status_id=1
+    )
+
+    request3 = create_customer_request(
+        customer_id=customer.customer_id,
+        van_id=van.van_id,
+        stop_id=stop2.stop_id,
+        item_id= bara.item_id,
+        quantity= 1,
+        status_id=1
+    )
+
+    print(f"✓ Requests created for stop orders")
     # ── Driver Assignment ─────────────────────────────────────────────────────
     assign_driver_to_route(driver.driver_id, route.route_id)
     print(f"✓ Driver assigned to route")

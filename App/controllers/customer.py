@@ -1,5 +1,5 @@
 from App.database import db
-from App.models import Customer, CustomerRequest, Status
+from App.models import Customer, CustomerRequest
 
 
 def get_customer_by_id(customer_id):
@@ -18,7 +18,7 @@ def get_customer_requests(customer_id):
     return customer.requests
 
 
-def create_customer_request(customer_id, van_id, stop_id, item_id, quantity, status_id):
+def create_customer_request(customer_id, van_id, stop_id, item_id, quantity,status_id):
     """
     Place a new customer request for an item at a given route stop.
 
@@ -28,11 +28,12 @@ def create_customer_request(customer_id, van_id, stop_id, item_id, quantity, sta
         stop_id:     ID of the route_stop where the customer will be.
         item_id:     ID of the inventory item being requested.
         quantity:    Number of units requested.
-        status_id:   Initial status (e.g. 'pending' status row ID).
+        status_id:   Initial status (1:"pending", 2:"confirmed", 3:"fufilled", 4:"cancelled").
 
     Returns:
         The newly created CustomerRequest instance.
     """
+
     new_request = CustomerRequest(
         customer_id=customer_id,
         van_id=van_id,

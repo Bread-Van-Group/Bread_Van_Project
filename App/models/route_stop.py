@@ -39,6 +39,7 @@ class RouteStop(db.Model):
             "stop_order":             self.stop_order,
             "estimated_arrival_time": str(self.estimated_arrival_time) if self.estimated_arrival_time else None,
             "created_at":             self.created_at.isoformat() if self.created_at else None,
+            "customer_requests":       [customer_request.get_json() for customer_request in self.customer_requests]
         }
 
     def __repr__(self):

@@ -39,7 +39,8 @@ class CustomerRequest(db.Model):
             "quantity":       self.quantity,
             "status_id":      self.status_id,
             "request_time":   self.request_time.isoformat()   if self.request_time   else None,
-            "fulfilled_time": self.fulfilled_time.isoformat() if self.fulfilled_time else None,
+            "fulfilled_time": self.fulfilled_time.isoformat() if self.fulfilled_time else None, 
+            "item" :          self.item.get_json()           
         }
 
     def __repr__(self):

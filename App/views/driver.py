@@ -1,10 +1,12 @@
-from flask import Blueprint, redirect, render_template, request, jsonify, url_for
-from flask_jwt_extended import jwt_required, current_user
+from flask import Blueprint, redirect, render_template, request, jsonify, url_for, flash
+from flask_jwt_extended import jwt_required, current_user, verify_jwt_in_request, get_jwt_identity
+from jwt import ExpiredSignatureError
 from App.controllers import (
     get_driver_by_id,
     get_driver_routes,
     assign_driver_to_route,
     unassign_driver_from_route,
+    get_pending_stops
 )
 from App.controllers.route import get_route_stops
 from App.models import CustomerRequest, RouteStop, Customer, InventoryItem, Status
@@ -16,11 +18,20 @@ driver_views = Blueprint('driver_views', __name__, template_folder='../templates
 # ── Page Routes ───────────────────────────────────────────────────────────────
 
 @driver_views.route('/driver/home', methods=['GET'])
-@jwt_required()
 def driver_homepage():
-    if current_user.role != 'driver':
+    try:
+        verify_jwt_in_request(optional=True)
+        identity = get_jwt_identity()
+        if identity is not None:
+            driver_id = int(identity)
+    except ExpiredSignatureError:
+        flash("Session has expired. Please log in again.", "error")
         return redirect(url_for('index_views.index'))
-    return render_template('driver/homepage.html')
+    except:
+        driver_id = None
+        return redirect(url_for('index_views.index'))
+    if driver_id:
+        return render_template('driver/homepage.html')
 
 
 # ── API Routes ────────────────────────────────────────────────────────────────
@@ -119,7 +130,7 @@ def complete_request(request_id):
     return jsonify(message='Request completed')
 
 
-@driver_views.route('/api/driver/active-requests', methods=['GET'])
+@driver_views.route('/api/driver/active-stops', methods=['GET'])
 @jwt_required()
 def get_active_requests():
     """
@@ -131,41 +142,7 @@ def get_active_requests():
     if current_user.role != 'driver':
         return jsonify(message='Unauthorized'), 403
 
-    # Get pending status id
-    pending_status = db.session.execute(
-        db.select(Status).filter_by(status_name='pending')
-    ).scalar_one_or_none()
+    # Get pending requests
+    requests = get_pending_stops()
 
-    if not pending_status:
-        return jsonify([])
-
-    requests = db.session.scalars(
-        db.select(CustomerRequest).filter_by(status_id=pending_status.status_id)
-    ).all()
-
-    result = []
-    for req in requests:
-        stop     = db.session.get(RouteStop,     req.stop_id)
-        customer = db.session.get(Customer,      req.customer_id)
-        item     = db.session.get(InventoryItem, req.item_id)
-
-        if not stop or not customer or not item:
-            continue
-
-        result.append({
-            'id':            req.request_id,
-            'lat':           stop.lat,
-            'lng':           stop.lng,
-            'address':       stop.address,
-            'customer_name': customer.name,
-            'status':        pending_status.status_name,
-            'orders': [
-                {
-                    'name':      item.name,
-                    'quantity':  req.quantity,
-                    'image_url': '',        # add a real URL when available
-                }
-            ]
-        })
-
-    return jsonify(result)
+    return requests
