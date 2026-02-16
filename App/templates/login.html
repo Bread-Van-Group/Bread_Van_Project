@@ -34,11 +34,17 @@
             <button type="submit">Login</button>
         </form>
 
-        <div style="margin-top: 20px; text-align: center; color: #666; font-size: 14px;">
+        <div class="test-accounts">
             <p>Test Accounts:</p>
             <p><strong>Driver:</strong> driver@test.com / password</p>
             <p><strong>Owner:</strong> owner@test.com / password</p>
             <p><strong>Customer:</strong> customer@test.com / password</p>
+        </div>
+
+        <div class="signup-section">
+            <p>Don't have an account? 
+                <a href="{{ url_for('auth_views.signup_page') }}" class="signup-link">Sign up here</a>
+            </p>
         </div>
     </div>
 </body>

@@ -138,6 +138,14 @@ html {
     inset 0 -2px 4px rgba(198, 106, 46, 0.3);
 }
 
+.nav-btn[href*="logout"] {
+  background: linear-gradient(145deg, #e74c3c, #c0392b);
+}
+
+.nav-btn[href*="logout"]:hover {
+  background: linear-gradient(145deg, #ec7063, #e74c3c);
+}
+
 .page-container {
   display: flex;
   flex-direction: column;
