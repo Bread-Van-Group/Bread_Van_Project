@@ -45,8 +45,8 @@
   <div class="orders-section">
     <!-- Order/Pre-Order Tabs -->
     <div class="order-tabs">
-      <button class="tab-btn active" data-tab="order">Order</button>
-      <button class="tab-btn" data-tab="pre-order">Pre-Order</button>
+      <a class="tab-btn active" href="{{ url_for('index_views.customer_homepage') }}" data-tab="order">Order</a>
+      <a class="tab-btn" href="{{ url_for('index_views.customer_preorder') }}" data-tab="pre-order">Pre-Order</a>
     </div>
 
     <!-- Product Grid -->
