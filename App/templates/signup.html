@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Bread Van Project</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat+Brush&family=Shadows+Into+Light+Two&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/signup.css') }}">
+</head>
+<body>
+    <!-- Header -->
+    <div class="signup-header">
+        <a class="back-btn" href="{{ url_for('index_views.index') }}">
+            <span>←</span>
+            <span>Back</span>
+        </a>
+        <h1 class="header-title">Sign up</h1>
+        <div style="width: 80px;"></div> 
+    </div>
+
+    <div class="signup-container">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('auth_views.signup_action') }}" enctype="multipart/form-data">
+            
+            <!-- Profile Picture Section -->
+            <div class="profile-picture-section">
+                <div class="profile-picture-preview" id="profilePreview">
+                    <span>(Profile Picture)</span>
+                </div>
+                <label for="profile_picture" class="edit-image-btn">(Edit image)</label>
+                <input type="file" id="profile_picture" name="profile_picture" accept="image/*" style="display: none;">
+            </div>
+
+            <!-- Form Fields -->
+            <div class="form-fields">
+                <div class="form-group">
+                    <label for="first_name">First name:</label>
+                    <input type="text" id="first_name" name="first_name" placeholder="(name)" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="last_name">Last name:</label>
+                    <input type="text" id="last_name" name="last_name" placeholder="(name)" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="age">Age:</label>
+                    <input type="number" id="age" name="age" placeholder="(age)" min="1" max="120">
+                </div>
+
+                <div class="form-group">
+                    <label for="address">Address/Location:</label>
+                    <input type="text" id="address" name="address" placeholder="(address/location)">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address:</label>
+                    <input type="email" id="email" name="email" placeholder="(email address)" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" placeholder="(Username)" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" placeholder="(Password)" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="verify_password">Verify Password:</label>
+                    <input type="password" id="verify_password" name="verify_password" placeholder="(password)" required>
+                </div>
+
+                <div class="confirm-btn-container">
+                    <button type="submit" class="confirm-btn">Confirm</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Established Footer -->
+    <div class="established-footer">
+        <h3>LOGO</h3>
+    </div>
+
+    <script>
+        // Profile picture preview
+        document.getElementById('profile_picture').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('profilePreview');
+                    preview.innerHTML = `<img src="${e.target.result}" alt="Profile">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Password validation
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            const password = document.getElementById('password').value;
+            const verifyPassword = document.getElementById('verify_password').value;
+            
+            if (password !== verifyPassword) {
+                e.preventDefault();
+                alert('Passwords do not match!');
+            }
+        });
+    </script>
+</body>
+</html>

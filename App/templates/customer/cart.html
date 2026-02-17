@@ -1,0 +1,81 @@
+{% extends "driver/layout.html" %} 
+{% block title %}Cart{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/user/cart.css') }}" />
+{% endblock %} 
+
+{% block content %}
+
+<!-- Top Navigation Bar -->
+<div class="cart-header">
+  <a class="header-btn" href="{{ url_for('index_views.customer_preorder') }}">
+    <span>←</span>
+    <span>Back</span>
+  </a>
+  <h1 class="header-title">Cart</h1>
+  <a class="header-btn" href="{{ url_for('index_views.customer_homepage') }}">Home</a>
+</div>
+
+<div class="page-container">
+  
+  <!-- Your Order Section -->
+  <div class="order-section">
+    <h2>Your Order:</h2>
+    <div class="order-items">
+      <div class="order-item">
+        <span class="item-quantity">(quantity)</span>
+        <span class="item-name">(name)</span>
+      </div>
+      <div class="order-item">
+        <span class="item-quantity">(quantity)</span>
+        <span class="item-name">(name)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pickup Details Section -->
+  <div class="pickup-section">
+    <div class="pickup-detail">
+      <span class="detail-label">Estimated pickup:</span>
+      <span class="detail-value">(ETA added to current time) (EtA)</span>
+    </div>
+    <div class="pickup-detail">
+      <span class="detail-label">Van:</span>
+      <span class="detail-value">(driver name) (plate number)</span>
+    </div>
+    <div class="pickup-detail">
+      <span class="detail-label">Location:</span>
+      <span class="detail-value">(Van location)</span>
+    </div>
+    <div class="pickup-detail customer-location">
+      <span class="detail-value">(Your Location)</span>
+    </div>
+  </div>
+
+  <!-- Special Instructions Section -->
+  <div class="instructions-section">
+    <label for="instructions">Special Instructions:</label>
+    <textarea 
+      id="instructions" 
+      class="instructions-input" 
+      placeholder="e.g. 'Blow horn', 'Ring doorbell'"
+      rows="3"
+    ></textarea>
+  </div>
+
+  <!-- Confirm Order Button -->
+  <div class="confirm-btn-container">
+    <a class="confirm-btn" href="#">
+      Confirm Order
+      <span>→</span>
+    </a>
+  </div>
+
+</div>
+
+<!-- Established Footer -->
+<div class="established-footer">
+  <h3>LOGO</h3>
+</div>
+
+{% endblock %}

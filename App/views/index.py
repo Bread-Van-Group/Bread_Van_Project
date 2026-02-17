@@ -91,3 +91,10 @@ def customer_preorder():
     if current_user.role != 'customer':
         return redirect(url_for('index_views.index'))
     return render_template('customer/preorder.html')
+
+@index_views.route('/customer/cart', methods=['GET'])
+@jwt_required()
+def customer_cart():
+    if current_user.role != 'customer':
+        return redirect(url_for('index_views.index'))
+    return render_template('customer/cart.html')

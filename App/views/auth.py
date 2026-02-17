@@ -6,6 +6,8 @@ from flask_jwt_extended import (
 from App.database import db
 from App.models import User
 from App.controllers import login
+import os
+from werkzeug.utils import secure_filename
 
 auth_views = Blueprint('auth_views', __name__, template_folder='../templates')
 
@@ -52,11 +54,91 @@ def login_action():
 
 
 @auth_views.route('/logout', methods=['GET'])
-def logout_action():
+def logout():
+    """Logout the user by clearing JWT cookies"""
     response = redirect(url_for('index_views.index'))
-    flash("Logged Out!", 'info')
     unset_jwt_cookies(response)
+    flash('You have been logged out successfully.', 'success')
     return response
+
+
+@auth_views.route('/signup', methods=['GET'])
+def signup_page():
+    """Display the signup page"""
+    return render_template('signup.html')
+
+
+@auth_views.route('/signup', methods=['POST'])
+def signup_action():
+    """Handle signup form submission"""
+    data = request.form
+    
+    # Validate required fields
+    required_fields = ['first_name', 'last_name', 'email', 'username', 'password', 'verify_password']
+    for field in required_fields:
+        if not data.get(field):
+            flash(f'{field.replace("_", " ").title()} is required', 'error')
+            return redirect(url_for('auth_views.signup_page'))
+    
+    # Check if passwords match
+    if data['password'] != data['verify_password']:
+        flash('Passwords do not match', 'error')
+        return redirect(url_for('auth_views.signup_page'))
+    
+    # Check if email already exists
+    existing_user = User.query.filter_by(email=data['email']).first()
+    if existing_user:
+        flash('Email already registered', 'error')
+        return redirect(url_for('auth_views.signup_page'))
+    
+    # Check if username already exists
+    if data.get('username'):
+        existing_username = User.query.filter_by(username=data['username']).first()
+        if existing_username:
+            flash('Username already taken', 'error')
+            return redirect(url_for('auth_views.signup_page'))
+    
+    # Handle profile picture upload (optional)
+    profile_picture = None
+    if 'profile_picture' in request.files:
+        file = request.files['profile_picture']
+        if file and file.filename != '':
+            filename = secure_filename(file.filename)
+            # Create uploads directory if it doesn't exist
+            upload_folder = os.path.join('App', 'static', 'uploads', 'profiles')
+            os.makedirs(upload_folder, exist_ok=True)
+            
+            # Save file with unique name
+            ext = os.path.splitext(filename)[1]
+            unique_filename = f"{data['email'].replace('@', '_').replace('.', '_')}{ext}"
+            file_path = os.path.join(upload_folder, unique_filename)
+            file.save(file_path)
+            profile_picture = f"/static/uploads/profiles/{unique_filename}"
+    
+    # Create new user
+    try:
+        new_user = User(
+            email=data['email'],
+            password=data['password'],  # Will be hashed by set_password()
+            role='customer',  # All signups are customers
+            username=data.get('username'),
+            first_name=data.get('first_name'),
+            last_name=data.get('last_name'),
+            age=int(data['age']) if data.get('age') else None,
+            address=data.get('address'),
+            profile_picture=profile_picture
+        )
+        
+        db.session.add(new_user)
+        db.session.commit()
+        
+        flash('Account created successfully! Please login.', 'success')
+        return redirect(url_for('index_views.index'))
+        
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error creating account: {str(e)}', 'error')
+        return redirect(url_for('auth_views.signup_page'))
 
 
 # ── API Routes ────────────────────────────────────────────────────────────────
@@ -78,10 +160,3 @@ def identify_user():
     return jsonify({
         'message': f"email: {current_user.email}, id: {current_user.user_id}, role: {current_user.role}"
     })
-
-
-@auth_views.route('/api/logout', methods=['GET'])
-def logout_api():
-    response = jsonify(message="Logged Out!")
-    unset_jwt_cookies(response)
-    return response
