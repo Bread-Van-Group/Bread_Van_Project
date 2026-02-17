@@ -1,0 +1,253 @@
+/* ─── Variables ─────────────────────────────────────────────── */
+:root {
+  --orange-deep: #c45e1e;
+  --orange-main: #e07b39;
+  --orange-warm: #f09455;
+  --orange-light: #fad4b4;
+  --orange-blush: #fff3ea;
+  --cream: #fffaf5;
+  --ink: #2a1a0e;
+  --ink-muted: #7a5a3e;
+  --ink-faint: #c8a98a;
+  --white: #ffffff;
+  --shadow-warm: rgba(180, 80, 10, 0.12);
+  --shadow-card: rgba(60, 30, 5, 0.1);
+}
+
+/* ─── Page wrapper ───────────────────────────────────────────── */
+.inventory-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  padding: 8px 24px 8px 24px;
+}
+
+/* ─── Card ───────────────────────────────────────────────────── */
+.inventory-content-container {
+  height: 100%;
+  width: 100%;
+  background: var(--white);
+  border-radius: 28px;
+  padding: 32px 36px 36px;
+  box-shadow:
+    0 0 0 1px rgba(224, 123, 57, 0.08),
+    0 4px 6px -1px var(--shadow-warm),
+    0 12px 40px -8px rgba(180, 80, 10, 0.14);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Accent stripe along top edge */
+.inventory-content-container::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--orange-deep),
+    var(--orange-warm),
+    var(--orange-light)
+  );
+  border-radius: 28px 28px 0 0;
+}
+
+/* ─── Header ─────────────────────────────────────────────────── */
+.inventory-container-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 28px;
+  gap: 14px;
+}
+
+.inventory-container-header a {
+  font-size: 2rem;
+  font-style: italic;
+  margin-right: 12px;
+  background-color: #e07b39;
+  border-radius: 50%;
+  color: white;
+  padding: 8px;
+}
+
+.inventory-container-header a:hover {
+  background-color: #c66a2e;
+  cursor: pointer;
+}
+
+.inventory-container-header h2 {
+  font-family: "Caveat Brush", cursive;
+  font-style: italic;
+  font-size: 3rem;
+  font-weight: 400;
+  color: var(--ink);
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+
+/* ─── Table ──────────────────────────────────────────────────── */
+.inventory-items-table {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.inventory-item-table-header {
+  display: grid;
+  grid-template-columns: 3fr 1fr 1fr 1fr;
+  gap: 12px;
+  padding: 0 16px 10px 16px;
+  border-bottom: 1.5px solid var(--orange-light);
+}
+
+.inventory-item-table-header h2 {
+  font-family: "Caveat Brush", cursive;
+  font-size: 1.5rem;
+  font-weight: 400;
+  letter-spacing: 0.13em;
+  font-style: italic;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  text-align: center;
+  margin: 0;
+}
+
+.inventory-item-table-header h2:first-child {
+  text-align: left;
+}
+
+/* ─── Scrollable list ────────────────────────────────────────── */
+.inventory-items-container {
+  display: flex;
+  flex-direction: column;
+  max-height: 48vh;
+  overflow-y: auto;
+  padding: 12px 16px;
+  gap: 8px;
+  direction: rtl;
+}
+
+.inventory-items-container > * {
+  direction: ltr;
+}
+
+.inventory-items-container::-webkit-scrollbar {
+  width: 4px;
+}
+.inventory-items-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+.inventory-items-container::-webkit-scrollbar-thumb {
+  background: var(--orange-light);
+  border-radius: 20px;
+}
+.inventory-items-container::-webkit-scrollbar-thumb:hover {
+  background: var(--orange-warm);
+}
+
+/* ─── Row ────────────────────────────────────────────────────── */
+.inventory-item {
+  display: grid;
+  grid-template-columns: 3fr 1fr 1fr 1fr;
+  gap: 1vw;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 15px;
+  background: var(--cream);
+  border: 1px solid transparent;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease,
+    transform 0.16s ease,
+    box-shadow 0.16s ease;
+  animation: rowFadeIn 0.35s ease both;
+}
+
+.inventory-item:hover {
+  background: var(--orange-blush);
+  border-color: var(--orange-light);
+  transform: translateX(3px);
+  box-shadow: 0 2px 12px var(--shadow-warm);
+}
+
+/* Staggered entrance animations */
+.inventory-item:nth-child(1) {
+  animation-delay: 0.04s;
+}
+.inventory-item:nth-child(2) {
+  animation-delay: 0.08s;
+}
+.inventory-item:nth-child(3) {
+  animation-delay: 0.12s;
+}
+.inventory-item:nth-child(4) {
+  animation-delay: 0.16s;
+}
+.inventory-item:nth-child(5) {
+  animation-delay: 0.2s;
+}
+.inventory-item:nth-child(6) {
+  animation-delay: 0.24s;
+}
+.inventory-item:nth-child(7) {
+  animation-delay: 0.28s;
+}
+.inventory-item:nth-child(8) {
+  animation-delay: 0.32s;
+}
+.inventory-item:nth-child(9) {
+  animation-delay: 0.36s;
+}
+.inventory-item:nth-child(10) {
+  animation-delay: 0.4s;
+}
+
+@keyframes rowFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─── Name cell ──────────────────────────────────────────────── */
+.inventory-item h2:first-child {
+  text-align: left;
+  margin: 0;
+}
+
+/* ─── Numeric cells ──────────────────────────────────────────── */
+.inventory-item h2 {
+  font-family: "Caveat Brush", cursive;
+  font-size: 1.5rem;
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1;
+  letter-spacing: 0.35px;
+  color: var(--ink);
+  text-align: center;
+  margin: 0;
+}
+
+/* ─── Available stock cell ───────────────────────────────────── */
+.inventory-item-avaialable-stock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inventory-item-avaialable-stock h2 {
+  min-width: 48px;
+  padding: 8px 12px;
+  border-radius: 50%;
+  background: var(--orange-deep);
+  color: var(--white);
+}

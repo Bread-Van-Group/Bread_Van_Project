@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, flash, url_for
 from flask_uploads import DOCUMENTS, IMAGES, TEXT, UploadSet, configure_uploads
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
@@ -33,9 +33,16 @@ def create_app(overrides={}):
     init_db(app)
     jwt = setup_jwt(app)
     setup_admin(app)
-    @jwt.invalid_token_loader
+    
     @jwt.unauthorized_loader
-    def custom_unauthorized_response(error):
-        return render_template('401.html', error=error), 401
+    def unauthorized_callback(reason):
+        flash("Please log in first.", "error")
+        return redirect(url_for('index_views.index'))
+
+    @jwt.expired_token_loader
+    def expired_callback(jwt_header, jwt_payload):
+        flash("Session expired. Please log in again.", "error")
+        return redirect(url_for('index_views.index'))
+    
     app.app_context().push()
     return app

@@ -6,7 +6,9 @@ from App.controllers import (
     get_driver_routes,
     assign_driver_to_route,
     unassign_driver_from_route,
-    get_pending_stops
+    get_pending_stops,
+    get_active_stops,
+    get_daily_inventory
 )
 from App.controllers.route import get_route_stops
 from App.models import CustomerRequest, RouteStop, Customer, InventoryItem, Status
@@ -18,20 +20,18 @@ driver_views = Blueprint('driver_views', __name__, template_folder='../templates
 # ── Page Routes ───────────────────────────────────────────────────────────────
 
 @driver_views.route('/driver/home', methods=['GET'])
+@jwt_required() 
 def driver_homepage():
-    try:
-        verify_jwt_in_request(optional=True)
-        identity = get_jwt_identity()
-        if identity is not None:
-            driver_id = int(identity)
-    except ExpiredSignatureError:
-        flash("Session has expired. Please log in again.", "error")
-        return redirect(url_for('index_views.index'))
-    except:
-        driver_id = None
-        return redirect(url_for('index_views.index'))
-    if driver_id:
-        return render_template('driver/homepage.html')
+    driver_id = int(get_jwt_identity())
+    return render_template('driver/homepage.html')
+
+
+@driver_views.route('/driver/inventory', methods=['GET'])
+@jwt_required() 
+def driver_inventory_page():
+    driver_id = int(get_jwt_identity())
+    daily_inventory = get_daily_inventory()
+    return render_template('driver/inventory.html', daily_inventory = daily_inventory)
 
 
 # ── API Routes ────────────────────────────────────────────────────────────────
@@ -143,6 +143,6 @@ def get_active_requests():
         return jsonify(message='Unauthorized'), 403
 
     # Get pending requests
-    requests = get_pending_stops()
+    requests = get_active_stops()
 
     return requests

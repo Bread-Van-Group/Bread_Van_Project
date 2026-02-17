@@ -37,6 +37,7 @@ class DailyInventory(db.Model):
             "quantity_reserved":  self.quantity_reserved,
             "quantity_available": self.quantity_available,
             "updated_at":         self.updated_at.isoformat() if self.updated_at else None,
+            "item":               self.item.get_json()
         }
 
     def __repr__(self):

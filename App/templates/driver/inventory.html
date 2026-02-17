@@ -1,0 +1,43 @@
+{% extends "driver/layout.html" %} {% block title %}Flask MVC App{% endblock %}
+{% block head %}
+<!-- Custom CSS file for Driver Homepage-->
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='styles/driver/inventory.css') }}"
+/>
+
+<!-- The Actual Homepage Content-->
+{% endblock %} {{ super() }} {% block content %}
+<!-- This is used to set a height for the map container on this page, you dont need it on others-->
+<div id="inventory-content" class="inventory-content">
+  <div id="inventory-content-container" class="inventory-content-container">
+    <div class="inventory-container-header">
+      <a href="{{url_for('driver_views.driver_homepage')}}">
+        <i class="fa-solid fa-arrow-left"></i>
+      </a>
+      <h2>Inventory</h2>
+    </div>
+    <div class="inventory-items-table">
+      <div class="inventory-item-table-header">
+        <h2>Name</h2>
+        <h2>In Stock</h2>
+        <h2>Pending Orders</h2>
+        <h2>Available</h2>
+      </div>
+      <div class="inventory-items-container">
+        {%for inventory_item in daily_inventory %}
+        <div class="inventory-item">
+          <h2>{{inventory_item.item.name}}</h2>
+          <h2>{{inventory_item.quantity_in_stock}}</h2>
+          <h2>{{inventory_item.quantity_reserved}}</h2>
+          <div class="inventory-item-avaialable-stock">
+            <h2>{{inventory_item.quantity_available}}</h2>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %} {% block scripts %} {% endblock %}

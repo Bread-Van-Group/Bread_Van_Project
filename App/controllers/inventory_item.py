@@ -1,5 +1,5 @@
 from App.database import db
-from App.models import InventoryItem, ProductPairing
+from App.models import InventoryItem, ProductPairing, DailyInventory
 
 
 def get_item_by_id(item_id):
@@ -75,3 +75,10 @@ def increment_pairing(item1_id, item2_id):
 
     db.session.commit()
     return pairing
+
+def get_daily_inventory():
+    daily_inventory = db.session.execute(
+        db.select(DailyInventory)
+    ).scalars().all()
+    
+    return [inventory_item.get_json() for inventory_item in daily_inventory]

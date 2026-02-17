@@ -20,6 +20,18 @@ def get_pending_stops():
 
     return [pending_stop.get_json() for pending_stop in pending_stops]
 
+def get_active_stops():
+    active_stops = db.session.execute(
+        db.select(RouteStop)
+        .join(RouteStop.customer_requests)
+        .join(CustomerRequest.status)
+        .filter(Status.status_name == "confirmed")
+        .distinct()
+    ).scalars().all()
+
+    return [active_stop.get_json() for active_stop in active_stops]
+
+
 
 def create_route(name, start_time, end_time, day_of_week, owner_id, description=None):
     route = Route(

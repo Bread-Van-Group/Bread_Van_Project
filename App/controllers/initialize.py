@@ -117,7 +117,7 @@ def initialize():
         stop_id=stop1.stop_id,
         item_id= hops.item_id,
         quantity= 1,
-        status_id=1
+        status_id=2
     )
 
     request2 = create_customer_request(
@@ -126,7 +126,7 @@ def initialize():
         stop_id=stop1.stop_id,
         item_id= bara.item_id,
         quantity= 1,
-        status_id=1
+        status_id=2
     )
 
     request3 = create_customer_request(
@@ -135,7 +135,7 @@ def initialize():
         stop_id=stop2.stop_id,
         item_id= bara.item_id,
         quantity= 1,
-        status_id=1
+        status_id=2
     )
 
     print(f"✓ Requests created for stop orders")
