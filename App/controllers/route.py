@@ -1,10 +1,13 @@
 from App.database import db
 from App.models import Route, RouteStop, CustomerRequest, Status
+from sqlalchemy import func
 
 
 def get_route_by_id(route_id):
     return db.session.get(Route, route_id)
 
+def get_stop_by_id(stop_id):
+    return db.session.get(RouteStop, stop_id)
 
 def get_all_routes():
     return db.session.scalars(db.select(Route)).all()
@@ -68,6 +71,26 @@ def add_stop_to_route(route_id, address, lat, lng, stop_order, estimated_arrival
     db.session.add(stop)
     db.session.commit()
     return stop
+
+def add_stop_to_end_of_route(route_id, stop_id):
+    stop = get_stop_by_id(stop_id)
+
+    if not stop:
+        return False
+
+    try:
+        last_stop_order = db.session.execute(
+            db.select(func.max(RouteStop.stop_order))
+            .where(RouteStop.route_id == route_id)
+        ).scalar()
+
+        stop.stop_order = (last_stop_order or 0) + 1
+        db.session.commit()
+        return True
+    except Exception as e:
+        db.session.rollback()
+        print(f"Unexpected error: {e}")
+        return False
 
 def remove_stop_from_route(stop_id):
     """Delete a route stop by ID. Returns True on success, False if not found."""

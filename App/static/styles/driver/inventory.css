@@ -210,7 +210,7 @@
 @keyframes rowFadeIn {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(-10px);
   }
   to {
     opacity: 1;
@@ -226,7 +226,7 @@
 
 /* ─── Numeric cells ──────────────────────────────────────────── */
 .inventory-item h2 {
-  font-family: "Caveat Brush", cursive;
+  font-family: "Shadows Into Light Two", cursive;
   font-size: 1.5rem;
   font-weight: 400;
   font-style: italic;

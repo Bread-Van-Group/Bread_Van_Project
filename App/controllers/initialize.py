@@ -1,6 +1,6 @@
 from App.database import db
 from .user import create_driver, create_customer, create_owner
-from .customer import create_customer_request
+from .customer_request import create_customer_request, set_request_confirmed
 from .status import create_status
 from .inventory_item import create_item
 from .route import create_route, add_stop_to_route
@@ -90,7 +90,25 @@ def initialize():
         estimated_arrival_time=time(7, 15),
     )
 
-    print(f"✓ Route created   : {route.name} with 2 stops")
+    stop3 = add_stop_to_route(
+        route_id=route.route_id,
+        address="That Street Dey",
+        lat=10.639817798264305, 
+        lng=-61.39347910881043,
+        stop_order=0,
+        estimated_arrival_time=time(7, 15),
+    )
+
+    stop4 = add_stop_to_route(
+        route_id=route.route_id,
+        address="The Other Street Dey",
+        lat=10.64161027605682,
+        lng=-61.39279246330262,
+        stop_order=0,
+        estimated_arrival_time=time(7, 15),
+    )
+
+    print(f"✓ Route created   : {route.name} with 4 stops")
 
     # ── Van ───────────────────────────────────────────────────────────────────
     van = create_van(
@@ -136,6 +154,29 @@ def initialize():
         item_id= bara.item_id,
         quantity= 1,
         status_id=2
+    )
+
+    #Set the preset requests which are confirmed to adhere to db rules
+    set_request_confirmed(request1.request_id)
+    set_request_confirmed(request2.request_id)
+    set_request_confirmed(request3.request_id)
+
+    request4 = create_customer_request(
+        customer_id=customer.customer_id,
+        van_id=van.van_id,
+        stop_id=stop3.stop_id,
+        item_id= salt.item_id,
+        quantity= 1,
+        status_id=1
+    )
+
+    request5 = create_customer_request(
+        customer_id=customer.customer_id,
+        van_id=van.van_id,
+        stop_id=stop4.stop_id,
+        item_id= channa.item_id,
+        quantity= 1,
+        status_id=1
     )
 
     print(f"✓ Requests created for stop orders")

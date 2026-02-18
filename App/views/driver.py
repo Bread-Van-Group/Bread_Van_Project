@@ -8,7 +8,11 @@ from App.controllers import (
     unassign_driver_from_route,
     get_pending_stops,
     get_active_stops,
-    get_daily_inventory
+    get_daily_inventory,
+    get_stop_by_id,
+    set_request_confirmed,
+    update_request_status,
+    add_stop_to_end_of_route
 )
 from App.controllers.route import get_route_stops
 from App.models import CustomerRequest, RouteStop, Customer, InventoryItem, Status
@@ -33,6 +37,44 @@ def driver_inventory_page():
     daily_inventory = get_daily_inventory()
     return render_template('driver/inventory.html', daily_inventory = daily_inventory)
 
+@driver_views.route('/driver/requests', methods=['GET'])
+@jwt_required() 
+def driver_requests_page():
+    driver_id = int(get_jwt_identity())
+    pending_stops = get_pending_stops()
+    return render_template('driver/requests_page.html', pending_stops=pending_stops)
+
+@driver_views.route('/driver/requests/accept/<int:stop_id>', methods=['GET'])
+@jwt_required() 
+def driver_accept_request(stop_id):
+    driver_id = int(get_jwt_identity())
+    pending_stops = get_pending_stops()
+    stop = get_stop_by_id(stop_id)
+    for request in stop.customer_requests:
+        if not set_request_confirmed(request.request_id):
+            flash('Error Could not accept request.', 'error')
+            return render_template('driver/requests_page.html', pending_stops=pending_stops)
+    
+    if not add_stop_to_end_of_route(stop.route_id, stop_id):
+        flash('Error Could not accept request.', 'error')
+        return render_template('driver/requests_page.html', pending_stops=pending_stops)
+
+    pending_stops = get_pending_stops()
+    return render_template('driver/requests_page.html', pending_stops=pending_stops)
+
+@driver_views.route('/driver/requests/deny/<int:stop_id>', methods=['GET'])
+@jwt_required() 
+def driver_deny_request(stop_id):
+    driver_id = int(get_jwt_identity())
+    pending_stops = get_pending_stops()
+    stop = get_stop_by_id(stop_id)
+    for request in stop.customer_requests:
+        if not update_request_status(request.request_id, 4, False):
+            flash('Error Could not accept request.', 'error')
+            return render_template('driver/requests_page.html', pending_stops=pending_stops)
+
+    pending_stops = get_pending_stops()
+    return render_template('driver/requests_page.html', pending_stops=pending_stops)
 
 # ── API Routes ────────────────────────────────────────────────────────────────
 
@@ -134,7 +176,7 @@ def complete_request(request_id):
 @jwt_required()
 def get_active_requests():
     """
-    Return all pending customer requests as map markers.
+    Return all active customer requests as map markers.
     Each entry includes lat/lng (from the route stop), customer name,
     address, and the list of pre-ordered items — matching what the
     map JS expects.
@@ -144,5 +186,22 @@ def get_active_requests():
 
     # Get pending requests
     requests = get_active_stops()
+
+    return requests
+
+@driver_views.route('/api/driver/pending-stops', methods=['GET'])
+@jwt_required()
+def get_pending_requests():
+    """
+    Return all pending customer requests as map markers.
+    Each entry includes lat/lng (from the route stop), customer name,
+    address, and the list of pre-ordered items — matching what the
+    map JS expects.
+    """
+    if current_user.role != 'driver':
+        return jsonify(message='Unauthorized'), 403
+
+    # Get pending requests
+    requests = get_pending_stops()
 
     return requests

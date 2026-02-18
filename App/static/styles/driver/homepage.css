@@ -1,3 +1,23 @@
+/* ─── Variables ─────────────────────────────────────────────── */
+:root {
+  --orange-deep: #c45e1e;
+  --orange-main: #e07b39;
+  --orange-warm: #f09455;
+  --orange-light: #fad4b4;
+  --orange-blush: #fff3ea;
+  --cream: #fffaf5;
+  --ink: #2a1a0e;
+  --ink-muted: #7a5a3e;
+  --ink-faint: #c8a98a;
+  --white: #ffffff;
+  --red-deep: #c0392b;
+  --red-main: #e74c3c;
+  --green-deep: #229954;
+  --green-main: #27ae60;
+  --shadow-warm: rgba(180, 80, 10, 0.12);
+}
+
+/* ─── Top container ──────────────────────────────────────────── */
 .top-content-container {
   display: flex;
   flex-direction: row;
@@ -7,16 +27,18 @@
   min-height: 0;
 }
 
+/* ─── Side content panel ─────────────────────────────────────── */
 .side-content {
   display: flex;
   flex-direction: column;
-  background-color: white;
+  background-color: var(--white);
   border-radius: 25px;
   height: 100%;
   width: 0%;
   box-shadow:
-    rgba(0, 0, 0, 0.16) 0px 3px 6px,
-    rgba(0, 0, 0, 0.23) 0px 3px 6px;
+    0 0 0 1px rgba(224, 123, 57, 0.08),
+    rgba(180, 80, 10, 0.12) 0px 3px 6px,
+    rgba(180, 80, 10, 0.08) 0px 3px 6px;
   padding: 0px;
   margin-right: 0px;
   gap: 4px;
@@ -28,6 +50,7 @@
     opacity 0.5s ease-in-out 0s;
 }
 
+/* ─── Side content header ────────────────────────────────────── */
 .side-content-header {
   display: flex;
   flex-direction: row;
@@ -43,24 +66,33 @@
   font-size: 3rem;
   letter-spacing: 0.5px;
   margin: 0;
-  color: #e07b39;
+  color: var(--orange-main);
 }
 
 .side-content-header i {
   font-size: 2rem;
   font-style: italic;
   margin-right: 12px;
-  background-color: #e07b39;
+  background: linear-gradient(135deg, var(--orange-main), var(--orange-deep));
   border-radius: 50%;
-  color: white;
+  color: var(--white);
   padding: 8px;
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+    rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
 }
 
 .side-content-header i:hover {
-  background-color: #c66a2e;
-  cursor: pointer;
+  background: linear-gradient(135deg, var(--orange-warm), var(--orange-main));
+  transform: translateX(-2px) scale(1.06);
 }
 
+/* ─── Side content body ──────────────────────────────────────── */
 .side-content-body {
   display: flex;
   flex: 1;
@@ -70,43 +102,44 @@
 
 .side-content-body h2 {
   font-family: "Caveat Brush", cursive;
-  font-weight: 200;
+  font-weight: 400;
   font-style: italic;
   font-size: 2.2rem;
   letter-spacing: 0.5px;
   margin: 0;
   margin-bottom: 2vh;
+  color: var(--ink);
 }
 
 .side-content-body h3 {
   font-family: "Caveat Brush", cursive;
-  font-weight: 200;
+  font-size: 1.2rem;
+  font-weight: 400;
   font-style: italic;
-  font-size: 1.8rem;
-  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--ink-muted);
   margin: 0;
+  line-height: 1.3;
 }
 
+/* ─── Address details ────────────────────────────────────────── */
 .address-details {
   display: flex;
   flex-direction: column;
-}
-
-.pre-order-list p {
-  margin-left: 24px;
-  font-family: "Shadows Into Light Two", cursive;
-  font-size: large;
-  font-weight: 400;
-  font-style: oblique;
+  gap: 1vh;
 }
 
 .address-details p {
-  margin-left: 24px;
-  font-family: "Shadows Into Light Two", cursive;
+  font-family: "Caveat Brush", cursive;
+  font-size: 1.7rem;
   font-weight: 400;
   font-style: italic;
+  color: var(--ink);
+  margin: 0 0 8px 0;
+  line-height: 1.3;
 }
 
+/* ─── Pre-order container ────────────────────────────────────── */
 .pre-order-container {
   display: flex;
   flex-direction: column;
@@ -120,6 +153,15 @@
   gap: 4px;
 }
 
+.pre-order-list p {
+  margin-left: 24px;
+  font-family: "Shadows Into Light Two", cursive;
+  font-size: large;
+  font-weight: 400;
+  font-style: oblique;
+  color: var(--ink);
+}
+
 .pre-order-item {
   display: flex;
   flex-direction: row;
@@ -130,11 +172,17 @@
   font-size: large;
   border-radius: 10px;
   padding: 8px 16px;
+  background: var(--white);
   box-shadow:
-    rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
-    rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+    rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+    rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+  color: var(--ink);
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
 }
 
+/* ─── Request buttons ────────────────────────────────────────── */
 .request-buttons-container {
   display: flex;
   flex-direction: row;
@@ -155,7 +203,7 @@
   letter-spacing: 0.5px;
   border: none;
   border-radius: 15px;
-  color: white;
+  color: var(--white);
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
@@ -163,60 +211,41 @@
   min-width: 8vw;
 }
 
-/* Cancel Button (Red/Destructive) */
+/* Accept Button (Red) */
 .accept-btn {
-  background: linear-gradient(145deg, #e74c3c, #c0392b);
+  background: linear-gradient(145deg, var(--red-main), var(--red-deep));
   box-shadow:
-    rgba(231, 76, 60, 0.4) 0px 4px 8px -1px,
-    rgba(192, 57, 43, 0.3) 0px 2px 4px -1px,
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+    rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 
 .accept-btn:hover {
-  background: linear-gradient(145deg, #ec7063, #e74c3c);
+  background: linear-gradient(145deg, #ec7063, var(--red-main));
   transform: translateY(-2px);
-  box-shadow:
-    rgba(231, 76, 60, 0.5) 0px 8px 16px -2px,
-    rgba(192, 57, 43, 0.4) 0px 6px 12px -2px,
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    rgba(192, 57, 43, 0.35) 0px -2px 6px 0px inset;
 }
 
 .accept-btn:active {
   transform: translateY(0);
-  box-shadow:
-    rgba(231, 76, 60, 0.3) 0px 3px 6px -1px,
-    rgba(192, 57, 43, 0.2) 0px 2px 4px -1px,
-    inset 0 2px 4px rgba(192, 57, 43, 0.3);
 }
 
-/* Complete Button (Green/Success) */
+/* Decline Button (Green) */
 .decline-btn {
-  background: linear-gradient(145deg, #27ae60, #229954);
+  background: linear-gradient(145deg, var(--green-main), var(--green-deep));
   box-shadow:
-    rgba(39, 174, 96, 0.4) 0px 4px 8px -1px,
-    rgba(34, 153, 84, 0.3) 0px 2px 4px -1px,
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+    rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 
 .decline-btn:hover {
-  background: linear-gradient(145deg, #58d68d, #27ae60);
+  background: linear-gradient(145deg, #58d68d, var(--green-main));
   transform: translateY(-2px);
-  box-shadow:
-    rgba(39, 174, 96, 0.5) 0px 8px 16px -2px,
-    rgba(34, 153, 84, 0.4) 0px 6px 12px -2px,
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    rgba(34, 153, 84, 0.35) 0px -2px 6px 0px inset;
 }
 
 .decline-btn:active {
   transform: translateY(0);
-  box-shadow:
-    rgba(39, 174, 96, 0.3) 0px 3px 6px -1px,
-    rgba(34, 153, 84, 0.2) 0px 2px 4px -1px,
-    inset 0 2px 4px rgba(34, 153, 84, 0.3);
 }
 
+/* ─── Map container ──────────────────────────────────────────── */
 .map-container {
   height: 100%;
   width: 100%;
@@ -228,14 +257,27 @@
   height: 100%;
   border-radius: 25px;
   box-shadow:
-    rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
-    rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+    0 0 0 1px rgba(224, 123, 57, 0.08),
+    rgba(180, 80, 10, 0.08) 0px 1px 2px 0px,
+    rgba(180, 80, 10, 0.05) 0px 2px 6px 2px;
 }
 
+/* ─── Map Icons ───────────────────────────────────────────────── */
 .van-icon {
   background: transparent;
   border-radius: 50%;
   background-color: rgb(251, 159, 102);
+  padding: 4px;
+  box-shadow:
+    rgba(0, 0, 0, 0.4) 0px 2px 4px,
+    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+    rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+}
+
+.marker-icon {
+  background: transparent;
+  border-radius: 50%;
+  background-color: white;
   padding: 4px;
   box-shadow:
     rgba(0, 0, 0, 0.4) 0px 2px 4px,

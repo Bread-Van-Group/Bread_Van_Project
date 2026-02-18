@@ -42,7 +42,7 @@
     <div class="page-container" id="content">
       <!-- Top bar -->
       <div class="top-bar">
-        <a href="{{ url_for('auth_views.logout_action') }}" class="logout-btn">
+        <a href="{{ url_for('auth_views.logout') }}" class="logout-btn">
           <i class="fa-solid fa-right-from-bracket"></i>
           <span>Logout</span>
         </a>
@@ -53,9 +53,12 @@
 
       <!-- Bottom navigation -->
       <div class="bottom-btn-container">
-        <a class="bottom-btn">
+        <a
+          class="bottom-btn"
+          href="{{ url_for('driver_views.driver_requests_page')}}"
+        >
           <i class="fa-solid fa-bell"></i>
-          <span>Requests</span>
+          <span>New Requests</span>
         </a>
         <a
           class="bottom-btn"

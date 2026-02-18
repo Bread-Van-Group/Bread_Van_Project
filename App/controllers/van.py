@@ -6,6 +6,12 @@ from datetime import date
 def get_van_by_id(van_id):
     return db.session.get(Van, van_id)
 
+def get_active_van():
+    return db.session.execute(
+        db.select(Van)
+        .filter_by(status="active")
+    ).scalar_one_or_none()
+
 
 def get_all_vans():
     return db.session.scalars(db.select(Van)).all()
