@@ -12,168 +12,76 @@ html {
   overflow-y: auto;
 }
 
-/* Header with Title */
-.header {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  padding: 16px 32px;
-  background: linear-gradient(to bottom, #fffcf5, #f8f0ce);
-  border-bottom: 1px solid rgba(232, 220, 200, 0.6);
-  box-shadow:
-    rgba(139, 101, 61, 0.15) 0px 4px 12px 0px,
-    rgba(101, 67, 33, 0.08) 0px 2px 6px 0px;
-  font-family: "Caveat Brush", cursive;
-  font-weight: 400;
-  font-style: normal;
-  font-size: 2.5rem;
-  letter-spacing: 0.5px;
-  color: #e07b39;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.header::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(218, 165, 32, 0.3) 20%,
-    rgba(218, 165, 32, 0.3) 80%,
-    transparent
-  );
-}
-
-/* Navigation Bar */
-.nav-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 16px 24px;
-  gap: 20px;
-  background: linear-gradient(to bottom, #f8f0ce, #fcfbf5);
-  border-bottom: 1px solid rgba(232, 220, 200, 0.4);
-  box-shadow:
-    rgba(139, 101, 61, 0.1) 0px 2px 8px 0px,
-    rgba(101, 67, 33, 0.05) 0px 1px 3px 0px;
-  position: sticky;
-  top: 76px; /* Height of header */
-  z-index: 99;
-}
-
-.nav-btn {
-  padding: 12px 32px;
-  border-radius: 15px;
-  font-size: 1.8rem;
-  font-family: "Caveat Brush", cursive;
-  font-weight: 400;
-  font-style: normal;
-  letter-spacing: 0.5px;
-  border: none;
-  box-shadow:
-    rgba(139, 101, 61, 0.3) 0px 4px 8px -1px,
-    rgba(101, 67, 33, 0.2) 0px 2px 4px -1px,
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  background: linear-gradient(145deg, #e8a764, #d89752);
-  color: white;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  min-width: 120px;
-}
-
-.nav-btn::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  transition: left 0.5s ease;
-}
-
-.nav-btn:hover::before {
-  left: 100%;
-}
-
-.nav-btn:hover {
-  background: linear-gradient(145deg, #f0b272, #e09a5e);
-  transform: translateY(-2px);
-  box-shadow:
-    rgba(139, 101, 61, 0.4) 0px 8px 16px -2px,
-    rgba(101, 67, 33, 0.3) 0px 6px 12px -2px,
-    inset 0 1px 0 rgba(255, 255, 255, 0.4),
-    rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
-}
-
-.nav-btn:active {
-  transform: translateY(0);
-  box-shadow:
-    rgba(139, 101, 61, 0.3) 0px 3px 6px -1px,
-    rgba(101, 67, 33, 0.2) 0px 2px 4px -1px,
-    inset 0 2px 4px rgba(101, 67, 33, 0.2);
-}
-
-/* Active/Current Page Button */
-.nav-btn.active {
-  background: linear-gradient(145deg, #e07b39, #c66a2e);
-  box-shadow:
-    rgba(224, 123, 57, 0.4) 0px 4px 8px -1px,
-    rgba(198, 106, 46, 0.3) 0px 2px 4px -1px,
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    inset 0 -2px 4px rgba(198, 106, 46, 0.3);
-}
-
-.nav-btn[href*="logout"] {
-  background: linear-gradient(145deg, #e74c3c, #c0392b);
-}
-
-.nav-btn[href*="logout"]:hover {
-  background: linear-gradient(145deg, #ec7063, #e74c3c);
-}
-
-.page-container {
+/* ─── Page Content ───────────────────────────────────────────────── */
+.page-content {
   display: flex;
   flex-direction: column;
-  padding: 24px;
+  padding: 12px;
   gap: 24px;
   padding-bottom: 40px;
 }
 
-/* Map Section */
-.map-section {
+/* ─── Main Content Section ───────────────────────────────────────────────── */
+.main-content-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
   position: relative;
   width: 100%;
-  height: 500px;
+  height: 80vh;
   border-radius: 25px;
   box-shadow:
     rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
     rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
-  overflow: hidden;
 }
 
+.content-navbar {
+  display: flex;
+  flex-direction: row;
+  margin-left: 5vw;
+}
+
+.content-navbar-btn {
+  border-radius: 15px 0px 0px 0px;
+  font-family: "Caveat Brush", cursive;
+  font-size: 1.3rem;
+  font-weight: 400;
+  font-style: italic;
+  text-decoration: none;
+  text-align: center;
+  letter-spacing: 0.5px;
+  border: none;
+  padding: 8px 12px;
+  box-shadow:
+    rgba(9, 30, 66, 0.25) 0px 1px 1px,
+    rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;
+}
+
+.content-navbar-btn i {
+  font-size: 1.5rem;
+}
+
+.content-navbar .content-navbar-btn:last-child {
+  border-radius: 0px 15px 0px 0px;
+}
+
+/* ─── Map Styling ───────────────────────────────────────────────── */
 .map {
+  position: absolute;
   width: 100%;
   height: 100%;
   border-radius: 25px;
+  opacity: 1;
+  z-index: 1;
+
+  transition: all 0.5s ease-in-out;
 }
 
 /* Map Info Footer (ETA and Distance) */
 .map-info {
+  z-index: 2;
   position: absolute;
   bottom: 16px;
   left: 16px;
@@ -214,14 +122,22 @@ html {
   color: #333;
 }
 
-/* Orders Section */
+/* ─── Orders Section ───────────────────────────────────────────────── */
 .orders-section {
+  position: absolute;
+  width: 100%;
+  height: 100%;
   background: white;
   border-radius: 25px;
   padding: 24px;
   box-shadow:
     rgba(0, 0, 0, 0.16) 0px 3px 6px,
     rgba(0, 0, 0, 0.23) 0px 3px 6px;
+  overflow: scroll;
+  opacity: 0;
+  z-index: -1;
+
+  transition: all 0.5s ease-in-out;
 }
 
 /* Order Tabs */
@@ -422,7 +338,7 @@ html {
 }
 
 /* Mobile Responsive */
-@media (max-width: 768px) {
+@media (min-width: 768px) {
   .nav-container {
     gap: 10px;
     padding: 12px 16px;

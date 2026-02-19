@@ -1,10 +1,10 @@
-{% extends "driver/layout.html" %} 
-{% block title %}Cart{% endblock %}
-{% block head %}
-<link rel="stylesheet" href="{{ url_for('static', filename='styles/user/cart.css') }}" />
-{% endblock %} 
-
-{% block content %}
+{% extends "customer/layout.html" %} {% block title %}Cart{% endblock %} {%
+block head %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='styles/customer/cart.css') }}"
+/>
+{% endblock %} {% block content %}
 
 <!-- Top Navigation Bar -->
 <div class="cart-header">
@@ -13,11 +13,12 @@
     <span>Back</span>
   </a>
   <h1 class="header-title">Cart</h1>
-  <a class="header-btn" href="{{ url_for('index_views.customer_homepage') }}">Home</a>
+  <a class="header-btn" href="{{ url_for('index_views.customer_homepage') }}"
+    >Home</a
+  >
 </div>
 
 <div class="page-container">
-  
   <!-- Your Order Section -->
   <div class="order-section">
     <h2>Your Order:</h2>
@@ -55,9 +56,9 @@
   <!-- Special Instructions Section -->
   <div class="instructions-section">
     <label for="instructions">Special Instructions:</label>
-    <textarea 
-      id="instructions" 
-      class="instructions-input" 
+    <textarea
+      id="instructions"
+      class="instructions-input"
       placeholder="e.g. 'Blow horn', 'Ring doorbell'"
       rows="3"
     ></textarea>
@@ -70,7 +71,6 @@
       <span>→</span>
     </a>
   </div>
-
 </div>
 
 <!-- Established Footer -->

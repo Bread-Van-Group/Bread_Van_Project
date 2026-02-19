@@ -10,6 +10,8 @@ class Van(db.Model):
     van_id           = db.Column(db.Integer, primary_key=True)
     license_plate    = db.Column(db.String(20),  nullable=False, unique=True)
     current_route_id = db.Column(db.Integer, db.ForeignKey("routes.route_id"),   nullable=True)
+    lat    = db.Column(db.Float, nullable = True)
+    lng    = db.Column(db.Float, nullable = True)
     status           = db.Column(db.String(20),  nullable=True)
     owner_id         = db.Column(db.Integer, db.ForeignKey("owners.owner_id"),   nullable=False)
     created_at       = db.Column(db.DateTime(timezone=True), nullable=True,
