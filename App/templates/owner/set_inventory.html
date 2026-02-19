@@ -1,0 +1,114 @@
+{% extends "owner/layout.html" %}
+
+{% block title %}Set Inventory{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/owner/homepage.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/owner/set_inventory.css') }}">
+  {{ super() }}
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  <!-- Sidebar Navigation -->
+  <div class="sidebar">
+    <div class="sidebar-logo">LOGO</div>
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_homepage') }}">Dashboard</a>
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_report') }}">Reports</a>
+    <a class="sidebar-btn active" href="{{ url_for('index_views.owner_inventory') }}">Set Inventory</a>
+    <a class="sidebar-btn" href="#">Routes</a>
+    <a class="sidebar-btn sidebar-logout" href="{{ url_for('auth_views.logout') }}">Logout</a>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="content-wrapper">
+    <div class="header">Set Inventory</div>
+
+    <div class="main-content">
+      <div class="content-card">
+
+        <!-- View Mode -->
+        <div id="view-mode">
+          <div class="inventory-controls">
+            <div class="filter-row">
+              <div class="filter-group">
+                <label>View:</label>
+
+
+                <div class="custom-select-wrapper">
+                  <div class="custom-select">
+                    <div class="custom-select__trigger">
+                      <span id="selected-view-text">Today's Inventory</span>
+                      <div class="custom-select__arrow">▼</div>
+                    </div>
+                    <div class="custom-options">
+                      <span class="custom-option selected" data-value="today">Today's Inventory</span>
+                      <span class="custom-option" data-value="tomorrow">Tomorrow's Inventory</span>
+                      <span class="custom-option" data-value="custom">Custom Date</span>
+                    </div>
+                  </div>
+                </div>
+
+
+              </div>
+
+              <div class="filter-group" id="custom-date-group" style="display:none;">
+                <label>Date:</label>
+                <input type="date" id="custom-date" />
+              </div>
+            </div>
+
+            <button class="action-btn edit-btn" id="edit-btn">
+              Edit <span id="edit-target">Tomorrow's</span> Inventory
+            </button>
+          </div>
+
+          <!-- Current Inventory Display -->
+          <div class="inventory-display">
+            <h3 id="display-title">Today's Inventory</h3>
+            <div class="inventory-grid" id="inventory-grid">
+              <div style="text-align:center; padding:40px; grid-column: 1/-1; color:#94a3b8;">
+                Loading inventory...
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Edit Mode -->
+        <div id="edit-mode" style="display:none;">
+          <div class="edit-header">
+            <h2>Edit <span id="editing-date-label">Tomorrow's</span> Inventory</h2>
+            <div class="edit-actions">
+              <button class="action-btn cancel-btn" id="cancel-btn">Cancel</button>
+              <button class="action-btn save-btn" id="save-btn">Save Inventory</button>
+            </div>
+          </div>
+
+          <!-- Item Selection -->
+          <div class="item-selection-area">
+            <h3>Add Items from Catalog</h3>
+            <div class="catalog-grid" id="catalog-grid">
+              <!-- Items from full inventory will be added here -->
+            </div>
+          </div>
+
+          <!-- Selected Items List -->
+          <div class="selected-items-area">
+            <h3>Selected Items for <span id="selected-date-label">Tomorrow</span></h3>
+            <div class="selected-items-list" id="selected-items-list">
+              <div style="text-align:center; padding:20px; color:#94a3b8;">
+                No items selected yet
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/owner/set_inventory.js') }}"></script>
+{% endblock %}
