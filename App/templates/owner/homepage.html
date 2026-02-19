@@ -1,4 +1,4 @@
-{% extends "driver/layout.html" %}
+{% extends "owner/layout.html" %}
 
 {% block title %}Owner Dashboard{% endblock %}
 
@@ -14,9 +14,9 @@
     <div class="sidebar-logo">LOGO</div>
     <a class="sidebar-btn active" href="{{ url_for('index_views.owner_homepage') }}">Dashboard</a>
     <a class="sidebar-btn" href="{{ url_for('index_views.owner_report') }}">Reports</a>
-    <a class="sidebar-btn" href="#">Inventory</a>
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_inventory') }}">Set Inventory</a>
     <a class="sidebar-btn" href="#">Routes</a>
-    <a class="sidebar-btn" href="{{ url_for('auth_views.logout_action') }}">LOGOUT</a>
+    <a class="sidebar-btn" href="{{ url_for('auth_views.logout') }}">LOGOUT</a>
   </div>
 
   <!-- Main Content Area -->

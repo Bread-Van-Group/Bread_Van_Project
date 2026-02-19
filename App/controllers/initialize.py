@@ -118,12 +118,23 @@ def initialize():
     )
     assign_van_to_route(van.van_id, route.route_id)
 
+    # Set inventory for today and tomorrow
     today = date.today()
-    set_van_inventory(van.van_id, hops.item_id,   quantity_in_stock=50, target_date=today)
-    set_van_inventory(van.van_id, salt.item_id,   quantity_in_stock=40, target_date=today)
-    set_van_inventory(van.van_id, whole.item_id,  quantity_in_stock=20, target_date=today)
-    set_van_inventory(van.van_id, bara.item_id,   quantity_in_stock=80, target_date=today)
+    tomorrow = today + timedelta(days=1)
+
+    # Today's inventory
+    set_van_inventory(van.van_id, hops.item_id, quantity_in_stock=50, target_date=today)
+    set_van_inventory(van.van_id, salt.item_id, quantity_in_stock=40, target_date=today)
+    set_van_inventory(van.van_id, whole.item_id, quantity_in_stock=20, target_date=today)
+    set_van_inventory(van.van_id, bara.item_id, quantity_in_stock=80, target_date=today)
     set_van_inventory(van.van_id, channa.item_id, quantity_in_stock=30, target_date=today)
+
+    # Tomorrow's inventory
+    set_van_inventory(van.van_id, hops.item_id, quantity_in_stock=60, target_date=tomorrow)
+    set_van_inventory(van.van_id, salt.item_id, quantity_in_stock=45, target_date=tomorrow)
+    set_van_inventory(van.van_id, whole.item_id, quantity_in_stock=25, target_date=tomorrow)
+    set_van_inventory(van.van_id, bara.item_id, quantity_in_stock=90, target_date=tomorrow)
+    set_van_inventory(van.van_id, channa.item_id, quantity_in_stock=35, target_date=tomorrow)
 
     print(f"✓ Van created     : {van.license_plate}")
 

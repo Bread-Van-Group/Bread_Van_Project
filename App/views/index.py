@@ -98,3 +98,65 @@ def customer_cart():
     if current_user.role != 'customer':
         return redirect(url_for('index_views.index'))
     return render_template('customer/cart.html')
+
+
+@index_views.route('/owner/inventory', methods=['GET'])
+@jwt_required()
+def owner_inventory():
+    if current_user.role != 'owner':
+        return redirect(url_for('index_views.index'))
+    return render_template('owner/set_inventory.html')
+
+@index_views.route('/api/owner/vans', methods=['GET'])
+@jwt_required()
+def get_owner_vans():
+    if current_user.role != 'owner':
+        return jsonify(message='Unauthorized'), 403
+    from App.controllers.owner import get_owner_vans
+    vans = get_owner_vans(current_user.owner_id)
+    return jsonify([v.get_json() for v in vans])
+
+
+@index_views.route('/api/owner/vans/<int:van_id>/inventory', methods=['GET'])
+@jwt_required()
+def get_van_inventory(van_id):
+    """Get daily inventory for a van on a specific date"""
+    if current_user.role != 'owner':
+        return jsonify(message='Unauthorized'), 403
+
+    from App.controllers.van import get_van_daily_inventory
+    from datetime import date
+
+    date_str = request.args.get('date')
+    target_date = date.fromisoformat(date_str) if date_str else date.today()
+
+    inventory = get_van_daily_inventory(van_id, target_date)
+    return jsonify([inv.get_json() for inv in inventory])
+
+
+@index_views.route('/api/owner/vans/<int:van_id>/inventory', methods=['POST'])
+@jwt_required()
+def set_van_inventory(van_id):
+    """Set daily inventory for a van"""
+    if current_user.role != 'owner':
+        return jsonify(message='Unauthorized'), 403
+
+    from App.controllers.van import set_van_inventory as set_inventory
+    from datetime import date
+
+    data = request.json
+    date_str = data.get('date')
+    target_date = date.fromisoformat(date_str) if date_str else date.today()
+
+    for item in data.get('items', []):
+        set_inventory(van_id, item['item_id'], item['quantity'], target_date)
+
+    return jsonify(message='Inventory updated successfully')
+
+
+@index_views.route('/api/inventory/items', methods=['GET'])
+@jwt_required()
+def get_all_items():
+    from App.controllers.inventory_item import get_all_items
+    items = get_all_items()
+    return jsonify([item.get_json() for item in items])
