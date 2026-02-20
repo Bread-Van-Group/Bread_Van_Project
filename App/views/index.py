@@ -160,3 +160,23 @@ def get_all_items():
     from App.controllers.inventory_item import get_all_items
     items = get_all_items()
     return jsonify([item.get_json() for item in items])
+
+
+@index_views.route('/api/inventory/items/prices', methods=['PUT'])
+@jwt_required()
+def update_item_prices():
+    """Bulk update item prices"""
+    if current_user.role != 'owner':
+        return jsonify(message='Unauthorized'), 403
+
+    from App.controllers.inventory_item import update_item_price
+
+    data = request.json
+    updated = []
+
+    for item in data.get('items', []):
+        result = update_item_price(item['item_id'], item['price'])
+        if result:
+            updated.append(item['item_id'])
+
+    return jsonify(message=f'Updated {len(updated)} prices', updated=updated)

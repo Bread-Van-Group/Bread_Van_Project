@@ -34,7 +34,6 @@
               <div class="filter-group">
                 <label>View:</label>
 
-
                 <div class="custom-select-wrapper">
                   <div class="custom-select">
                     <div class="custom-select__trigger">
@@ -49,7 +48,6 @@
                   </div>
                 </div>
 
-
               </div>
 
               <div class="filter-group" id="custom-date-group" style="display:none;">
@@ -58,9 +56,15 @@
               </div>
             </div>
 
-            <button class="action-btn edit-btn" id="edit-btn">
-              Edit <span id="edit-target">Tomorrow's</span> Inventory
-            </button>
+            <div style="display:flex; gap:10px;">
+              <input type="file" id="csv-upload" accept=".csv" style="display:none;" />
+              <button class="action-btn" id="import-csv-btn" onclick="document.getElementById('csv-upload').click()" style="display:none;">
+                Import CSV
+              </button>
+              <button class="action-btn edit-btn" id="edit-btn">
+                Edit <span id="edit-target">Tomorrow's</span> Inventory
+              </button>
+            </div>
           </div>
 
           <!-- Current Inventory Display -->
