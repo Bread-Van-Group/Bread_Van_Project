@@ -46,6 +46,19 @@ body, html {
   box-shadow: 4px 0 20px rgba(0,0,0,0.3);
 }
 
+.sidebar {
+  display: flex;
+  flex-direction: column;
+}
+.sidebar-logout {
+  margin-top: auto;
+  color: #e74c3c !important;
+}
+.sidebar-logout:hover {
+  background-color: #e74c3c !important;
+  color: white !important;
+}
+
 /* Sidebar logo - modern style */
 .sidebar-logo {
   position: fixed;

@@ -222,6 +222,11 @@
   font-size: 1rem;
   margin-bottom: 8px;
 }
+.inventory-card-quantity-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
 .inventory-card-quantity {
   font-size: 1.5rem;
   font-weight: 800;
@@ -230,7 +235,14 @@
 .inventory-card-label {
   font-size: 0.85rem;
   color: #64748b;
-  margin-top: 4px;
+}
+.inventory-card-price {
+  font-size: 0.9rem;
+  color: #2c3e50;
+  font-weight: 600;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e2e8f0;
 }
 
 /* Edit Mode */

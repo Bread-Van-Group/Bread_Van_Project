@@ -82,3 +82,17 @@ def get_daily_inventory():
     ).scalars().all()
     
     return [inventory_item.get_json() for inventory_item in daily_inventory]
+
+
+def update_item_price(item_id, new_price):
+    """Update the price of an inventory item"""
+    from App.models import InventoryItem
+    from App.database import db
+
+    item = InventoryItem.query.get(item_id)
+    if not item:
+        return None
+
+    item.price = new_price
+    db.session.commit()
+    return item
