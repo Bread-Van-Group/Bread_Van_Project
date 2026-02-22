@@ -1,0 +1,126 @@
+/* ─── Variables ─────────────────────────────────────────────── */
+:root {
+  --orange-deep: #c45e1e;
+  --orange-main: #e07b39;
+  --orange-warm: #f09455;
+  --orange-light: #fad4b4;
+  --orange-blush: #fff3ea;
+  --cream: #fffaf5;
+  --ink: #2a1a0e;
+  --ink-muted: #7a5a3e;
+  --ink-faint: #c8a98a;
+  --white: #ffffff;
+  --shadow-warm: rgba(180, 80, 10, 0.12);
+  --shadow-card: rgba(60, 30, 5, 0.1);
+}
+
+.page-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ─── Nav Bar ───────────────────────────────────────────────── */
+.nav-container {
+  display: flex;
+  width: 100%;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: stretch;
+  box-shadow:
+    rgba(0, 0, 0, 0.05) 0px 0px 0px 1px,
+    rgb(209, 213, 219) 0px 0px 0px 1px inset;
+  position: fixed;
+  bottom: 0;
+  z-index: 99;
+  padding-bottom: env(safe-area-inset-bottom); /* handles iPhone notch */
+}
+
+.nav-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex: 1;
+  padding: 8px 4px 10px;
+  min-height: 56px;
+  font-family: "Caveat Brush", cursive;
+  font-weight: 400;
+  font-style: italic;
+  text-decoration: none;
+  text-align: center;
+  letter-spacing: 0.5px;
+  border: none;
+  position: relative;
+  background: linear-gradient(145deg, #e8a764, #d89752);
+  color: white;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent; /* removes default mobile tap flash */
+}
+
+.nav-btn i {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.nav-btn span {
+  font-size: 1rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.nav-btn:hover::before,
+.nav-btn:active::before {
+  left: 100%;
+}
+
+.nav-btn:hover {
+  background: linear-gradient(145deg, #f0b272, #e09a5e);
+  transform: translateY(-2px);
+  box-shadow:
+    rgba(139, 101, 61, 0.4) 0px 8px 16px -2px,
+    rgba(101, 67, 33, 0.3) 0px 6px 12px -2px,
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
+}
+
+.nav-btn:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow:
+    rgba(139, 101, 61, 0.3) 0px 3px 6px -1px,
+    rgba(101, 67, 33, 0.2) 0px 2px 4px -1px,
+    inset 0 2px 4px rgba(101, 67, 33, 0.2);
+}
+
+/* Active/Current Page Button */
+.nav-btn.active {
+  background: linear-gradient(145deg, #e07b39, #c66a2e);
+  box-shadow:
+    rgba(224, 123, 57, 0.4) 0px 4px 8px -1px,
+    rgba(198, 106, 46, 0.3) 0px 2px 4px -1px,
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -2px 4px rgba(198, 106, 46, 0.3);
+}
+
+/* Active indicator pip */
+.nav-btn.active::after {
+  content: "";
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.nav-btn[href*="logout"] {
+  background: linear-gradient(145deg, #e74c3c, #c0392b);
+}
+
+.nav-btn[href*="logout"]:hover {
+  background: linear-gradient(145deg, #ec7063, #e74c3c);
+}

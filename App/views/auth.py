@@ -45,7 +45,7 @@ def login_action():
     elif user.role == 'owner':
         response = redirect(url_for('index_views.owner_homepage'))
     elif user.role == 'customer':
-        response = redirect(url_for('index_views.customer_homepage'))
+        response = redirect(url_for('customer_views.customer_homepage'))
     else:
         response = redirect(url_for('index_views.index'))
 

@@ -1,7 +1,8 @@
 import os
-from flask import Flask, render_template, redirect, flash, url_for
+from flask import Flask, request, render_template, redirect, flash, url_for
 from flask_uploads import DOCUMENTS, IMAGES, TEXT, UploadSet, configure_uploads
 from flask_cors import CORS
+from flask_socketio import SocketIO
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import  FileStorage
 
@@ -16,6 +17,14 @@ from App.controllers import (
 
 from App.views import views, setup_admin
 
+socketio = SocketIO(cors_allowed_origins="*")
+
+#Websocket functions
+
+@socketio.on("driver_location")
+def handle_driver_location(data):
+    print(data)
+    socketio.emit("driver_update", data, skip_sid=request.sid)
 
 
 def add_views(app):
@@ -34,6 +43,9 @@ def create_app(overrides={}):
     jwt = setup_jwt(app)
     setup_admin(app)
     
+    #Websockets code
+    socketio.init_app(app)
+
     @jwt.unauthorized_loader
     def unauthorized_callback(reason):
         flash("Please log in first.", "error")

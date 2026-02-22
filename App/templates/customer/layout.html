@@ -25,7 +25,7 @@
     />
     <link
       rel="stylesheet"
-      href="{{ url_for('static', filename='styles/driver/layout.css') }}"
+      href="{{ url_for('static', filename='styles/customer/layout.css') }}"
     />
 
     <!-- Material Icons -->
@@ -41,43 +41,35 @@
   <body>
     <div class="page-container" id="content">
       <!-- Top bar -->
-      <div class="top-bar">
-        <a href="{{ url_for('auth_views.logout') }}" class="logout-btn">
-          <i class="fa-solid fa-right-from-bracket"></i>
-          <span>Logout</span>
-        </a>
-      </div>
 
       <!-- Page content -->
       {% block content %}{% endblock %}
 
-      <!-- Bottom navigation -->
-      <div class="bottom-btn-container">
+      <!-- Navigation Bar -->
+      <div class="nav-container">
         <a
-          class="bottom-btn"
-          href="{{ url_for('driver_views.driver_requests_page')}}"
+          class="nav-btn active"
+          href="{{ url_for('customer_views.customer_homepage') }}"
+          ><i class="fa-solid fa-home"></i><span>Home</span></a
         >
-          <i class="fa-solid fa-bell"></i>
-          <span>New Requests</span>
-        </a>
+        <a class="nav-btn" href="{{ url_for('customer_views.customer_stock') }}"
+          ><i class="fa-solid fa-store"></i><span>Store</span></a
+        >
         <a
-          class="bottom-btn"
-          href="{{ url_for('driver_views.driver_inventory_page') }}"
+          class="nav-btn"
+          href="{{ url_for('customer_views.customer_schedule') }}"
+          ><i class="fa-solid fa-calendar"></i><span>Schedule</span></a
         >
-          <i class="fa-solid fa-box"></i>
-          <span>Inventory</span>
-        </a>
-        <a class="bottom-btn">
-          <i class="fa-solid fa-receipt"></i>
-          <span>Transactions</span>
-        </a>
+        <a class="nav-btn" href="{{ url_for('auth_views.logout') }}"
+          ><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a
+        >
       </div>
     </div>
 
-    <!---Web Socket Code Below-->
+    <!--Web Socket Code-->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-    <script src="{{url_for('static', filename='js/driver/map.js')}}"></script>
+    <script src="{{url_for('static', filename='js/customer/layout.js')}}"></script>
     <script>
       M.AutoInit();
 

@@ -1,35 +1,88 @@
-{% extends "driver/layout.html" %} 
-{% block title %}Customer Home{% endblock %}
-{% block head %}
+{% extends "customer/layout.html" %} {% block title %}Customer Home{% endblock
+%} {% block head %}
 <!-- Leaflet CSS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
 
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <!-- Custom CSS -->
-<link rel="stylesheet" href="{{ url_for('static', filename='styles/user/homepage.css') }}" />
-{% endblock %} 
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='styles/customer/homepage.css') }}"
+/>
+{% endblock %} {% block content %}
 
-{% block content %}
-
-<div class="header">Welcome, Customer!</div>
-
-<!-- Navigation Bar -->
-<div class="nav-container">
-  <a class="nav-btn active" href="{{ url_for('index_views.customer_homepage') }}">Home</a>
-  <a class="nav-btn" href="{{ url_for('index_views.customer_stock') }}">Ava Stock</a>
-  <a class="nav-btn" href="{{ url_for('index_views.customer_schedule') }}">Schedule</a>
-  <a class="nav-btn" href="{{ url_for('auth_views.logout') }}">Logout</a>
-</div>
-
-<div class="page-container">
+<div class="page-content">
   <!-- Map Section -->
-  <div class="map-section">
-    <div id="map" class="map"></div>
-    
-    <!-- Map Info Overlay -->
-    <div class="map-info">
+  <div class="main-content-container">
+    <div class="content-navbar">
+      <button
+        id="map-button"
+        class="content-navbar-btn"
+        onclick="changeContent('map')"
+      >
+        <i class="fa-solid fa-map"></i><span>Map</span>
+      </button>
+      <button
+        id="order-button"
+        class="content-navbar-btn content-navbar-btn-inactive"
+        onclick="changeContent('order')"
+      >
+        <i class="fa-solid fa-basket-shopping"></i
+        ><span class="my-order-info"
+          >My Order: {%if orders %}<span
+            id="my-order-status"
+            class="my-order-status my-order-status-inactive"
+          >
+            Pending
+            <span class="loading-dots"
+              ><span>.</span> <span>.</span> <span>.</span></span
+            >
+            <i class="fa-solid fa-van-shuttle"></i
+          ></span>
+          {% else %} <span> No Order X</span> {% endif %}</span
+        >
+      </button>
+    </div>
+    <div id="main-content" class="main-content">
+      <!-- Map Section -->
+
+      <div id="map" class="map"></div>
+      <div id="map-text" class="map-text">
+        There currently aren't any active drivers
+      </div>
+
+      <!-- Orders Section -->
+      <div id="order-section" class="orders-section">
+        <div class="order-items">
+          {%if orders %} {% for order in orders %}
+          <div class="order-item">
+            <p class="item-name">{{order.item.name}}</p>
+
+            <p class="item-quantity">x {{order.quantity}}</p>
+
+            <div class="item-details">
+              <p class="item-price">
+                <span> Unit Price: </span>${{order.item.price}}0
+              </p>
+              <p class="item-total">
+                <span>Total:</span> ${{order.item.price * order.quantity}}0
+              </p>
+            </div>
+          </div>
+          {% endfor %} {% else %}
+          <div>none</div>
+          {% endif %}
+        </div>
+        <p class="order-total"><span>Total: </span>${{order_total}}</p>
+      </div>
+
+      <!-- Map Info Overlay -->
+      <!-- <div class="map-info">
       <div class="map-info-item">
         <span class="map-info-label">ETA:</span>
         <span class="map-info-value" id="eta">5min</span>
@@ -38,35 +91,7 @@
         <span class="map-info-label">Distance:</span>
         <span class="map-info-value" id="distance">5km</span>
       </div>
-    </div>
-  </div>
-
-  <!-- Orders Section -->
-  <div class="orders-section">
-    <!-- Order/Pre-Order Tabs -->
-    <div class="order-tabs">
-      <a class="tab-btn active" href="{{ url_for('index_views.customer_homepage') }}" data-tab="order">Order</a>
-      <a class="tab-btn" href="{{ url_for('index_views.customer_preorder') }}" data-tab="pre-order">Pre-Order</a>
-    </div>
-
-    <!-- Product Grid -->
-    <div class="product-grid">
-      <div class="product-card">
-        <div class="product-image">(image)</div>
-        <h3 class="product-name">Hops bread</h3>
-        <p class="product-status">(Ordered amount)</p>
-      </div>
-
-      <div class="product-card">
-        <div class="product-image">(image)</div>
-        <h3 class="product-name">Coconut bus</h3>
-        <p class="product-status">(Ordered amount)</p>
-      </div>
-    </div>
-
-    <!-- Status Button -->
-    <div class="status-btn-container">
-      <button class="status-btn">Status</button>
+    </div> -->
     </div>
   </div>
 
@@ -76,31 +101,8 @@
   </div>
 </div>
 
-{% endblock %} 
+{% endblock %} {% block scripts %}
 
-{% block scripts %}
-<script>
-  var map = L.map("map", {
-    center: [10.234144, -61.43942],
-    zoom: 16,
-    minZoom: 16,
-    maxZoom: 18,
-    maxBounds: [[10.24166, -61.45022], [10.2274, -61.42478]],
-  });
-  
-  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 18,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-  }).addTo(map);
-
-  const tabBtns = document.querySelectorAll('.tab-btn');
-  tabBtns.forEach(btn => {
-    btn.addEventListener('click', function() {
-      tabBtns.forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
-      const tab = this.dataset.tab;
-      console.log('Switched to:', tab);
-    });
-  });
-</script>
+<script src="{{url_for('static', filename='js/customer/map.js')}}"></script>
+<script src="{{url_for('static', filename='js/customer/homepage.js')}}"></script>
 {% endblock %}
