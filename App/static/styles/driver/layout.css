@@ -1,3 +1,19 @@
+/* ─── Variables ─────────────────────────────────────────────── */
+:root {
+  --orange-deep: #c45e1e;
+  --orange-main: #e07b39;
+  --orange-warm: #f09455;
+  --orange-light: #fad4b4;
+  --orange-blush: #fff3ea;
+  --cream: #fffaf5;
+  --ink: #2a1a0e;
+  --ink-muted: #7a5a3e;
+  --ink-faint: #c8a98a;
+  --white: #ffffff;
+  --shadow-warm: rgba(180, 80, 10, 0.12);
+  --shadow-card: rgba(60, 30, 5, 0.1);
+}
+
 * {
   box-sizing: border-box;
 }

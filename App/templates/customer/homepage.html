@@ -20,39 +20,65 @@
   <!-- Map Section -->
   <div class="main-content-container">
     <div class="content-navbar">
-      <button class="content-navbar-btn" onclick="changeContent('map')">
+      <button
+        id="map-button"
+        class="content-navbar-btn"
+        onclick="changeContent('map')"
+      >
         <i class="fa-solid fa-map"></i><span>Map</span>
       </button>
-      <button class="content-navbar-btn" onclick="changeContent('order')">
-        <i class="fa-solid fa-basket-shopping"></i><span>My Order</span>
+      <button
+        id="order-button"
+        class="content-navbar-btn content-navbar-btn-inactive"
+        onclick="changeContent('order')"
+      >
+        <i class="fa-solid fa-basket-shopping"></i
+        ><span class="my-order-info"
+          >My Order: {%if orders %}<span
+            id="my-order-status"
+            class="my-order-status my-order-status-inactive"
+          >
+            Pending
+            <span class="loading-dots"
+              ><span>.</span> <span>.</span> <span>.</span></span
+            >
+            <i class="fa-solid fa-van-shuttle"></i
+          ></span>
+          {% else %} <span> No Order X</span> {% endif %}</span
+        >
       </button>
     </div>
     <div id="main-content" class="main-content">
       <!-- Map Section -->
+
       <div id="map" class="map"></div>
+      <div id="map-text" class="map-text">
+        There currently aren't any active drivers
+      </div>
 
       <!-- Orders Section -->
       <div id="order-section" class="orders-section">
-        <!-- Order/Pre-Order Tabs -->
+        <div class="order-items">
+          {%if orders %} {% for order in orders %}
+          <div class="order-item">
+            <p class="item-name">{{order.item.name}}</p>
 
-        <div class="product-grid">
-          <div class="product-card">
-            <div class="product-image">(image)</div>
-            <h3 class="product-name">Hops bread</h3>
-            <p class="product-status">(Ordered amount)</p>
+            <p class="item-quantity">x {{order.quantity}}</p>
+
+            <div class="item-details">
+              <p class="item-price">
+                <span> Unit Price: </span>${{order.item.price}}0
+              </p>
+              <p class="item-total">
+                <span>Total:</span> ${{order.item.price * order.quantity}}0
+              </p>
+            </div>
           </div>
-
-          <div class="product-card">
-            <div class="product-image">(image)</div>
-            <h3 class="product-name">Coconut bus</h3>
-            <p class="product-status">(Ordered amount)</p>
-          </div>
+          {% endfor %} {% else %}
+          <div>none</div>
+          {% endif %}
         </div>
-
-        <!-- Status Button -->
-        <div class="status-btn-container">
-          <button class="status-btn">Status</button>
-        </div>
+        <p class="order-total"><span>Total: </span>${{order_total}}</p>
       </div>
 
       <!-- Map Info Overlay -->
@@ -76,6 +102,7 @@
 </div>
 
 {% endblock %} {% block scripts %}
+
 <script src="{{url_for('static', filename='js/customer/map.js')}}"></script>
 <script src="{{url_for('static', filename='js/customer/homepage.js')}}"></script>
 {% endblock %}

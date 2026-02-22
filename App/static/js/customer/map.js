@@ -60,3 +60,14 @@ socket.on("driver_update", function (data) {
     breadVanMarker.setLatLng([data.lat, data.lng]);
   }
 });
+
+if (breadVanMarker == null) {
+  toggleMapInactive();
+}
+
+function toggleMapInactive() {
+  const map = document.querySelector("#map");
+  const mapText = document.querySelector("#map-text");
+  map.style.opacity = 0.3;
+  mapText.style.opacity = 1;
+}

@@ -49,13 +49,15 @@
       <div class="nav-container">
         <a
           class="nav-btn active"
-          href="{{ url_for('index_views.customer_homepage') }}"
+          href="{{ url_for('customer_views.customer_homepage') }}"
           ><i class="fa-solid fa-home"></i><span>Home</span></a
         >
-        <a class="nav-btn" href="{{ url_for('index_views.customer_stock') }}"
+        <a class="nav-btn" href="{{ url_for('customer_views.customer_stock') }}"
           ><i class="fa-solid fa-store"></i><span>Store</span></a
         >
-        <a class="nav-btn" href="{{ url_for('index_views.customer_schedule') }}"
+        <a
+          class="nav-btn"
+          href="{{ url_for('customer_views.customer_schedule') }}"
           ><i class="fa-solid fa-calendar"></i><span>Schedule</span></a
         >
         <a class="nav-btn" href="{{ url_for('auth_views.logout') }}"
