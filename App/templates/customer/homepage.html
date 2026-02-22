@@ -34,22 +34,7 @@
       <!-- Orders Section -->
       <div id="order-section" class="orders-section">
         <!-- Order/Pre-Order Tabs -->
-        <div class="order-tabs">
-          <a
-            class="tab-btn active"
-            href="{{ url_for('index_views.customer_homepage') }}"
-            data-tab="order"
-            >Order</a
-          >
-          <a
-            class="tab-btn"
-            href="{{ url_for('index_views.customer_preorder') }}"
-            data-tab="pre-order"
-            >Pre-Order</a
-          >
-        </div>
 
-        <!-- Product Grid -->
         <div class="product-grid">
           <div class="product-card">
             <div class="product-image">(image)</div>
@@ -91,5 +76,6 @@
 </div>
 
 {% endblock %} {% block scripts %}
+<script src="{{url_for('static', filename='js/customer/map.js')}}"></script>
 <script src="{{url_for('static', filename='js/customer/homepage.js')}}"></script>
 {% endblock %}
