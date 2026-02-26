@@ -1,0 +1,108 @@
+{% extends "customer/layout.html" %} {% block title %}Customer Home{% endblock
+%} {% block head %}
+<!-- Leaflet CSS -->
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- Custom CSS -->
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='styles/customer/homepage.css') }}"
+/>
+{% endblock %} {% block content %}
+
+<div class="page-content">
+  <!-- Map Section -->
+  <div class="main-content-container">
+    <div class="content-navbar">
+      <button
+        id="map-button"
+        class="content-navbar-btn"
+        onclick="changeContent('map')"
+      >
+        <i class="fa-solid fa-map"></i><span>Map</span>
+      </button>
+      <button
+        id="order-button"
+        class="content-navbar-btn content-navbar-btn-inactive"
+        onclick="changeContent('order')"
+      >
+        <i class="fa-solid fa-basket-shopping"></i
+        ><span class="my-order-info"
+          >My Order: {%if orders %}<span
+            id="my-order-status"
+            class="my-order-status my-order-status-inactive"
+          >
+            Pending
+            <span class="loading-dots"
+              ><span>.</span> <span>.</span> <span>.</span></span
+            >
+            <i class="fa-solid fa-van-shuttle"></i
+          ></span>
+          {% else %} <span> No Order X</span> {% endif %}</span
+        >
+      </button>
+    </div>
+    <div id="main-content" class="main-content">
+      <!-- Map Section -->
+
+      <div id="map" class="map"></div>
+      <div id="map-text" class="map-text">
+        There currently aren't any active drivers
+      </div>
+
+      <!-- Orders Section -->
+      <div id="order-section" class="orders-section">
+        <div class="order-items">
+          {%if orders %} {% for order in orders %}
+          <div class="order-item">
+            <p class="item-name">{{order.item.name}}</p>
+
+            <p class="item-quantity">x {{order.quantity}}</p>
+
+            <div class="item-details">
+              <p class="item-price">
+                <span> Unit Price: </span>${{order.item.price}}0
+              </p>
+              <p class="item-total">
+                <span>Total:</span> ${{order.item.price * order.quantity}}0
+              </p>
+            </div>
+          </div>
+          {% endfor %} {% else %}
+          <div>none</div>
+          {% endif %}
+        </div>
+        <p class="order-total"><span>Total: </span>${{order_total}}</p>
+      </div>
+
+      <!-- Map Info Overlay -->
+      <!-- <div class="map-info">
+      <div class="map-info-item">
+        <span class="map-info-label">ETA:</span>
+        <span class="map-info-value" id="eta">5min</span>
+      </div>
+      <div class="map-info-item">
+        <span class="map-info-label">Distance:</span>
+        <span class="map-info-value" id="distance">5km</span>
+      </div>
+    </div> -->
+    </div>
+  </div>
+
+  <!-- Established Footer -->
+  <div class="established-footer">
+    <h3>Established</h3>
+  </div>
+</div>
+
+{% endblock %} {% block scripts %}
+
+<script src="{{url_for('static', filename='js/customer/map.js')}}"></script>
+<script src="{{url_for('static', filename='js/customer/homepage.js')}}"></script>
+{% endblock %}
