@@ -8,12 +8,15 @@ block head %}
 
 <!-- Top Navigation Bar -->
 <div class="cart-header">
-  <a class="header-btn" href="{{ url_for('index_views.customer_preorder') }}">
+  <a
+    class="header-btn"
+    href="{{ url_for('customer_views.customer_preorder') }}"
+  >
     <span>←</span>
     <span>Back</span>
   </a>
   <h1 class="header-title">Cart</h1>
-  <a class="header-btn" href="{{ url_for('index_views.customer_homepage') }}"
+  <a class="header-btn" href="{{ url_for('customer_views.customer_homepage') }}"
     >Home</a
   >
 </div>

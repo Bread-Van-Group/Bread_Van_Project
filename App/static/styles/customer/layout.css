@@ -10,14 +10,33 @@
   --ink-muted: #7a5a3e;
   --ink-faint: #c8a98a;
   --white: #ffffff;
+  --red-deep: #c0392b;
+  --red-main: #e74c3c;
+  --green-deep: #229954;
+  --green-main: #27ae60;
   --shadow-warm: rgba(180, 80, 10, 0.12);
   --shadow-card: rgba(60, 30, 5, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body,
+html {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background-color: #fcfbf5;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .page-container {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 1vh;
+  height: 100vh;
 }
 
 /* ─── Nav Bar ───────────────────────────────────────────────── */

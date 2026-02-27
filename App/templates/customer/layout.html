@@ -28,12 +28,6 @@
       href="{{ url_for('static', filename='styles/customer/layout.css') }}"
     />
 
-    <!-- Material Icons -->
-    <link
-      href="https://fonts.googleapis.com/icon?family=Material+Icons"
-      rel="stylesheet"
-    />
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     {% block head %}{% endblock %}
     <title>{% block title %}{% endblock %}</title>
@@ -48,14 +42,19 @@
       <!-- Navigation Bar -->
       <div class="nav-container">
         <a
-          class="nav-btn active"
+          id="home"
+          class="nav-btn"
           href="{{ url_for('customer_views.customer_homepage') }}"
           ><i class="fa-solid fa-home"></i><span>Home</span></a
         >
-        <a class="nav-btn" href="{{ url_for('customer_views.customer_stock') }}"
+        <a
+          id="store"
+          class="nav-btn"
+          href="{{ url_for('customer_views.customer_store') }}"
           ><i class="fa-solid fa-store"></i><span>Store</span></a
         >
         <a
+          id="schedule"
           class="nav-btn"
           href="{{ url_for('customer_views.customer_schedule') }}"
           ><i class="fa-solid fa-calendar"></i><span>Schedule</span></a
@@ -68,11 +67,7 @@
 
     <!--Web Socket Code-->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-    <script src="{{url_for('static', filename='js/customer/layout.js')}}"></script>
     <script>
-      M.AutoInit();
-
       {% with messages = get_flashed_messages() %}
         {% if messages %}
           {% for message in messages %}
@@ -80,6 +75,15 @@
           {% endfor %}
         {% endif %}
       {% endwith %}
+    </script>
+    <!--Navbar Code -->
+    <script>
+      const currentURL = "{{ request.path  }}";
+      const id = currentURL.slice(currentURL.lastIndexOf("/") + 1);
+
+      const currentNavBtn = document.querySelector(`#${id}`);
+
+      currentNavBtn.classList.add("active");
     </script>
 
     {% block scripts %}{% endblock %}
