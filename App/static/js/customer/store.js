@@ -3,6 +3,7 @@ const order = [];
 //Order Update Function
 function updateOrder(id, itemPrice, itemName, action) {
   const item = order.find((obj) => obj.inventory_id === id);
+  console.log(order);
 
   switch (action) {
     case "add":
@@ -42,6 +43,7 @@ function closeCart() {
   );
 
   cartDetailsContainer.style.opacity = 0;
+  cartDetailsContainer.style.zIndex = -1;
 }
 
 //Display Cart
@@ -51,6 +53,7 @@ function openCart() {
   );
 
   cartDetailsContainer.style.opacity = 1;
+  cartDetailsContainer.style.zIndex = 200;
 }
 
 //This code changes the actual order html

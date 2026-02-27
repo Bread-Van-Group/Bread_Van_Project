@@ -366,6 +366,8 @@
   right: 2vw;
   padding: 8px;
 
+  max-height: 50vh;
+
   border-radius: 15px;
 
   font-family: "Shadows Into Light Two", cursive;
