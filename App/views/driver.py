@@ -18,6 +18,8 @@ from App.controllers.route import get_route_stops
 from App.models import CustomerRequest, RouteStop, Customer, InventoryItem, Status
 from App.database import db
 
+from datetime import date
+
 driver_views = Blueprint('driver_views', __name__, template_folder='../templates')
 
 
@@ -34,7 +36,11 @@ def driver_homepage():
 @jwt_required() 
 def driver_inventory_page():
     driver_id = int(get_jwt_identity())
-    daily_inventory = get_daily_inventory()
+
+    today = date.today()
+
+    daily_inventory = get_daily_inventory(today)
+
     return render_template('driver/inventory.html', daily_inventory = daily_inventory)
 
 @driver_views.route('/driver/requests', methods=['GET'])

@@ -1,0 +1,494 @@
+/* ─── Filter Section ─────────────────────────────────────────────── */
+.filters {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--white);
+  box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+}
+
+/* Search */
+.search-filter {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  color: var(--orange-deep);
+  font-size: 1.2rem;
+  left: 3vw;
+  top: 0.5rem;
+}
+
+.search-bar {
+  width: 100%;
+  height: 6vh;
+  padding: 12px 34px;
+  background: var(--orange-blush);
+  border: 1.5px solid var(--orange-light);
+  border-radius: 20px;
+  color: var(--ink);
+  font-family: "Caveat Brush", cursive;
+  font-size: 1rem;
+  outline: none;
+}
+
+.search-bar::placeholder {
+  color: var(--ink-faint);
+  font-style: italic;
+}
+
+/* Category */
+.category-filter {
+  flex-shrink: 0;
+  position: relative;
+}
+
+.category-filter::after {
+  content: "⮟";
+  position: absolute;
+  color: var(--orange-deep);
+  right: 4vw;
+  top: 1vh;
+}
+
+.category-filter-select {
+  height: 6vh;
+  padding: 0 28px 0 13px;
+  background: var(--orange-blush);
+  border: 1.5px solid var(--orange-light);
+  border-radius: 20px;
+  color: var(--orange-deep);
+  font-family: "Caveat Brush", cursive;
+  font-size: 0.95rem;
+  font-style: italic;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  cursor: pointer;
+  min-width: 28vw;
+}
+
+/*Cart Button */
+.cart-btn {
+  display: flex;
+  flex-direction: row;
+  gap: 1vw;
+
+  padding: 8px 8px;
+  background: var(--orange-main);
+  color: var(--white);
+
+  border: none;
+
+  font-family: "Shadows Into Light Two", cursive;
+  font-size: 0.85rem;
+  font-style: italic;
+  letter-spacing: 0.1px;
+
+  border-radius: 15px;
+  transition: all 0.3s ease-in-out;
+  box-shadow:
+    rgba(9, 30, 66, 0.25) 0px 1px 1px,
+    rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;
+}
+
+.cart-btn:active {
+  background: var(--orange-warm);
+  box-shadow: none;
+}
+
+.cart-btn i {
+  font-size: 1.2rem;
+}
+
+/* ─── Store Section ─────────────────────────────────────────────── */
+.store-section {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+  height: 69vh;
+  padding: 4px 12px;
+  gap: 2vh;
+  overflow-y: scroll;
+}
+
+.store-section::-webkit-scrollbar {
+  width: 2vw;
+}
+.store-section::-webkit-scrollbar-track {
+  background: transparent;
+}
+.store-section::-webkit-scrollbar-thumb {
+  background: var(--orange-light);
+  border-radius: 20px;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+.store-section::-webkit-scrollbar-thumb:hover {
+  background: var(--orange-warm);
+  background-clip: padding-box;
+}
+
+.store-card {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  gap: 4vw;
+  background-color: var(--white);
+  padding: 4px 12px;
+  border-radius: 15px;
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+    rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+}
+
+.store-card-image {
+  height: 28vh;
+  margin: 12px 4px;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 15px;
+  z-index: 0;
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+    rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+}
+
+.store-card-details {
+  width: 60vw;
+}
+
+.store-card-name {
+  font-family: "Caveat Brush", cursive;
+  font-weight: 400;
+  font-style: italic;
+  margin-top: 4vh;
+  font-size: 1.7rem;
+  color: var(--orange-deep);
+  line-height: 0.5;
+  letter-spacing: 0.05px;
+}
+
+.store-card-price {
+  text-align: center;
+  font-family: "Shadows Into Light Two", cursive;
+  width: 20vw;
+  font-weight: 400;
+  font-style: italic;
+  background-color: var(--orange-deep);
+  padding: 4px;
+  border-radius: 10px;
+  margin-top: 3vh;
+  margin-bottom: 1vh;
+  font-size: 1.2rem;
+  color: var(--white);
+}
+
+.store-card-in-stock-marker {
+  font-family: "Caveat Brush", cursive;
+  color: var(--ink-muted);
+  font-size: 1rem;
+  font-style: italic;
+  margin-top: 2vh;
+}
+
+.store-card-out-of-stock-marker {
+  font-family: "Caveat Brush", cursive;
+  background-color: var(--orange-light);
+  color: var(--orange-deep);
+  border-radius: 0;
+  border-left: 3px solid var(--orange-deep);
+  font-size: 1rem;
+  font-style: italic;
+  margin-top: 2vh;
+}
+
+.store-card-quantity-btns {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  gap: 5vw;
+}
+
+.store-card-quantity-btns {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.adjust-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 8vw;
+  height: 6vh;
+  border-radius: 50%;
+  border: 1.5px solid var(--orange-light);
+  background: var(--orange-blush);
+  color: var(--orange-deep);
+  font-family: "Shadows Into Light Two", cursive;
+  font-size: 1.4rem;
+  line-height: 1;
+  transition: all 0.3s ease-in-out;
+}
+
+.adjust-btn:active {
+  background: var(--orange-warm);
+  color: var(--white);
+  border-color: var(--orange-warm);
+}
+
+.ordered-quantity {
+  font-family: "Shadows Into Light Two", cursive;
+  font-style: italic;
+  font-size: 1.4rem;
+  color: var(--orange-deep);
+  min-width: 20px;
+  text-align: center;
+  margin: 0;
+}
+
+/* ─── Checkout Section ─────────────────────────────────────────────── */
+.checkout-section {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background-color: white;
+  box-shadow:
+    rgba(9, 30, 66, 0.25) 0px 4px 8px -2px,
+    rgba(9, 30, 66, 0.08) 0px 0px 0px 1px;
+}
+.order-total-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 8vh;
+  margin: 0;
+  gap: 1vw;
+  background: white;
+  border-radius: 16px;
+  padding: 12px 18px;
+
+  box-shadow:
+    rgba(224, 123, 57, 0.18) 0px 0px 0px 1.5px,
+    rgba(17, 17, 26, 0.06) 0px 2px 8px;
+}
+
+.order-total-text {
+  font-size: 1.1rem;
+  font-family: "Caveat Brush", cursive;
+  color: var(--ink-faint);
+  font-style: italic;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.order-total-number {
+  font-size: 1.45rem;
+  font-family: "Shadows Into Light Two", cursive;
+  color: var(--orange-deep);
+  font-style: italic;
+  font-weight: 600;
+}
+
+.checkout-btn {
+  padding: 12px 18px;
+  height: 8vh;
+  display: flex;
+  align-items: center;
+  gap: 1vw;
+
+  background: var(--orange-deep);
+  color: var(--white);
+  text-decoration: none;
+
+  font-family: "Shadows Into Light Two", cursive;
+  font-style: italic;
+  font-size: 1.2rem;
+  letter-spacing: 0.1px;
+
+  border-radius: 15px;
+  transition: all 0.3s ease-in-out;
+  box-shadow:
+    rgba(9, 30, 66, 0.25) 0px 1px 1px,
+    rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;
+}
+
+.checkout-btn i {
+  font-size: 1.4rem;
+}
+
+/* ─── Cart Section ─────────────────────────────────────────────── */
+.cart-marker {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  width: 5vw;
+
+  font-family: "Caveat Brush", cursive;
+  color: var(--ink-faint);
+  font-size: 0.9rem;
+  font-style: italic;
+  font-weight: 400;
+
+  top: 1vh;
+  right: 5vw;
+  color: white;
+  background-color: var(--orange-warm);
+  box-shadow:
+    rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
+    rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+}
+
+.cart-details {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+
+  opacity: 0;
+
+  height: auto;
+  width: auto;
+
+  top: 9vh;
+  right: 2vw;
+  padding: 8px;
+
+  border-radius: 15px;
+
+  font-family: "Shadows Into Light Two", cursive;
+  font-style: italic;
+  font-size: 0.85rem;
+  color: var(--ink-faint);
+
+  box-shadow:
+    rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
+    rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+
+  background-color: white;
+  z-index: 200;
+  transition: all 0.1s ease-in-out;
+}
+
+.cart-details-close {
+  font-family: "Shadows Into Light Two", cursive;
+  font-style: normal;
+  font-size: 0.85rem;
+  border-radius: 50%;
+  width: 5vw;
+  padding-left: 4px;
+  box-shadow:
+    rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
+    rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+  background-color: var(--red-deep);
+  color: var(--white);
+}
+
+.cart-details::before {
+  content: "";
+  position: absolute;
+  top: -4vh;
+  right: 5vw;
+  width: 3vw;
+  height: 3vh;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 10px solid white;
+  filter: drop-shadow(0px -1px 1px rgba(60, 64, 67, 0.15));
+  z-index: 201;
+}
+
+.cart-details-inner {
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+  padding: 4px;
+  gap: 1vh;
+  max-height: 50vh;
+  width: auto;
+  z-index: 200;
+}
+
+.cart-item {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 8px;
+  width: 70vw;
+
+  border-radius: 10px;
+
+  box-shadow:
+    rgba(0, 0, 0, 0.1) 0px 1px 3px 0px,
+    rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;
+}
+
+.cart-item-name {
+  font-family: "Caveat Brush", cursive;
+  font-weight: 400;
+  font-style: italic;
+  font-size: 1.35rem;
+  color: var(--orange-deep);
+}
+
+.cart-item-price {
+  font-family: "Shadows Into Light Two", cursive;
+  font-style: normal;
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+}
+
+.cart-item-qty-section {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1vw;
+}
+
+.cart-item-quantity {
+  font-family: "Shadows Into Light Two", cursive;
+  font-style: normal;
+  font-size: 0.85rem;
+  border-radius: 12px;
+  background-color: var(--orange-warm);
+  color: white;
+  padding: 2px 10px;
+  line-height: 1.6;
+  letter-spacing: 0.3px;
+}
+
+.cart-adjust-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 6vw;
+  height: 4vh;
+  border-radius: 50%;
+  border: 1.5px solid var(--orange-light);
+  background: var(--orange-blush);
+  color: var(--orange-deep);
+  font-family: "Shadows Into Light Two", cursive;
+  font-size: 1rem;
+  line-height: 1;
+  transition: all 0.3s ease-in-out;
+}
+
+.cart-adjust-btn:active {
+  background: var(--orange-warm);
+  color: var(--white);
+  border-color: var(--orange-warm);
+}
