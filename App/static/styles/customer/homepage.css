@@ -1,0 +1,421 @@
+/* ─── Page Content ───────────────────────────────────────────────── */
+.page-content {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  gap: 24px;
+  padding-bottom: 40px;
+}
+
+/* ─── Main Content Section ───────────────────────────────────────────────── */
+.main-content-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  position: relative;
+  width: 100%;
+  height: 80vh;
+  border-radius: 25px;
+  background-color: white;
+  box-shadow:
+    rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
+    rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+}
+
+.content-navbar {
+  display: flex;
+  flex-direction: row;
+  margin-left: 3vw;
+  gap: 1vw;
+}
+
+.content-navbar-btn {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  position: relative;
+  border-radius: 15px 15px 0px 0px;
+  font-family: "Caveat Brush", cursive;
+  font-size: 1.2rem;
+  font-weight: 400;
+  font-style: italic;
+  text-decoration: none;
+  text-align: center;
+  letter-spacing: 0.5px;
+  border: none;
+  padding: 8px 12px;
+  box-shadow:
+    rgba(9, 30, 66, 0.25) 0px 1px 1px,
+    rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;
+  color: white;
+  background: linear-gradient(145deg, #e07b39, #c66a2e);
+  transition: all 0.3s ease-in-out;
+}
+
+.content-navbar-btn-inactive {
+  background: linear-gradient(145deg, #e07c39ae, #c66b2ea8);
+  opacity: 0.9;
+  transform: translateY(1vh);
+  font-size: 1.1rem;
+}
+
+.content-navbar-btn i {
+  font-size: 1.4rem;
+}
+
+.my-order-info {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1vw;
+}
+
+.my-order-info i {
+  font-size: 1rem;
+  padding-left: 1vw;
+}
+
+.my-order-status {
+  background-color: var(--orange-blush);
+  padding: 4px;
+  border-radius: 15px;
+  color: var(--orange-deep);
+  transition: all 0.3s ease-in-out;
+}
+
+.my-order-status-inactive {
+  opacity: 0.6;
+}
+
+.loading-dots span {
+  opacity: 0;
+  animation: dotOn 2s steps(1) infinite;
+}
+
+.loading-dots span:nth-child(1) {
+  animation-delay: 0s;
+}
+.loading-dots span:nth-child(2) {
+  animation-delay: 0.3s;
+}
+.loading-dots span:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+@keyframes dotOn {
+  0% {
+    opacity: 0;
+  }
+  1% {
+    opacity: 1;
+  }
+  60% {
+    opacity: 1;
+  }
+  61% {
+    opacity: 0;
+  }
+}
+
+/* ─── Map Styling ───────────────────────────────────────────────── */
+.map {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 25px;
+  opacity: 1;
+  z-index: 1;
+
+  transition: all 0.5s ease-in-out;
+}
+
+.map-text {
+  position: absolute;
+  top: 40%;
+  opacity: 0;
+  font-family: "Caveat Brush", cursive;
+  font-size: 1.7rem;
+  font-style: italic;
+  text-align: center;
+  letter-spacing: 0.5px;
+  border-radius: 15px;
+  color: var(--ink);
+  transition: all 0.5s ease-in-out;
+  z-index: 2;
+}
+
+/* Map Info Footer (ETA and Distance) */
+.map-info {
+  z-index: 2;
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 16px 32px;
+  border-radius: 15px;
+  box-shadow:
+    rgba(60, 64, 67, 0.3) 0px 2px 4px 0px,
+    rgba(60, 64, 67, 0.15) 0px 4px 8px 2px;
+  font-family: "Shadows Into Light Two", cursive;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.map-info-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.map-info-label {
+  font-family: "Caveat Brush", cursive;
+  font-size: 1.6rem;
+  color: #e07b39;
+  font-weight: 400;
+}
+
+.map-info-value {
+  font-family: "Shadows Into Light Two", cursive;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+/* ─── Orders Section ───────────────────────────────────────────────── */
+.orders-section {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: #fcfbf5;
+  border-radius: 25px;
+  padding: 16px 12px 16px 8px;
+  box-shadow:
+    rgba(0, 0, 0, 0.16) 0px 3px 6px,
+    rgba(0, 0, 0, 0.23) 0px 3px 6px;
+  opacity: 0;
+  z-index: -1;
+  transition: all 0.5s ease-in-out;
+}
+
+.order-items {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: center;
+  padding: 4px 2px;
+  direction: rtl;
+  height: 75%;
+  overflow-y: scroll;
+}
+
+.order-items > * {
+  direction: ltr;
+}
+
+.order-items::-webkit-scrollbar {
+  width: 4px;
+}
+.order-items::-webkit-scrollbar-track {
+  background: transparent;
+}
+.order-items::-webkit-scrollbar-thumb {
+  background: var(--orange-light);
+  border-radius: 20px;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+.order-items::-webkit-scrollbar-thumb:hover {
+  background: var(--orange-warm);
+  background-clip: padding-box;
+}
+
+.order-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-family: "Caveat Brush", cursive;
+  font-weight: 400;
+  font-style: italic;
+  padding: 14px 14px 12px 16px;
+  border-radius: 18px;
+  width: 100%;
+  min-height: 16vh;
+  background: white;
+  box-shadow:
+    rgba(14, 63, 126, 0.04) 0px 0px 0px 1px,
+    rgba(42, 51, 69, 0.04) 0px 1px 1px -0.5px,
+    rgba(42, 51, 70, 0.04) 0px 3px 3px -1.5px,
+    rgba(42, 51, 70, 0.04) 0px 6px 6px -3px,
+    rgba(14, 63, 126, 0.04) 0px 12px 12px -6px,
+    rgba(14, 63, 126, 0.04) 0px 24px 24px -12px;
+
+  /* Left accent border */
+  border-left: 3.5px solid var(--orange-light);
+  transition: all 0.3s ease;
+}
+
+.item-name {
+  margin: 0 0 auto 0;
+  font-size: 1.35rem;
+  color: var(--orange-deep);
+  line-height: 1.3;
+}
+
+.item-quantity {
+  position: absolute;
+  top: -1vh;
+  right: 12px;
+  border-radius: 12px;
+  background-color: var(--orange-warm);
+  color: white;
+  padding: 2px 10px;
+  font-size: 0.95rem;
+  font-style: normal;
+  line-height: 1.6;
+  letter-spacing: 0.3px;
+}
+
+.item-details {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  font-family: "Shadows Into Light Two", cursive;
+  font-style: normal;
+  border-top: 1px dashed #ece9df;
+  margin-top: 10px;
+  padding-top: 8px;
+}
+
+.item-details span {
+  font-family: "Caveat Brush", cursive;
+  color: var(--ink-faint);
+  font-size: 0.9rem;
+  font-style: italic;
+  margin-right: 3px;
+}
+
+.item-price {
+  color: var(--ink-muted);
+  font-size: 1rem;
+  margin: 0;
+}
+
+.item-total {
+  font-size: 1.2rem;
+  color: var(--orange-deep);
+  margin: 0;
+  font-weight: 600;
+}
+
+.item-total span {
+  color: var(--ink-faint);
+  font-weight: 400;
+  font-style: italic;
+  text-transform: uppercase;
+}
+
+.order-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.45rem;
+  font-family: "Shadows Into Light Two", cursive;
+  color: var(--orange-deep);
+  font-style: italic;
+  font-weight: 600;
+
+  background: white;
+  border-radius: 16px;
+  padding: 12px 18px;
+  margin-top: 5vh;
+
+  box-shadow:
+    rgba(224, 123, 57, 0.18) 0px 0px 0px 1.5px,
+    rgba(17, 17, 26, 0.06) 0px 2px 8px;
+}
+
+.order-total span {
+  font-size: 1.1rem;
+  font-family: "Caveat Brush", cursive;
+  color: var(--ink-faint);
+  font-style: italic;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ─── Map Icons ───────────────────────────────────────────────── */
+.established-footer {
+  background: white;
+  border-radius: 25px;
+  padding: 20px;
+  text-align: center;
+  box-shadow:
+    rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
+    rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+}
+
+.established-footer h3 {
+  font-family: "Caveat Brush", cursive;
+  font-size: 2rem;
+  font-weight: 400;
+  color: #333;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+/* Mobile Responsive */
+@media (min-width: 768px) {
+  .nav-container {
+    gap: 10px;
+    padding: 12px 16px;
+    flex-wrap: wrap;
+  }
+
+  .nav-btn {
+    padding: 10px 20px;
+    font-size: 1.4rem;
+    min-width: 90px;
+  }
+
+  .map-section {
+    height: 400px;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+  }
+
+  .product-image {
+    width: 100px;
+    height: 100px;
+  }
+
+  .header {
+    font-size: 2rem;
+    padding: 12px 20px;
+  }
+}
+
+/* ─── Map Icons ───────────────────────────────────────────────── */
+.van-icon {
+  background: transparent;
+  border-radius: 50%;
+  background-color: rgb(251, 159, 102);
+  padding: 4px;
+  box-shadow:
+    rgba(0, 0, 0, 0.4) 0px 2px 4px,
+    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+    rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+}

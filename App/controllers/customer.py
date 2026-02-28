@@ -15,5 +15,17 @@ def get_customer_requests(customer_id):
     customer = get_customer_by_id(customer_id)
     if not customer:
         return None
-    return customer.requests
+    requests = customer.requests
+    return [request.get_json() for request in requests]
+
+def get_customer_request_total(customer_id):
+    customer = get_customer_by_id(customer_id)
+    if not customer:
+        return None
+    requests = customer.requests
+    return sum(
+        order.quantity * order.item.price
+        for order in requests
+    )
+
 
