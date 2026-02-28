@@ -168,13 +168,13 @@ body, html {
   flex: 1;
   width: 100%;
   padding: 20px;
-  min-height: 0;  
+  min-height: 0;
 }
 
 .map {
   width: 100%;
   height: 100%;
-  border-radius: 25px;  
+  border-radius: 25px;
 }
 
 /* Remove old button-container styles since we're using sidebar now */
