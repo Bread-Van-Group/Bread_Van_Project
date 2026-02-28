@@ -2,7 +2,7 @@ from flask import Blueprint, redirect, render_template, request, jsonify, url_fo
 from flask_jwt_extended import jwt_required, current_user, verify_jwt_in_request
 from App.controllers import initialize
 from App.controllers.transaction import get_report_data
-
+from App.database import db
 
 index_views = Blueprint('index_views', __name__, template_folder='../templates')
 

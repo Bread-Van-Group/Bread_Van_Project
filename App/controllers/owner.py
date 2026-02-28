@@ -22,3 +22,8 @@ def get_owner_routes(owner_id):
     return db.session.scalars(
         db.select(Route).filter_by(owner_id=owner_id)
     ).all()
+
+def get_owner_routes(owner_id):
+    """Get all routes belonging to an owner"""
+    from App.models import Route
+    return Route.query.filter_by(owner_id=owner_id).all()
