@@ -6,8 +6,7 @@ from flask_jwt_extended import (
 from App.database import db
 from App.models import User
 from App.controllers import login
-import os
-from werkzeug.utils import secure_filename
+from App.controllers.user import create_customer
 
 auth_views = Blueprint('auth_views', __name__, template_folder='../templates')
 
@@ -27,7 +26,6 @@ def identify_page():
 @auth_views.route('/login', methods=['POST'])
 def login_action():
     data = request.form
-    # Login now uses email instead of username
     token = login(data['email'], data['password'])
 
     if not token:
@@ -55,7 +53,6 @@ def login_action():
 
 @auth_views.route('/logout', methods=['GET'])
 def logout():
-    """Logout the user by clearing JWT cookies"""
     response = redirect(url_for('index_views.index'))
     unset_jwt_cookies(response)
     flash('You have been logged out successfully.', 'success')
@@ -64,81 +61,45 @@ def logout():
 
 @auth_views.route('/signup', methods=['GET'])
 def signup_page():
-    """Display the signup page"""
     return render_template('signup.html')
 
 
 @auth_views.route('/signup', methods=['POST'])
 def signup_action():
-    """Handle signup form submission"""
     data = request.form
-    
+
     # Validate required fields
-    required_fields = ['first_name', 'last_name', 'email', 'username', 'password', 'verify_password']
-    for field in required_fields:
+    for field in ['first_name', 'last_name', 'email', 'password', 'verify_password']:
         if not data.get(field):
             flash(f'{field.replace("_", " ").title()} is required', 'error')
             return redirect(url_for('auth_views.signup_page'))
-    
-    # Check if passwords match
+
     if data['password'] != data['verify_password']:
         flash('Passwords do not match', 'error')
         return redirect(url_for('auth_views.signup_page'))
-    
-    # Check if email already exists
-    existing_user = User.query.filter_by(email=data['email']).first()
-    if existing_user:
-        flash('Email already registered', 'error')
+
+    # Combine first + last name into the single 'name' field Customer expects
+    full_name = f"{data['first_name'].strip()} {data['last_name'].strip()}"
+
+    # create_customer returns None if email already exists
+    new_user = create_customer(
+        email=data['email'],
+        password=data['password'],
+        name=full_name,
+        address=data.get('address') or None,
+        phone=data.get('phone') or None,
+    )
+
+    if not new_user:
+        flash('An account with that email already exists', 'error')
         return redirect(url_for('auth_views.signup_page'))
-    
-    # Check if username already exists
-    if data.get('username'):
-        existing_username = User.query.filter_by(username=data['username']).first()
-        if existing_username:
-            flash('Username already taken', 'error')
-            return redirect(url_for('auth_views.signup_page'))
-    
-    # Handle profile picture upload (optional)
-    profile_picture = None
-    if 'profile_picture' in request.files:
-        file = request.files['profile_picture']
-        if file and file.filename != '':
-            filename = secure_filename(file.filename)
-            # Create uploads directory if it doesn't exist
-            upload_folder = os.path.join('App', 'static', 'uploads', 'profiles')
-            os.makedirs(upload_folder, exist_ok=True)
-            
-            # Save file with unique name
-            ext = os.path.splitext(filename)[1]
-            unique_filename = f"{data['email'].replace('@', '_').replace('.', '_')}{ext}"
-            file_path = os.path.join(upload_folder, unique_filename)
-            file.save(file_path)
-            profile_picture = f"/static/uploads/profiles/{unique_filename}"
-    
-    # Create new user
-    try:
-        new_user = User(
-            email=data['email'],
-            password=data['password'],  # Will be hashed by set_password()
-            role='customer',  # All signups are customers
-            username=data.get('username'),
-            first_name=data.get('first_name'),
-            last_name=data.get('last_name'),
-            age=int(data['age']) if data.get('age') else None,
-            address=data.get('address'),
-            profile_picture=profile_picture
-        )
-        
-        db.session.add(new_user)
-        db.session.commit()
-        
-        flash('Account created successfully! Please login.', 'success')
-        return redirect(url_for('index_views.index'))
-        
-    except Exception as e:
-        db.session.rollback()
-        flash(f'Error creating account: {str(e)}', 'error')
-        return redirect(url_for('auth_views.signup_page'))
+
+    # Log the new user in immediately after signup
+    token = login(data['email'], data['password'])
+    flash('Account created successfully! Welcome aboard.', 'success')
+    response = redirect(url_for('customer_views.customer_homepage'))
+    set_access_cookies(response, token)
+    return response
 
 
 # ── API Routes ────────────────────────────────────────────────────────────────

@@ -368,26 +368,6 @@ html {
   letter-spacing: 0.5px;
 }
 
-/* ─── Map Icons ───────────────────────────────────────────────── */
-.established-footer {
-  background: white;
-  border-radius: 25px;
-  padding: 20px;
-  text-align: center;
-  box-shadow:
-    rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
-    rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
-}
-
-.established-footer h3 {
-  font-family: "Caveat Brush", cursive;
-  font-size: 2rem;
-  font-weight: 400;
-  color: #333;
-  margin: 0;
-  letter-spacing: 0.5px;
-}
-
 /* Mobile Responsive */
 @media (min-width: 768px) {
   .nav-container {
