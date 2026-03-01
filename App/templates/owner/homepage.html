@@ -15,35 +15,36 @@
     <a class="sidebar-btn active" href="{{ url_for('index_views.owner_homepage') }}">Dashboard</a>
     <a class="sidebar-btn" href="{{ url_for('index_views.owner_report') }}">Reports</a>
     <a class="sidebar-btn" href="{{ url_for('index_views.owner_inventory') }}">Set Inventory</a>
-    <a class="sidebar-btn" href="#">Routes</a>
-    <a class="sidebar-btn" href="{{ url_for('auth_views.logout') }}">LOGOUT</a>
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_routes') }}">Routes</a>
+    <a class="sidebar-btn sidebar-logout" href="{{ url_for('auth_views.logout') }}">Logout</a>
   </div>
 
   <!-- Main Content Area -->
   <div class="content-wrapper">
-    <div class="header">Welcome, Owner!
-    </div>
+    <div class="header">Welcome, Owner!</div>
 
     <div class="main-content">
       <!-- White card container with shadow and rounded corners -->
       <div class="content-card">
         <div class="section daily-summary">
-          <h2>Daily Summary</h2>
-          <p>12-2-2026</p>
-          <p>Best-selling Item: Hops</p>
-          <p>Most Profitable Route: Couva</p>
-          <p>Total daily revenue: $3000</p>
+          <h2>Today's Summary</h2>
+          <p id="today-date">Loading...</p>
+          <p id="best-selling">Best-selling Item: Loading...</p>
+          <p id="total-transactions">Transactions Today: Loading...</p>
+          <p id="total-revenue">Total Revenue: Loading...</p>
         </div>
 
         <div class="section today-routes">
-          <h2>Today's Routes</h2>
-          <div class="route-item">
-            <span>Northville - Kingsly</span>
-            <span class="time">11:00am</span>
+          <h2>Active Routes</h2>
+          <div id="routes-list">
+            <p style="color:#94a3b8; text-align:center;">Loading routes...</p>
           </div>
-          <div class="route-item">
-            <span>Evertown - Hillstreet</span>
-            <span class="time">2:00pm</span>
+        </div>
+
+        <div class="section inventory-status">
+          <h2>Low Stock Alerts</h2>
+          <div id="low-stock-list">
+            <p style="color:#94a3b8; text-align:center;">Loading inventory...</p>
           </div>
         </div>
       </div>
@@ -54,12 +55,75 @@
 
 {% block scripts %}
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.route-item').forEach(item => {
-      item.addEventListener('click', function() {
-        this.classList.toggle('selected');
+  async function loadDashboardData() {
+    try {
+      // Load today's summary
+      const summaryRes = await fetch('/api/owner/dashboard/summary');
+      const summary = await summaryRes.json();
+
+      // Update today's date
+      const today = new Date();
+      document.getElementById('today-date').textContent = today.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
       });
-    });
-  });
+
+      // Update summary stats
+      document.getElementById('best-selling').textContent =
+        `Best-selling Item: ${summary.best_selling_item || 'No sales yet'}`;
+      document.getElementById('total-transactions').textContent =
+        `Transactions Today: ${summary.total_transactions}`;
+      document.getElementById('total-revenue').textContent =
+        `Total Revenue: $${parseFloat(summary.total_revenue || 0).toFixed(2)}`;
+
+    } catch (err) {
+      console.error('Failed to load summary:', err);
+    }
+
+    try {
+      // Load routes
+      const routesRes = await fetch('/api/owner/routes');
+      const routes = await routesRes.json();
+
+      const routesList = document.getElementById('routes-list');
+      if (routes.length === 0) {
+        routesList.innerHTML = '<p style="color:#94a3b8; text-align:center;">No routes configured</p>';
+      } else {
+        routesList.innerHTML = routes.map(route => `
+          <div class="route-item">
+            <span>${route.name}</span>
+            <span class="time">${route.start_time} - ${route.end_time}</span>
+            <span class="day-badge">${route.day_of_week}</span>
+          </div>
+        `).join('');
+      }
+    } catch (err) {
+      console.error('Failed to load routes:', err);
+    }
+
+    try {
+      // Load low stock items
+      const stockRes = await fetch('/api/owner/inventory/low-stock');
+      const lowStock = await stockRes.json();
+
+      const stockList = document.getElementById('low-stock-list');
+      if (lowStock.length === 0) {
+        stockList.innerHTML = '<p style="color:#16a34a; text-align:center;">✓ All items well stocked</p>';
+      } else {
+        stockList.innerHTML = lowStock.map(item => `
+          <div class="stock-alert-item">
+            <span class="stock-item-name">${item.item_name}</span>
+            <span class="stock-quantity ${item.quantity < 10 ? 'critical' : 'low'}">${item.quantity} units</span>
+          </div>
+        `).join('');
+      }
+    } catch (err) {
+      console.error('Failed to load inventory:', err);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', loadDashboardData);
 </script>
 {% endblock %}
