@@ -1,13 +1,20 @@
-.header {
-  background: linear-gradient(135deg, #0077be 0%, #00a86b 100%);
-  padding: 20px;
-  text-align: center;
-  font-size: 28px;
-  font-weight: 600;
-  font-family: 'Segoe UI', Arial, sans-serif;
-  color: white;
-  border: none;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+/* ─── Variables ─────────────────────────────────────────────── */
+:root {
+  --orange-deep: #c45e1e;
+  --orange-main: #e07b39;
+  --orange-warm: #f09455;
+  --orange-light: #fad4b4;
+  --orange-blush: #fff3ea;
+  --cream: #fffaf5;
+  --ink: #2a1a0e;
+  --ink-muted: #7a5a3e;
+  --ink-faint: #c8a98a;
+  --white: #ffffff;
+  --red-deep: #c0392b;
+  --red-main: #e74c3c;
+  --green-deep: #229954;
+  --green-main: #27ae60;
+  --shadow-warm: rgba(180, 80, 10, 0.12);
 }
 
 * {
@@ -19,84 +26,65 @@ body, html {
   padding: 0;
   height: 100vh;
   overflow: hidden;
-  background: linear-gradient(135deg, #0077be 0%, #00a86b 100%);
-  font-family: 'Segoe UI', Arial, sans-serif;
+  background: var(--orange-blush);
+  font-family: "Caveat Brush", cursive;
 }
 
-/* Page wrapper to hold sidebar and content */
+/* ─── Page wrapper ───────────────────────────────────────────── */
 .page-wrapper {
   display: flex;
   height: 100vh;
   width: 100%;
 }
 
-/* Sidebar navigation */
+/* ─── Sidebar ────────────────────────────────────────────────── */
 .sidebar {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
   align-items: stretch;
-  background: linear-gradient(180deg, #004e7a 0%, #005f4b 100%);
-  padding: 100px 20px 20px 20px;
-  gap: 12px;
+  background: var(--orange-main);
   min-width: 220px;
   max-width: 220px;
   z-index: 10;
-  position: relative;
-  box-shadow: 4px 0 20px rgba(0,0,0,0.3);
+  box-shadow: 4px 0 20px rgba(180, 80, 10, 0.3);
+  overflow: hidden;
 }
 
-.sidebar {
-  display: flex;
-  flex-direction: column;
-}
-.sidebar-logout {
-  margin-top: auto;
-  color: #e74c3c !important;
-}
-.sidebar-logout:hover {
-  background-color: #e74c3c !important;
-  color: white !important;
-}
-
-/* Sidebar logo - modern style */
+/* Logo sits at the top of the sidebar, darker orange */
 .sidebar-logo {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 220px;
+  width: 100%;
   height: 80px;
-  background: linear-gradient(135deg, #0077be 0%, #00a86b 100%);
-  color: white;
-  border: none;
-  border-bottom: 3px solid rgba(255,255,255,0.2);
+  background: var(--orange-deep);
+  color: var(--white);
+  border-bottom: 3px solid rgba(255, 255, 255, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 28px;
   font-weight: 700;
-  font-family: 'Segoe UI', Arial, sans-serif;
+  font-family: "Caveat Brush", cursive;
   letter-spacing: 2px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-  z-index: 1000;
+  flex-shrink: 0;
 }
 
+/* Sidebar nav links */
 .sidebar-btn {
   padding: 14px 20px;
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #e0e0e0;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
+  background-color: transparent;
+  color: var(--white);
+  border: 1px solid transparent;
+  border-radius: 15px;
+  margin: 4px 12px;
   cursor: pointer;
   font-size: 15px;
-  font-weight: 600;
+  font-family: "Caveat Brush", cursive;
+  font-style: italic;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  transition: all 0.3s ease;
+  transition: all 0.3s ease-in-out;
   white-space: nowrap;
   text-decoration: none;
   text-align: center;
-  font-family: 'Segoe UI', Arial, sans-serif;
   position: relative;
   overflow: hidden;
 }
@@ -118,97 +106,86 @@ body, html {
 
 .sidebar-btn:hover {
   background-color: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.4);
+  border-color: rgba(255, 255, 255, 0.3);
   transform: translateX(5px);
-  box-shadow: 0 4px 15px rgba(0, 168, 107, 0.4);
 }
 
-.sidebar-btn:active {
-  transform: translateX(3px);
-}
-
-/* Active/highlighted state for current page */
 .sidebar-btn.active {
-  background: linear-gradient(135deg, #0077be 0%, #00a86b 100%);
-  color: #ffffff;
+  background: var(--orange-deep);
+  color: var(--white);
   border-color: transparent;
-  box-shadow: 0 4px 20px rgba(0, 168, 107, 0.6);
+  box-shadow: 0 4px 20px rgba(180, 80, 10, 0.4);
   transform: translateX(5px);
 }
 
-.sidebar-btn.active:hover {
-  background: linear-gradient(135deg, #0088d4 0%, #00c27c 100%);
-  box-shadow: 0 6px 25px rgba(0, 168, 107, 0.7);
+/* Logout pushed to bottom */
+.sidebar-btn:last-child {
+  margin-top: auto;
+  color: var(--orange-light);
 }
 
-/* Content wrapper for everything except sidebar */
+.sidebar-btn:last-child:hover {
+  background-color: var(--red-main) !important;
+  color: var(--white) !important;
+  border-color: transparent;
+}
+
+/* ─── Content wrapper ────────────────────────────────────────── */
 .content-wrapper {
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background-color: #f5f7fa;
 }
 
+/* ─── Header ─────────────────────────────────────────────────── */
+.header {
+  background: var(--orange-main);
+  padding: 20px;
+  text-align: center;
+  font-size: 1.8rem;
+  font-family: "Caveat Brush", cursive;
+  font-style: italic;
+  color: var(--white);
+  border-bottom: 3px solid rgba(255, 255, 255, 0.15);
+  box-shadow: rgba(180, 80, 10, 0.25) 0px 3px 8px;
+  flex-shrink: 0;
+}
+
+/* ─── Main content ───────────────────────────────────────────── */
 .main-content {
   flex: 1;
   overflow-y: auto;
   padding: 30px;
-  background-color: #f5f7fa;
+  background-color: var(--orange-blush);
 }
 
-.page-container {
-  display: flex;
-  flex-direction: row;
-  height: calc(100vh - 140px);
-  width: 100%;
-}
-
-.map-container {
-  flex: 1;
-  width: 100%;
-  padding: 20px;
-  min-height: 0;
-}
-
-.map {
-  width: 100%;
-  height: 100%;
-  border-radius: 25px;
-}
-
-/* Remove old button-container styles since we're using sidebar now */
-.button-container {
-  display: none;
-}
-
-/* using for card in owner */
+/* ─── Content card ───────────────────────────────────────────── */
 .content-card {
-  background: white;
+  background: var(--white);
   border-radius: 16px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 0 0 1px rgba(224, 123, 57, 0.08),
+    rgba(180, 80, 10, 0.12) 0px 3px 6px;
   padding: 35px;
-  margin: 0;
   border: none;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.content-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-}
-
+/* ─── Section headings ───────────────────────────────────────── */
 .section {
   margin-bottom: 30px;
 }
 
 .section h2 {
-  color: #2c3e50;
-  font-size: 1.5rem;
-  font-weight: 700;
+  color: var(--orange-deep);
+  font-size: 1.6rem;
+  font-weight: 400;
+  font-family: "Caveat Brush", cursive;
+  font-style: italic;
   margin-bottom: 18px;
   padding-bottom: 12px;
-  border-bottom: 2px solid #0077be;
+  border-bottom: 2px solid var(--orange-light);
   position: relative;
 }
 
@@ -219,44 +196,55 @@ body, html {
   left: 0;
   width: 60px;
   height: 2px;
-  background: linear-gradient(90deg, #0077be, #00a86b);
+  background: linear-gradient(90deg, var(--orange-main), var(--orange-warm));
 }
 
 .section p {
-  color: #555;
+  color: var(--ink-muted);
   font-size: 15px;
+  font-family: "Shadows Into Light Two", cursive;
+  font-style: italic;
   line-height: 1.8;
   margin: 8px 0;
 }
 
+/* ─── Route items ────────────────────────────────────────────── */
 .route-item {
   display: flex;
   justify-content: space-between;
   padding: 16px;
   margin: 10px 0;
-  background: #f8f9fa;
+  background: var(--orange-blush);
   border-left: 4px solid transparent;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s ease-in-out;
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+    rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+  font-family: "Shadows Into Light Two", cursive;
+  font-style: italic;
+  color: var(--ink);
 }
 
 .route-item:hover {
-  background-color: #e8f4f8;
-  border-left-color: #0077be;
+  background-color: var(--orange-light);
+  border-left-color: var(--orange-deep);
   transform: translateX(5px);
-  box-shadow: 0 4px 12px rgba(0, 119, 190, 0.15);
+  box-shadow: 0 4px 12px rgba(180, 80, 10, 0.15);
 }
 
 .route-item.selected {
-  background-color: #e8f4f8;
-  border-left-color: #0077be;
-  box-shadow: 0 4px 12px rgba(0, 119, 190, 0.2);
+  background-color: var(--orange-light);
+  border-left-color: var(--orange-deep);
+  box-shadow: 0 4px 12px rgba(180, 80, 10, 0.2);
 }
 
 .time {
-  color: #0077be;
+  color: var(--orange-deep);
   font-weight: 700;
+  font-family: "Shadows Into Light Two", cursive;
+  font-style: italic;
   min-width: 80px;
   text-align: right;
   font-size: 14px;

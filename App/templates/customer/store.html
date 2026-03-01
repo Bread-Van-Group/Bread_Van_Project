@@ -1,0 +1,100 @@
+{% extends "customer/layout.html" %} {% block title %}Store{% endblock %} {%
+block head %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='styles/customer/store.css') }}"
+/>
+{% endblock %} {% block content %}
+<div class="filters">
+  <div class="search-filter">
+    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+    <input
+      class="search-bar"
+      placeholder="Search"
+      id="search-bar"
+      type="text"
+    />
+  </div>
+  <div class="category-filter">
+    <select id="category-filter" class="category-filter-select">
+      <option value="all">All</option>
+      <option value="bread">Bread</option>
+      <option value="fried">Fried</option>
+      <option value="filling">Filling</option>
+      <option value="pastry">Pastry</option>
+      <option value="cake">Cake</option>
+    </select>
+  </div>
+  <button class="cart-btn" onclick="openCart()">
+    <i class="fa-solid fa-basket-shopping"></i>Cart
+    <div id="cart-marker" class="cart-marker">0</div>
+  </button>
+  <div id="cart-details-container" class="cart-details">
+    <div class="cart-details-close" onclick="closeCart()">X</div>
+    <div id="cart-details" class="cart-details-inner">No items in cart</div>
+  </div>
+</div>
+<div class="store-section">
+  {% for store_item in store_items %}
+  <div
+    id="store-card-{{store_item.item_id}}"
+    class="store-card"
+    data-category="{{store_item.item.category}}"
+    data-price="{{store_item.item.price}}"
+    data-available="{{store_item.quantity_available}}"
+    data-name="{{store_item.item.name}}"
+  >
+    {%if store_item.item.category == 'bread' %}
+    <img class="store-card-image" src="\static\assets\images\bread.png" />
+    {%elif store_item.item.category == 'filling' %}
+    <img class="store-card-image" src="\static\assets\images\fillings.png" />
+    {%elif store_item.item.category == 'fried' %}
+    <img class="store-card-image" src="\static\assets\images\fried.png" />
+    {%elif store_item.item.category == 'pastry' %}
+    <img class="store-card-image" src="\static\assets\images\pastry.png" />
+    {%elif store_item.item.category == 'cake' %}
+    <img class="store-card-image" src="\static\assets\images\cakes.png" />
+    {% endif %}
+    <div class="store-card-details">
+      <p class="store-card-name">{{store_item.item.name}}</p>
+      <p class="store-card-price">${{store_item.item.price}}0</p>
+      {% if store_item.quantity_available != 0 %}
+      <p class="store-card-in-stock-marker">In Stock</p>
+      {% else %}
+      <p class="store-card-out-of-stock-marker">Out of Stock</p>
+      {% endif %}
+      <div class="store-card-quantity-btns">
+        <button
+          id="qty-btn"
+          class="adjust-btn plus"
+          onclick="changeQuantity({{store_item.item_id }}, 'minus')"
+        >
+          -
+        </button>
+        <p id="ordered-qty-{{store_item.item_id}}" class="ordered-quantity">
+          0
+        </p>
+        <button
+          id="qty-btn"
+          class="adjust-btn minus"
+          onclick="changeQuantity({{store_item.item_id}}, 'plus')"
+        >
+          +
+        </button>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+<div class="checkout-section">
+  <p class="order-total-container">
+    <span class="order-total-text">Total: </span
+    ><span class="order-total-number" id="order-total">$0.00</span>
+  </p>
+  <a class="checkout-btn" href="{{url_for('customer_views.customer_cart')}}"
+    ><i class="fa-solid fa-cart-shopping"></i>Checkout</a
+  >
+</div>
+{% endblock %} {% block scripts %}
+<script src="{{ url_for('static', filename='js/customer/store.js')}}"></script>
+{% endblock %}
