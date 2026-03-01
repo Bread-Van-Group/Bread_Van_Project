@@ -1,0 +1,147 @@
+{% extends "owner/layout.html" %}
+
+{% block title %}Routes{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+  <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/owner/homepage.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/owner/routes.css') }}">
+  {{ super() }}
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  <div class="sidebar">
+    <div class="sidebar-logo">LOGO</div>
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_homepage') }}">Dashboard</a>
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_report') }}">Reports</a>
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_inventory') }}">Set Inventory</a>
+    <a class="sidebar-btn active" href="{{ url_for('index_views.owner_routes') }}">Routes</a>
+    <a class="sidebar-btn sidebar-logout" href="{{ url_for('auth_views.logout') }}">Logout</a>
+  </div>
+
+  <div class="content-wrapper">
+    <div class="header">Routes Management</div>
+    <div class="main-content">
+      <div class="routes-container">
+
+        <!-- Left Panel — switches between list view and editor view -->
+        <div class="routes-list-panel">
+
+          <!--  LIST VIEW  -->
+          <div id="panel-list-view">
+            <div class="panel-header">
+              <h2>My Routes</h2>
+              <button class="add-route-btn" id="add-route-btn">+ Add Route</button>
+            </div>
+            <div class="routes-list" id="routes-list">
+              <div style="text-align:center;padding:40px;color:#94a3b8;">Loading routes…</div>
+            </div>
+          </div>
+
+          <!--  EDITOR VIEW  -->
+          <div id="panel-editor-view" style="display:none;">
+            <div class="panel-header">
+              <h2 id="editor-title">New Route</h2>
+              <button class="close-editor-btn" onclick="hideRouteEditor()">&#x2715;</button>
+            </div>
+
+            <div class="editor-body">
+
+              <div class="form-group">
+                <label>Route Name</label>
+                <input type="text" id="route-name" placeholder="e.g., Morning East Route" />
+              </div>
+
+              <!-- Custom dropdown -->
+              <div class="form-group">
+                <label>Day of Week</label>
+                <div class="custom-select" id="day-select">
+                  <button type="button" class="custom-select-trigger" id="day-select-trigger" aria-haspopup="listbox" aria-expanded="false">
+                    <span id="day-select-label">Monday</span>
+                    <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                  </button>
+                  <ul class="custom-select-menu" id="day-select-menu" role="listbox">
+                    <li role="option" data-value="Monday">Monday</li>
+                    <li role="option" data-value="Tuesday">Tuesday</li>
+                    <li role="option" data-value="Wednesday">Wednesday</li>
+                    <li role="option" data-value="Thursday">Thursday</li>
+                    <li role="option" data-value="Friday">Friday</li>
+                    <li role="option" data-value="Saturday">Saturday</li>
+                    <li role="option" data-value="Sunday">Sunday</li>
+                  </ul>
+                </div>
+                <input type="hidden" id="route-day" value="Monday" />
+              </div>
+
+              <div class="time-row">
+                <div class="form-group">
+                  <label>Start Time</label>
+                  <input type="time" id="route-start-time" value="06:00" />
+                </div>
+                <div class="form-group">
+                  <label>End Time</label>
+                  <input type="time" id="route-end-time" value="10:00" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Description <span class="optional-label">(optional)</span></label>
+                <textarea id="route-description" rows="2" placeholder="Brief description of this route"></textarea>
+              </div>
+
+              <div class="location-box">
+                <div class="location-box-title">&#128205; Route Locations</div>
+                <p class="location-hint">Click the map to place start &amp; end points.</p>
+                <div class="location-row" id="start-location-row">
+                  <span class="loc-dot loc-dot-green"></span>
+                  <div id="start-location" class="loc-text">Click map to set</div>
+                  <button class="loc-reset-btn" id="start-reset-btn" onclick="resetPoint('start')" style="display:none;">Reset</button>
+                </div>
+                <div class="location-row" id="end-location-row">
+                  <span class="loc-dot loc-dot-red"></span>
+                  <div id="end-location" class="loc-text">Click map to set</div>
+                  <button class="loc-reset-btn" id="end-reset-btn" onclick="resetPoint('end')" style="display:none;">Reset</button>
+                </div>
+              </div>
+
+            </div><!-- editor-body -->
+
+            <div class="editor-footer">
+              <button class="footer-btn btn-cancel" onclick="hideRouteEditor()">Cancel</button>
+              <button class="footer-btn btn-save" id="save-route-btn">Save Route</button>
+            </div>
+          </div><!-- panel-editor-view -->
+
+        </div><!-- routes-list-panel -->
+
+        <!--  Map -->
+        <div class="map-panel">
+          <div class="map-header">
+            <div class="map-controls">
+              <button class="control-btn" id="edit-route-btn" style="display:none;">&#9998; Edit Route</button>
+              <button class="control-btn" id="view-routes-btn">View All</button>
+            </div>
+          </div>
+          <div id="map" class="map"></div>
+          <!-- Floating hint -->
+          <div id="map-selection-hint"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/owner/routes.js') }}"></script>
+{% endblock %}
