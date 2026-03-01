@@ -17,7 +17,6 @@
 {% endblock %} {% block content %}
 
 <div class="page-content">
-  <!-- Map Section -->
   <div class="main-content-container">
     <div class="content-navbar">
       <button
@@ -49,22 +48,17 @@
       </button>
     </div>
     <div id="main-content" class="main-content">
-      <!-- Map Section -->
-
       <div id="map" class="map"></div>
       <div id="map-text" class="map-text">
         There currently aren't any active drivers
       </div>
 
-      <!-- Orders Section -->
       <div id="order-section" class="orders-section">
         <div class="order-items">
           {%if orders %} {% for order in orders %}
           <div class="order-item">
             <p class="item-name">{{order.item.name}}</p>
-
             <p class="item-quantity">x {{order.quantity}}</p>
-
             <div class="item-details">
               <p class="item-price">
                 <span> Unit Price: </span>${{order.item.price}}0
@@ -80,29 +74,11 @@
         </div>
         <p class="order-total"><span>Total: </span>${{order_total}}</p>
       </div>
-
-      <!-- Map Info Overlay -->
-      <!-- <div class="map-info">
-      <div class="map-info-item">
-        <span class="map-info-label">ETA:</span>
-        <span class="map-info-value" id="eta">5min</span>
-      </div>
-      <div class="map-info-item">
-        <span class="map-info-label">Distance:</span>
-        <span class="map-info-value" id="distance">5km</span>
-      </div>
-    </div> -->
     </div>
-  </div>
-
-  <!-- Established Footer -->
-  <div class="established-footer">
-    <h3>Established</h3>
   </div>
 </div>
 
 {% endblock %} {% block scripts %}
-
 <script src="{{url_for('static', filename='js/customer/map.js')}}"></script>
 <script src="{{url_for('static', filename='js/customer/homepage.js')}}"></script>
 {% endblock %}
