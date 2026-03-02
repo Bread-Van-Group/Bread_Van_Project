@@ -11,7 +11,7 @@ let selectingFor         = null;
 let activeRoutingControl = null;
 let isEditing            = false;
 
-//  Icons 
+//  Icons
 let greenIcon, redIcon;
 function createIcons() {
   const shadow = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png';
@@ -21,7 +21,7 @@ function createIcons() {
   redIcon   = L.icon({ ...opts, iconUrl:`${base}/marker-icon-2x-red.png` });
 }
 
-//  Routing 
+//  Routing
 function buildRoutingPath(start, end) {
   clearRoutingPath();
   activeRoutingControl = L.Routing.control({
@@ -40,7 +40,7 @@ function clearMap() {
   map.eachLayer(layer => { if (layer instanceof L.Marker) map.removeLayer(layer); });
 }
 
-//  Map init 
+//  Map init
 function initMap() {
   map = L.map('map').setView([10.6409, -61.3953], 13);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -50,7 +50,7 @@ function initMap() {
   map.on('click', handleMapClick);
 }
 
-//  Custom dropdown 
+//  Custom dropdown
 function initDayDropdown() {
   const wrapper  = document.getElementById('day-select');
   const trigger  = document.getElementById('day-select-trigger');
@@ -95,7 +95,7 @@ function setDropdownValue(value) {
   hidden.value      = value;
 }
 
-//  Map hint 
+//  Map hint
 function updateMapHint() {
   const hint = document.getElementById('map-selection-hint');
   if (!isSelectingLocation) { hint.style.display = 'none'; return; }
@@ -109,7 +109,7 @@ function updateMapHint() {
   }
 }
 
-//  Map click 
+//  Map click
 function handleMapClick(e) {
   if (!isSelectingLocation) return;
   const { lat, lng } = e.latlng;
@@ -180,7 +180,7 @@ function setSelecting(which) {
   updateMapHint();
 }
 
-//  Panel switching 
+//  Panel switching
 function showEditorPanel() {
   document.getElementById('panel-list-view').style.display   = 'none';
   document.getElementById('panel-editor-view').style.display = 'flex';
@@ -219,8 +219,7 @@ function renderRoutesList() {
           <button class="route-delete-btn" onclick="event.stopPropagation(); deleteRoute(${r.route_id}, '${r.name.replace(/'/g, "\\'")}')" title="Delete">&#128465;</button>
         </div>
       </div>
-      <div class="route-card-detail">&#9200; ${r.start_time} – ${r.end_time}</div>
-      <div class="route-card-detail">&#128205; ${r.stops_count ?? 0} stops</div>
+      <div class="route-card-detail">Time: ${r.start_time} – ${r.end_time}</div>
       <span class="route-card-day">${r.day_of_week}</span>
     </div>
   `).join('');
@@ -269,7 +268,7 @@ function viewAllRoutes() {
   map.setView([10.6409, -61.3953], 13);
 }
 
-// Open mapeditor 
+// Open mapeditor
 function resetEditorFields() {
   // Clear markers & path
   if (startMarker) { map.removeLayer(startMarker); startMarker = null; }
@@ -426,7 +425,7 @@ async function replaceRouteEndpoints(routeId, start, end) {
   }
 }
 
-//  Delete route 
+//  Delete route
 async function deleteRoute(routeId, routeName) {
   if (!confirm(`Delete route "${routeName}"?\n\nThis will permanently remove the route and all its stops.`)) return;
 
@@ -449,7 +448,7 @@ async function deleteRoute(routeId, routeName) {
   }
 }
 
-// Init 
+// Init
 document.addEventListener('DOMContentLoaded', async () => {
   initMap();
   initDayDropdown();

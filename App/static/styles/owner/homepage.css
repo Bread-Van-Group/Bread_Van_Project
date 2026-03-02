@@ -17,17 +17,19 @@
   --shadow-warm: rgba(180, 80, 10, 0.12);
 }
 
+/* ─── Reset & Base ───────────────────────────────────────────── */
 * {
   box-sizing: border-box;
 }
 
-body, html {
+body,
+html {
   margin: 0;
   padding: 0;
   height: 100vh;
   overflow: hidden;
-  background: var(--orange-blush);
-  font-family: "Caveat Brush", cursive;
+  background-color: #fcfbf5;
+  font-family: "Shadows Into Light Two", cursive;
 }
 
 /* ─── Page wrapper ───────────────────────────────────────────── */
@@ -42,46 +44,67 @@ body, html {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  background: var(--orange-main);
+  background: linear-gradient(180deg, #2e1204 0%, #4a1e08 50%, #6b3012 100%);
+  padding: 100px 16px 20px 16px;
+  gap: 8px;
   min-width: 220px;
   max-width: 220px;
   z-index: 10;
-  box-shadow: 4px 0 20px rgba(180, 80, 10, 0.3);
-  overflow: hidden;
+  position: relative;
+  box-shadow:
+    4px 0 24px rgba(80, 30, 5, 0.4),
+    inset -1px 0 0 rgba(240, 148, 85, 0.12);
 }
 
-/* Logo sits at the top of the sidebar, darker orange */
+.sidebar-logout {
+  margin-top: auto;
+  color: #f1948a !important;
+  border-color: rgba(231, 76, 60, 0.35) !important;
+  background-color: rgba(231, 76, 60, 0.08) !important;
+}
+
+.sidebar-logout:hover {
+  background: linear-gradient(145deg, var(--red-main), var(--red-deep)) !important;
+  color: var(--white) !important;
+  border-color: transparent !important;
+}
+
+/* ─── Sidebar logo ───────────────────────────────────────────── */
 .sidebar-logo {
   width: 100%;
   height: 80px;
-  background: var(--orange-deep);
+  background: linear-gradient(135deg, var(--orange-deep) 0%, var(--orange-main) 100%);
   color: var(--white);
-  border-bottom: 3px solid rgba(255, 255, 255, 0.15);
+  border: none;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
-  font-weight: 700;
-  font-family: "Caveat Brush", cursive;
-  letter-spacing: 2px;
-  flex-shrink: 0;
-}
-
-/* Sidebar nav links */
-.sidebar-btn {
-  padding: 14px 20px;
-  background-color: transparent;
-  color: var(--white);
-  border: 1px solid transparent;
-  border-radius: 15px;
-  margin: 4px 12px;
-  cursor: pointer;
-  font-size: 15px;
+  font-size: 2rem;
+  font-weight: 400;
   font-family: "Caveat Brush", cursive;
   font-style: italic;
-  text-transform: uppercase;
+  letter-spacing: 2px;
+  box-shadow:
+    0 4px 16px rgba(100, 40, 5, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  z-index: 1000;
+}
+
+/* ─── Sidebar buttons ────────────────────────────────────────── */
+.sidebar-btn {
+  padding: 12px 16px;
+  background-color: rgba(255, 255, 255, 0.06);
+  color: var(--orange-light);
+  border: 1px solid rgba(240, 148, 85, 0.18);
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-family: "Caveat Brush", cursive;
+  font-style: italic;
+  font-weight: 400;
   letter-spacing: 0.5px;
-  transition: all 0.3s ease-in-out;
+  transition: all 0.25s ease;
   white-space: nowrap;
   text-decoration: none;
   text-align: center;
@@ -96,8 +119,8 @@ body, html {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-  transition: left 0.5s;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  transition: left 0.5s ease;
 }
 
 .sidebar-btn:hover::before {
@@ -105,29 +128,30 @@ body, html {
 }
 
 .sidebar-btn:hover {
-  background-color: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
-  transform: translateX(5px);
+  background-color: rgba(240, 148, 85, 0.16);
+  border-color: rgba(240, 148, 85, 0.4);
+  color: var(--white);
+  transform: translateX(4px);
+  box-shadow: 0 3px 12px rgba(180, 80, 10, 0.28);
+}
+
+.sidebar-btn:active {
+  transform: translateX(2px);
 }
 
 .sidebar-btn.active {
-  background: var(--orange-deep);
+  background: linear-gradient(135deg, var(--orange-deep), var(--orange-main));
   color: var(--white);
   border-color: transparent;
-  box-shadow: 0 4px 20px rgba(180, 80, 10, 0.4);
-  transform: translateX(5px);
+  box-shadow:
+    0 4px 16px rgba(180, 80, 10, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateX(4px);
 }
 
-/* Logout pushed to bottom */
-.sidebar-btn:last-child {
-  margin-top: auto;
-  color: var(--orange-light);
-}
-
-.sidebar-btn:last-child:hover {
-  background-color: var(--red-main) !important;
-  color: var(--white) !important;
-  border-color: transparent;
+.sidebar-btn.active:hover {
+  background: linear-gradient(135deg, var(--orange-main), var(--orange-warm));
+  box-shadow: 0 6px 20px rgba(180, 80, 10, 0.55);
 }
 
 /* ─── Content wrapper ────────────────────────────────────────── */
@@ -136,6 +160,7 @@ body, html {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background-color: #fcfbf5;
 }
 
 /* ─── Header ─────────────────────────────────────────────────── */
@@ -157,19 +182,58 @@ body, html {
   flex: 1;
   overflow-y: auto;
   padding: 30px;
-  background-color: var(--orange-blush);
+  background-color: #fcfbf5;
+}
+
+/* ─── Page container ─────────────────────────────────────────── */
+.page-container {
+  display: flex;
+  flex-direction: row;
+  height: calc(100vh - 140px);
+  width: 100%;
+}
+
+/* ─── Map ────────────────────────────────────────────────────── */
+.map-container {
+  flex: 1;
+  width: 100%;
+  padding: 20px;
+  min-height: 0;
+}
+
+.map {
+  width: 100%;
+  height: 100%;
+  border-radius: 25px;
+  box-shadow:
+    0 0 0 1px rgba(224, 123, 57, 0.08),
+    rgba(180, 80, 10, 0.08) 0px 1px 2px 0px,
+    rgba(180, 80, 10, 0.05) 0px 2px 6px 2px;
 }
 
 /* ─── Content card ───────────────────────────────────────────── */
 .content-card {
   background: var(--white);
-  border-radius: 16px;
+  border-radius: 28px;
   box-shadow:
     0 0 0 1px rgba(224, 123, 57, 0.08),
-    rgba(180, 80, 10, 0.12) 0px 3px 6px;
-  padding: 35px;
+    0 4px 6px -1px var(--shadow-warm),
+    0 12px 40px -8px rgba(180, 80, 10, 0.14);
+  padding: 32px 36px 36px;
+  margin: 0;
   border: none;
+  position: relative;
+  overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+
+.content-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 0 1px rgba(224, 123, 57, 0.12),
+    0 8px 16px -2px var(--shadow-warm),
+    0 20px 50px -10px rgba(180, 80, 10, 0.18);
 }
 
 /* ─── Section headings ───────────────────────────────────────── */
@@ -178,32 +242,22 @@ body, html {
 }
 
 .section h2 {
-  color: var(--orange-deep);
-  font-size: 1.6rem;
-  font-weight: 400;
   font-family: "Caveat Brush", cursive;
   font-style: italic;
-  margin-bottom: 18px;
+  font-size: 2rem;
+  font-weight: 400;
+  color: var(--orange-main);
+  letter-spacing: 0.5px;
+  margin: 0 0 18px 0;
   padding-bottom: 12px;
-  border-bottom: 2px solid var(--orange-light);
-  position: relative;
-}
-
-.section h2::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 60px;
-  height: 2px;
-  background: linear-gradient(90deg, var(--orange-main), var(--orange-warm));
+  border-bottom: 1.5px solid var(--orange-light);
 }
 
 .section p {
-  color: var(--ink-muted);
-  font-size: 15px;
   font-family: "Shadows Into Light Two", cursive;
+  font-size: 1.15rem;
   font-style: italic;
+  color: var(--ink);
   line-height: 1.8;
   margin: 8px 0;
 }
@@ -212,40 +266,62 @@ body, html {
 .route-item {
   display: flex;
   justify-content: space-between;
-  padding: 16px;
+  padding: 14px 16px;
   margin: 10px 0;
-  background: var(--orange-blush);
+  background: var(--cream);
   border-left: 4px solid transparent;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
-  transition: all 0.3s ease-in-out;
-  box-shadow:
-    rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
-    rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
-  font-family: "Shadows Into Light Two", cursive;
-  font-style: italic;
-  color: var(--ink);
+  box-shadow: rgba(0, 0, 0, 0.06) 0px 1px 4px;
+  transition: all 0.25s ease;
 }
 
 .route-item:hover {
-  background-color: var(--orange-light);
-  border-left-color: var(--orange-deep);
+  background-color: var(--orange-blush);
+  border-left-color: var(--orange-main);
   transform: translateX(5px);
-  box-shadow: 0 4px 12px rgba(180, 80, 10, 0.15);
+  box-shadow: 0 4px 12px var(--shadow-warm);
 }
 
 .route-item.selected {
-  background-color: var(--orange-light);
+  background-color: var(--orange-blush);
   border-left-color: var(--orange-deep);
-  box-shadow: 0 4px 12px rgba(180, 80, 10, 0.2);
+  box-shadow: 0 4px 12px var(--shadow-warm);
 }
 
 .time {
-  color: var(--orange-deep);
-  font-weight: 700;
-  font-family: "Shadows Into Light Two", cursive;
+  font-family: "Caveat Brush", cursive;
   font-style: italic;
+  color: var(--orange-main);
+  font-weight: 400;
+  font-size: 1.2rem;
   min-width: 80px;
   text-align: right;
-  font-size: 14px;
+}
+
+/* ─── Van & marker icons ─────────────────────────────────────── */
+.van-icon {
+  background: transparent;
+  border-radius: 50%;
+  background-color: rgb(251, 159, 102);
+  padding: 4px;
+  box-shadow:
+    rgba(0, 0, 0, 0.4) 0px 2px 4px,
+    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+    rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+}
+
+.marker-icon {
+  background: transparent;
+  border-radius: 50%;
+  background-color: white;
+  padding: 4px;
+  box-shadow:
+    rgba(0, 0, 0, 0.4) 0px 2px 4px,
+    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+    rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+}
+
+.button-container {
+  display: none;
 }

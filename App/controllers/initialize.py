@@ -248,4 +248,4 @@ def initialize():
     db.session.commit()
     print(f"✓ Dummy transactions: {tx_count} transactions seeded over last 30 days")
 
-    print("\n✅ Database initialised successfully.")
+    print("\n✓ Database initialised successfully.")

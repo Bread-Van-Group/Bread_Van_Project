@@ -413,7 +413,7 @@ async function handleCSVUpload(event) {
       document.getElementById('edit-mode').style.display = 'block';
       renderCatalogByCategory();
       renderSelectedItems();
-      alert(`✅ Imported ${selectedItems.size} items from CSV`);
+      alert('✅ Imported ${selectedItems.size} items from CSV');
     } catch (err) {
       console.error('CSV parse error:', err);
       alert('❌ Failed to parse CSV file');
@@ -529,7 +529,7 @@ async function saveProduct() {
       body: JSON.stringify(productData)
     });
     if (res.ok) {
-      alert('✅ Product saved successfully!');
+      alert('✓ Product saved successfully!');
       hideProductModal();
       await loadAllItems();
       await loadProducts();
