@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/signup.css') }}">
 </head>
 <body>
-    <!-- Header -->
     <div class="signup-header">
         <a class="back-btn" href="{{ url_for('index_views.index') }}">
             <span>←</span>
@@ -21,7 +20,6 @@
     </div>
 
     <div class="signup-container">
-        <!-- Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 <div class="flash-messages">
@@ -33,9 +31,8 @@
         {% endwith %}
 
         <form method="POST" action="{{ url_for('auth_views.signup_action') }}">
-
-            <!-- Form Fields -->
             <div class="form-fields">
+
                 <div class="form-group">
                     <label for="first_name">First name:</label>
                     <input type="text" id="first_name" name="first_name" placeholder="(name)" required>
@@ -47,8 +44,64 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="address">Address/Location:</label>
-                    <input type="text" id="address" name="address" placeholder="(address/location)">
+                    <label for="area">Area:</label>
+                    <select id="area" name="area">
+                        <option value="">-- Select your area --</option>
+                        <option>Arima</option>
+                        <option>Arouca</option>
+                        <option>Barataria</option>
+                        <option>Carenage</option>
+                        <option>Chaguanas</option>
+                        <option>Chaguaramas</option>
+                        <option>Claxton Bay</option>
+                        <option>Couva</option>
+                        <option>Curepe</option>
+                        <option>Debe</option>
+                        <option>Diego Martin</option>
+                        <option>El Socorro</option>
+                        <option>Erin</option>
+                        <option>Fyzabad</option>
+                        <option>Gasparillo</option>
+                        <option>Gran Couva</option>
+                        <option>Guayaguayare</option>
+                        <option>La Brea</option>
+                        <option>Laventille</option>
+                        <option>Marabella</option>
+                        <option>Maraval</option>
+                        <option>Mayaro</option>
+                        <option>Malabar</option>
+                        <option>Morvant</option>
+                        <option>Moruga</option>
+                        <option>Newtown</option>
+                        <option>Penal</option>
+                        <option>Petit Valley</option>
+                        <option>Piarco</option>
+                        <option>Point Fortin</option>
+                        <option>Point Lisas</option>
+                        <option>Pointe-a-Pierre</option>
+                        <option>Port of Spain</option>
+                        <option>Princes Town</option>
+                        <option>Rio Claro</option>
+                        <option>San Fernando</option>
+                        <option>San Juan</option>
+                        <option>Sangre Grande</option>
+                        <option>Siparia</option>
+                        <option>St. Augustine</option>
+                        <option>St. James</option>
+                        <option>St. Joseph</option>
+                        <option>Tableland</option>
+                        <option>Toco</option>
+                        <option>Trincity</option>
+                        <option>Tunapuna</option>
+                        <option>Valsayn</option>
+                        <option>Williamsville</option>
+                        <option>Woodbrook</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="address">Address:</label>
+                    <input type="text" id="address" name="address" placeholder="(street address)">
                 </div>
 
                 <div class="form-group">
@@ -78,13 +131,11 @@
         </form>
     </div>
 
-    <!-- Logo Footer -->
-    <div class="Logo-footer">
+    <div class="established-footer">
         <h3>LOGO</h3>
     </div>
 
     <script>
-        // Client-side password match check before submit
         document.querySelector('form').addEventListener('submit', function(e) {
             const password = document.getElementById('password').value;
             const verify = document.getElementById('verify_password').value;

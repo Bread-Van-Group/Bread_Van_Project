@@ -7,6 +7,8 @@ from App.database import db
 from App.models import User
 from App.controllers import login
 from App.controllers.user import create_customer
+import os
+from werkzeug.utils import secure_filename
 
 auth_views = Blueprint('auth_views', __name__, template_folder='../templates')
 
@@ -26,6 +28,7 @@ def identify_page():
 @auth_views.route('/login', methods=['POST'])
 def login_action():
     data = request.form
+    # Login now uses email instead of username
     token = login(data['email'], data['password'])
 
     if not token:
@@ -53,6 +56,7 @@ def login_action():
 
 @auth_views.route('/logout', methods=['GET'])
 def logout():
+    """Logout the user by clearing JWT cookies"""
     response = redirect(url_for('index_views.index'))
     unset_jwt_cookies(response)
     flash('You have been logged out successfully.', 'success')
@@ -61,11 +65,13 @@ def logout():
 
 @auth_views.route('/signup', methods=['GET'])
 def signup_page():
+    """Display the signup page"""
     return render_template('signup.html')
 
 
 @auth_views.route('/signup', methods=['POST'])
 def signup_action():
+    """Handle signup form submission"""
     data = request.form
 
     # Validate required fields
@@ -74,6 +80,7 @@ def signup_action():
             flash(f'{field.replace("_", " ").title()} is required', 'error')
             return redirect(url_for('auth_views.signup_page'))
 
+    # Check if passwords match
     if data['password'] != data['verify_password']:
         flash('Passwords do not match', 'error')
         return redirect(url_for('auth_views.signup_page'))
@@ -81,13 +88,14 @@ def signup_action():
     # Combine first + last name into the single 'name' field Customer expects
     full_name = f"{data['first_name'].strip()} {data['last_name'].strip()}"
 
-    # create_customer returns None if email already exists
+    # create_customer returns None if the email already exists
     new_user = create_customer(
         email=data['email'],
         password=data['password'],
         name=full_name,
         address=data.get('address') or None,
         phone=data.get('phone') or None,
+        area=data.get('area') or None,  # NEW
     )
 
     if not new_user:
