@@ -49,6 +49,7 @@ def initialize():
         name="Bob Customer",
         address="789 Pine Road, Port of Spain",
         phone="868-200-0001",
+        area="Port of Spain",
     )
     print(f"✓ Customer created: {customer.email}")
 

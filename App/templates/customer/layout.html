@@ -25,13 +25,7 @@
     />
     <link
       rel="stylesheet"
-      href="{{ url_for('static', filename='styles/driver/layout.css') }}"
-    />
-
-    <!-- Material Icons -->
-    <link
-      href="https://fonts.googleapis.com/icon?family=Material+Icons"
-      rel="stylesheet"
+      href="{{ url_for('static', filename='styles/customer/layout.css') }}"
     />
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -41,44 +35,39 @@
   <body>
     <div class="page-container" id="content">
       <!-- Top bar -->
-      <div class="top-bar">
-        <a href="{{ url_for('auth_views.logout') }}" class="logout-btn">
-          <i class="fa-solid fa-right-from-bracket"></i>
-          <span>Logout</span>
-        </a>
-      </div>
 
       <!-- Page content -->
       {% block content %}{% endblock %}
 
-      <!-- Bottom navigation -->
-      <div class="bottom-btn-container">
+      <!-- Navigation Bar -->
+      <div class="nav-container">
         <a
-          class="bottom-btn"
-          href="{{ url_for('driver_views.driver_requests_page')}}"
+          id="home"
+          class="nav-btn"
+          href="{{ url_for('customer_views.customer_homepage') }}"
+          ><i class="fa-solid fa-home"></i><span>Home</span></a
         >
-          <i class="fa-solid fa-bell"></i>
-          <span>New Requests</span>
-        </a>
         <a
-          class="bottom-btn"
-          href="{{ url_for('driver_views.driver_inventory_page') }}"
+          id="store"
+          class="nav-btn"
+          href="{{ url_for('customer_views.customer_store') }}"
+          ><i class="fa-solid fa-store"></i><span>Store</span></a
         >
-          <i class="fa-solid fa-box"></i>
-          <span>Inventory</span>
-        </a>
-        <a class="bottom-btn">
-          <i class="fa-solid fa-receipt"></i>
-          <span>Transactions</span>
-        </a>
+        <a
+          id="schedule"
+          class="nav-btn"
+          href="{{ url_for('customer_views.customer_schedule') }}"
+          ><i class="fa-solid fa-calendar"></i><span>Schedule</span></a
+        >
+        <a class="nav-btn" href="{{ url_for('auth_views.logout') }}"
+          ><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a
+        >
       </div>
     </div>
 
-    <!---Web Socket Code Below-->
+    <!--Web Socket Code-->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script src="{{url_for('static', filename='js/driver/map.js')}}"></script>
     <script>
-
       {% with messages = get_flashed_messages() %}
         {% if messages %}
           {% for message in messages %}
@@ -86,6 +75,15 @@
           {% endfor %}
         {% endif %}
       {% endwith %}
+    </script>
+    <!--Navbar Code -->
+    <script>
+      const currentURL = "{{ request.path  }}";
+      const id = currentURL.slice(currentURL.lastIndexOf("/") + 1);
+
+      const currentNavBtn = document.querySelector(`#${id}`);
+
+      currentNavBtn.classList.add("active");
     </script>
 
     {% block scripts %}{% endblock %}

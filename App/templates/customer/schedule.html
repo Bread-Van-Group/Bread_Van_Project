@@ -1,0 +1,124 @@
+{% extends "customer/layout.html" %}
+{% block title %}Schedule{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/customer/schedule.css') }}" />
+{% endblock %}
+
+{% block content %}
+<div class="schedule-page">
+
+  <!-- Meta Info -->
+  <div class="schedule-meta">
+    <p class="schedule-meta-location">
+      <i class="fa-solid fa-location-dot" style="color: var(--orange-main);"></i>
+      Your Area: <strong>{{ current_user.area }}</strong>
+    </p>
+    <p class="schedule-meta-date">
+      Today:
+      <span id="today-date"></span>
+    </p>
+  </div>
+
+  <!-- Today's Schedule -->
+  <div class="schedule-card">
+    <div class="schedule-card-header">
+      Today's Schedule Detail:
+      <span id="today-date-header"></span>
+    </div>
+
+    <div class="stop-list">
+      {% if stops %}
+        {% for stop in stops %}
+        <div class="stop-item {% if stop.is_user_area %}user-area{% endif %}">
+
+          <!-- Time -->
+          <span class="stop-time">
+            {{ stop.estimated_arrival_time or '--:--' }}
+          </span>
+
+          <!-- Details -->
+          <div class="stop-details">
+            <div class="stop-title-row">
+
+              <!-- Status Icon -->
+              {% if stop.status == 'cancelled' %}
+                <i class="fa-solid fa-circle-xmark stop-icon cancelled"></i>
+              {% elif stop.status == 'delayed' %}
+                <i class="fa-solid fa-clock stop-icon delayed"></i>
+              {% else %}
+                <i class="fa-solid fa-circle-check stop-icon on-time"></i>
+              {% endif %}
+
+              <span class="stop-area">{{ stop.address }}</span>
+
+              {% if stop.is_user_area %}
+                <span class="stop-your-area-badge">
+                  <i class="fa-solid fa-house"></i> Your Area
+                </span>
+              {% endif %}
+            </div>
+
+            <div class="stop-sub">
+              {% if stop.distance %}
+                <span class="stop-distance">
+                  <i class="fa-solid fa-route"></i> {{ stop.distance }}
+                </span>
+                <span style="color: var(--orange-light);">•</span>
+              {% endif %}
+
+              {% if stop.stock_status == 'full' %}
+                <span class="stop-stock">Full Stock</span>
+              {% elif stop.stock_status == 'low' %}
+                <span class="stop-stock low">Low Stock —</span>
+                <a class="stop-stock-link" href="{{ url_for('customer_views.customer_store') }}">
+                  See Available Stock
+                </a>
+              {% elif stop.stock_status == 'out' %}
+                <span class="stop-stock out">Out of Stock</span>
+              {% endif %}
+            </div>
+          </div>
+
+        </div>
+        {% endfor %}
+      {% else %}
+        <div style="padding: 24px; text-align: center; font-family: 'Caveat Brush', cursive; font-style: italic; color: var(--ink-faint); font-size: 1.2rem;">
+          No stops scheduled for today.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend-card">
+    <div class="legend-header">Legend</div>
+    <div class="legend-body">
+      <div class="legend-item">
+        <i class="fa-solid fa-circle-check on-time"></i> On time
+      </div>
+      <div class="legend-item">
+        <i class="fa-solid fa-clock delayed"></i> Delayed
+      </div>
+      <div class="legend-item">
+        <i class="fa-solid fa-circle-xmark cancelled"></i> Cancelled
+      </div>
+      <div class="legend-item">
+        <i class="fa-solid fa-house your-area"></i> Your area
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Inject today's date in a readable format
+  const now = new Date();
+  const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+  const formatted = now.toLocaleDateString('en-GB', options);
+  document.getElementById('today-date').textContent = formatted;
+  document.getElementById('today-date-header').textContent = formatted;
+</script>
+{% endblock %}
+
+{% block scripts %}{% endblock %}
