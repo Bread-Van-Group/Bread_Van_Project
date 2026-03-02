@@ -1,102 +1,117 @@
-.header {
-  background: linear-gradient(135deg, #0077be 0%, #00a86b 100%);
-  padding: 20px;
-  text-align: center;
-  font-size: 28px;
-  font-weight: 600;
-  font-family: 'Segoe UI', Arial, sans-serif;
-  color: white;
-  border: none;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+/* ─── Variables ─────────────────────────────────────────────── */
+:root {
+  --orange-deep: #c45e1e;
+  --orange-main: #e07b39;
+  --orange-warm: #f09455;
+  --orange-light: #fad4b4;
+  --orange-blush: #fff3ea;
+  --cream: #fffaf5;
+  --ink: #2a1a0e;
+  --ink-muted: #7a5a3e;
+  --ink-faint: #c8a98a;
+  --white: #ffffff;
+  --red-deep: #c0392b;
+  --red-main: #e74c3c;
+  --green-deep: #229954;
+  --green-main: #27ae60;
+  --shadow-warm: rgba(180, 80, 10, 0.12);
 }
 
+/* ─── Reset & Base ───────────────────────────────────────────── */
 * {
   box-sizing: border-box;
 }
 
-body, html {
+body,
+html {
   margin: 0;
   padding: 0;
   height: 100vh;
   overflow: hidden;
-  background: linear-gradient(135deg, #0077be 0%, #00a86b 100%);
-  font-family: 'Segoe UI', Arial, sans-serif;
+  background-color: #fcfbf5;
+  font-family: "Shadows Into Light Two", cursive;
 }
 
-/* Page wrapper to hold sidebar and content */
+/* ─── Page wrapper ───────────────────────────────────────────── */
 .page-wrapper {
   display: flex;
   height: 100vh;
   width: 100%;
 }
 
-/* Sidebar navigation */
+/* ─── Sidebar ────────────────────────────────────────────────── */
 .sidebar {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: stretch;
-  background: linear-gradient(180deg, #004e7a 0%, #005f4b 100%);
-  padding: 100px 20px 20px 20px;
-  gap: 12px;
+  background: linear-gradient(180deg, #2e1204 0%, #4a1e08 50%, #6b3012 100%);
+  padding: 100px 16px 20px 16px;
+  gap: 8px;
   min-width: 220px;
   max-width: 220px;
   z-index: 10;
   position: relative;
-  box-shadow: 4px 0 20px rgba(0,0,0,0.3);
+  box-shadow:
+    4px 0 24px rgba(80, 30, 5, 0.4),
+    inset -1px 0 0 rgba(240, 148, 85, 0.12);
 }
 
-.sidebar {
-  display: flex;
-  flex-direction: column;
-}
 .sidebar-logout {
   margin-top: auto;
-  color: #e74c3c !important;
-}
-.sidebar-logout:hover {
-  background-color: #e74c3c !important;
-  color: white !important;
+  color: #f1948a !important;
+  border-color: rgba(231, 76, 60, 0.35) !important;
+  background-color: rgba(231, 76, 60, 0.08) !important;
 }
 
-/* Sidebar logo - modern style */
+.sidebar-logout:hover {
+  background: linear-gradient(145deg, var(--red-main), var(--red-deep)) !important;
+  color: var(--white) !important;
+  border-color: transparent !important;
+}
+
+/* ─── Sidebar logo ───────────────────────────────────────────── */
 .sidebar-logo {
   position: fixed;
   top: 0;
   left: 0;
   width: 220px;
   height: 80px;
-  background: linear-gradient(135deg, #0077be 0%, #00a86b 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--orange-deep) 0%, var(--orange-main) 100%);
+  color: var(--white);
   border: none;
-  border-bottom: 3px solid rgba(255,255,255,0.2);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
-  font-weight: 700;
-  font-family: 'Segoe UI', Arial, sans-serif;
+  font-size: 2rem;
+  font-weight: 400;
+  font-family: "Caveat Brush", cursive;
+  font-style: italic;
   letter-spacing: 2px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  box-shadow:
+    0 4px 16px rgba(100, 40, 5, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
   z-index: 1000;
 }
 
+/* ─── Sidebar buttons ────────────────────────────────────────── */
 .sidebar-btn {
-  padding: 14px 20px;
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #e0e0e0;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
+  padding: 12px 16px;
+  background-color: rgba(255, 255, 255, 0.06);
+  color: var(--orange-light);
+  border: 1px solid rgba(240, 148, 85, 0.18);
+  border-radius: 12px;
   cursor: pointer;
-  font-size: 15px;
-  font-weight: 600;
-  text-transform: uppercase;
+  font-size: 1.1rem;
+  font-family: "Caveat Brush", cursive;
+  font-style: italic;
+  font-weight: 400;
   letter-spacing: 0.5px;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
   white-space: nowrap;
   text-decoration: none;
   text-align: center;
-  font-family: 'Segoe UI', Arial, sans-serif;
   position: relative;
   overflow: hidden;
 }
@@ -108,8 +123,8 @@ body, html {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-  transition: left 0.5s;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  transition: left 0.5s ease;
 }
 
 .sidebar-btn:hover::before {
@@ -117,46 +132,49 @@ body, html {
 }
 
 .sidebar-btn:hover {
-  background-color: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.4);
-  transform: translateX(5px);
-  box-shadow: 0 4px 15px rgba(0, 168, 107, 0.4);
+  background-color: rgba(240, 148, 85, 0.16);
+  border-color: rgba(240, 148, 85, 0.4);
+  color: var(--white);
+  transform: translateX(4px);
+  box-shadow: 0 3px 12px rgba(180, 80, 10, 0.28);
 }
 
 .sidebar-btn:active {
-  transform: translateX(3px);
+  transform: translateX(2px);
 }
 
-/* Active/highlighted state for current page */
 .sidebar-btn.active {
-  background: linear-gradient(135deg, #0077be 0%, #00a86b 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--orange-deep), var(--orange-main));
+  color: var(--white);
   border-color: transparent;
-  box-shadow: 0 4px 20px rgba(0, 168, 107, 0.6);
-  transform: translateX(5px);
+  box-shadow:
+    0 4px 16px rgba(180, 80, 10, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateX(4px);
 }
 
 .sidebar-btn.active:hover {
-  background: linear-gradient(135deg, #0088d4 0%, #00c27c 100%);
-  box-shadow: 0 6px 25px rgba(0, 168, 107, 0.7);
+  background: linear-gradient(135deg, var(--orange-main), var(--orange-warm));
+  box-shadow: 0 6px 20px rgba(180, 80, 10, 0.55);
 }
 
-/* Content wrapper for everything except sidebar */
+/* ─── Content wrapper ────────────────────────────────────────── */
 .content-wrapper {
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background-color: #f5f7fa;
+  background-color: #fcfbf5;
 }
 
 .main-content {
   flex: 1;
   overflow-y: auto;
   padding: 30px;
-  background-color: #f5f7fa;
+  background-color: #fcfbf5;
 }
 
+/* ─── Page container ─────────────────────────────────────────── */
 .page-container {
   display: flex;
   flex-direction: row;
@@ -164,6 +182,7 @@ body, html {
   width: 100%;
 }
 
+/* ─── Map ────────────────────────────────────────────────────── */
 .map-container {
   flex: 1;
   width: 100%;
@@ -175,89 +194,123 @@ body, html {
   width: 100%;
   height: 100%;
   border-radius: 25px;
+  box-shadow:
+    0 0 0 1px rgba(224, 123, 57, 0.08),
+    rgba(180, 80, 10, 0.08) 0px 1px 2px 0px,
+    rgba(180, 80, 10, 0.05) 0px 2px 6px 2px;
 }
 
-/* Remove old button-container styles since we're using sidebar now */
-.button-container {
-  display: none;
-}
-
-/* using for card in owner */
+/* ─── Content card ───────────────────────────────────────────── */
 .content-card {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-  padding: 35px;
+  background: var(--white);
+  border-radius: 28px;
+  box-shadow:
+    0 0 0 1px rgba(224, 123, 57, 0.08),
+    0 4px 6px -1px var(--shadow-warm),
+    0 12px 40px -8px rgba(180, 80, 10, 0.14);
+  padding: 32px 36px 36px;
   margin: 0;
   border: none;
+  position: relative;
+  overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+
 .content-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+  box-shadow:
+    0 0 0 1px rgba(224, 123, 57, 0.12),
+    0 8px 16px -2px var(--shadow-warm),
+    0 20px 50px -10px rgba(180, 80, 10, 0.18);
 }
 
+/* ─── Section headings ───────────────────────────────────────── */
 .section {
   margin-bottom: 30px;
 }
 
 .section h2 {
-  color: #2c3e50;
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-bottom: 18px;
+  font-family: "Caveat Brush", cursive;
+  font-style: italic;
+  font-size: 2rem;
+  font-weight: 400;
+  color: var(--orange-main);
+  letter-spacing: 0.5px;
+  margin: 0 0 18px 0;
   padding-bottom: 12px;
-  border-bottom: 2px solid #0077be;
-  position: relative;
-}
-
-.section h2::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 60px;
-  height: 2px;
-  background: linear-gradient(90deg, #0077be, #00a86b);
+  border-bottom: 1.5px solid var(--orange-light);
 }
 
 .section p {
-  color: #555;
-  font-size: 15px;
+  font-family: "Shadows Into Light Two", cursive;
+  font-size: 1.15rem;
+  font-style: italic;
+  color: var(--ink);
   line-height: 1.8;
   margin: 8px 0;
 }
 
+/* ─── Route items ────────────────────────────────────────────── */
 .route-item {
   display: flex;
   justify-content: space-between;
-  padding: 16px;
+  padding: 14px 16px;
   margin: 10px 0;
-  background: #f8f9fa;
+  background: var(--cream);
   border-left: 4px solid transparent;
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  box-shadow: rgba(0, 0, 0, 0.06) 0px 1px 4px;
+  transition: all 0.25s ease;
 }
 
 .route-item:hover {
-  background-color: #e8f4f8;
-  border-left-color: #0077be;
+  background-color: var(--orange-blush);
+  border-left-color: var(--orange-main);
   transform: translateX(5px);
-  box-shadow: 0 4px 12px rgba(0, 119, 190, 0.15);
+  box-shadow: 0 4px 12px var(--shadow-warm);
 }
 
 .route-item.selected {
-  background-color: #e8f4f8;
-  border-left-color: #0077be;
-  box-shadow: 0 4px 12px rgba(0, 119, 190, 0.2);
+  background-color: var(--orange-blush);
+  border-left-color: var(--orange-deep);
+  box-shadow: 0 4px 12px var(--shadow-warm);
 }
 
 .time {
-  color: #0077be;
-  font-weight: 700;
+  font-family: "Caveat Brush", cursive;
+  font-style: italic;
+  color: var(--orange-main);
+  font-weight: 400;
+  font-size: 1.2rem;
   min-width: 80px;
   text-align: right;
-  font-size: 14px;
+}
+
+/* ─── Van & marker icons ─────────────────────────────────────── */
+.van-icon {
+  background: transparent;
+  border-radius: 50%;
+  background-color: rgb(251, 159, 102);
+  padding: 4px;
+  box-shadow:
+    rgba(0, 0, 0, 0.4) 0px 2px 4px,
+    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+    rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+}
+
+.marker-icon {
+  background: transparent;
+  border-radius: 50%;
+  background-color: white;
+  padding: 4px;
+  box-shadow:
+    rgba(0, 0, 0, 0.4) 0px 2px 4px,
+    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+    rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+}
+
+.button-container {
+  display: none;
 }

@@ -381,6 +381,65 @@ def get_route_stops(route_id):
         'estimated_arrival_time': s.estimated_arrival_time.strftime('%H:%M') if s.estimated_arrival_time else ''
     } for s in stops])
 
+@index_views.route('/api/owner/routes/<int:route_id>/stops', methods=['POST'])
+@jwt_required()
+def create_route_stop(route_id):
+    """Add a stop to a route"""
+    if current_user.role != 'owner':
+        return jsonify(message='Unauthorized'), 403
+
+    from App.models import Route, RouteStop
+    from datetime import time
+
+    route = Route.query.get(route_id)
+    if not route or route.owner_id != current_user.owner_id:
+        return jsonify(message='Route not found'), 404
+
+    data = request.json
+
+    estimated_arrival = None
+    if data.get('estimated_arrival_time'):
+        try:
+            estimated_arrival = time.fromisoformat(data['estimated_arrival_time'])
+        except (ValueError, TypeError):
+            estimated_arrival = None
+
+    stop = RouteStop(
+        route_id=route_id,
+        address=data.get('address', ''),
+        lat=data['lat'],
+        lng=data['lng'],
+        stop_order=data.get('stop_order', 0),
+        estimated_arrival_time=estimated_arrival
+    )
+    db.session.add(stop)
+    db.session.commit()
+
+    return jsonify(message='Stop created', stop_id=stop.stop_id), 201
+
+
+@index_views.route('/api/owner/routes/<int:route_id>/stops/<int:stop_id>', methods=['DELETE'])
+@jwt_required()
+def delete_route_stop(route_id, stop_id):
+    """Delete a stop from a route"""
+    if current_user.role != 'owner':
+        return jsonify(message='Unauthorized'), 403
+
+    from App.models import Route, RouteStop
+
+    route = Route.query.get(route_id)
+    if not route or route.owner_id != current_user.owner_id:
+        return jsonify(message='Route not found'), 404
+
+    stop = RouteStop.query.filter_by(stop_id=stop_id, route_id=route_id).first()
+    if not stop:
+        return jsonify(message='Stop not found'), 404
+
+    db.session.delete(stop)
+    db.session.commit()
+
+    return jsonify(message='Stop deleted'), 200
+
 
 @index_views.route('/api/owner/routes', methods=['POST'])
 @jwt_required()
