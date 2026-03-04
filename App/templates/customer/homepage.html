@@ -1,14 +1,5 @@
 {% extends "customer/layout.html" %} {% block title %}Customer Home{% endblock
 %} {% block head %}
-<!-- Leaflet CSS -->
-<link
-  rel="stylesheet"
-  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-/>
-
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <!-- Custom CSS -->
 <link
   rel="stylesheet"
@@ -64,7 +55,8 @@
                 <span> Unit Price: </span>${{order.item.price}}0
               </p>
               <p class="item-total">
-                <span>Total:</span> ${{order.item.price * order.quantity}}0
+                <span>Total:</span> ${{ "%.2f" % (order.item.price *
+                order.quantity) }}
               </p>
             </div>
           </div>

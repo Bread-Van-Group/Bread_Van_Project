@@ -1,10 +1,19 @@
 from App.database import db
 from App.models import Route, RouteStop, CustomerRequest, Status
 from sqlalchemy import func
+from datetime import datetime
 
 
 def get_route_by_id(route_id):
     return db.session.get(Route, route_id)
+
+def get_todays_route():
+    day = datetime.now().strftime("%A") 
+    return db.session.execute(
+        db.select(Route).filter_by(
+            day_of_week = day
+        )
+    ).scalar_one_or_none()
 
 def get_stop_by_id(stop_id):
     return db.session.get(RouteStop, stop_id)

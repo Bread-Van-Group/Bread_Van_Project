@@ -1,6 +1,15 @@
 <!doctype html>
 <html>
   <head>
+    <!-- Leaflet CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <!-- Font Awesome Icons -->
     <link
       rel="stylesheet"
@@ -27,6 +36,13 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='styles/customer/layout.css') }}"
     />
+
+    <!--Leaflet Routing Machine CSS and JS-->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css"
+    />
+    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     {% block head %}{% endblock %}
@@ -68,18 +84,35 @@
     <!--Web Socket Code-->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
-      {% with messages = get_flashed_messages() %}
-        {% if messages %}
-          {% for message in messages %}
-            M.toast({html: '{{ message }}'})
-          {% endfor %}
-        {% endif %}
-      {% endwith %}
+      function showToast(message) {
+        const toast = document.createElement("div");
+        toast.className = "toast";
+        toast.innerText = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => toast.classList.add("show"), 10);
+        setTimeout(() => {
+          toast.classList.remove("show");
+          setTimeout(() => toast.remove(), 300);
+        }, 2500);
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const params = new URLSearchParams(window.location.search);
+        const error = params.get("error");
+        if (error) showToast(error);
+      });
     </script>
     <!--Navbar Code -->
     <script>
       const currentURL = "{{ request.path  }}";
-      const id = currentURL.slice(currentURL.lastIndexOf("/") + 1);
+      var id = "";
+
+      if (currentURL == String("/customer/checkout")) {
+        id = "store";
+      } else {
+        id = currentURL.slice(currentURL.lastIndexOf("/") + 1);
+      }
 
       const currentNavBtn = document.querySelector(`#${id}`);
 

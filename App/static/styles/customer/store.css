@@ -122,8 +122,12 @@
   overflow-y: scroll;
 }
 
-.store-section::-webkit-scrollbar { width: 2vw; }
-.store-section::-webkit-scrollbar-track { background: transparent; }
+.store-section::-webkit-scrollbar {
+  width: 2vw;
+}
+.store-section::-webkit-scrollbar-track {
+  background: transparent;
+}
 .store-section::-webkit-scrollbar-thumb {
   background: var(--orange-light);
   border-radius: 20px;
@@ -307,6 +311,7 @@
   align-items: center;
   gap: 8px;
   background: var(--orange-deep);
+  border: none;
   color: var(--white);
   text-decoration: none;
   font-family: "Shadows Into Light Two", cursive;
@@ -320,7 +325,9 @@
     rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;
 }
 
-.checkout-btn i { font-size: 1.4rem; }
+.checkout-btn i {
+  font-size: 1.4rem;
+}
 
 /* ─── Cart Badge ─────────────────────────────────────────────── */
 /* FIX: positioned relative to .cart-btn now */

@@ -1,9 +1,36 @@
-//This stores the current order to be passed to the checkout page
-const order = [];
+//Call these functions on initial mounting to populate cart
+changeOrder();
+syncStoreToOrder();
+
+//This Function Updates The Customer's session so that the current
+//order is reflected correctly
+function updateSession() {
+  fetch("/api/customer/update-session", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ order: order }),
+  });
+}
+
+//Sync Store Items to Existing Order
+function syncStoreToOrder() {
+  const totalElement = document.querySelector("#order-total");
+  var total = Number(String(totalElement.innerHTML).slice(1));
+
+  order.forEach((item) => {
+    const item_id = item.inventory_id;
+    const quantityElement = document.querySelector("#ordered-qty-" + item_id);
+
+    quantityElement.innerHTML = item.quantity;
+    total += item.quantity * item.price;
+  });
+
+  totalElement.innerHTML = "$" + total.toFixed(2);
+}
+
 //Order Update Function
 function updateOrder(id, itemPrice, itemName, action) {
   const item = order.find((obj) => obj.inventory_id === id);
-  console.log(order);
 
   switch (action) {
     case "add":
@@ -141,6 +168,7 @@ function changeQuantity(id, operation) {
   }
 
   totalElement.innerHTML = "$" + total.toFixed(2);
+  updateSession();
   changeOrder();
 }
 

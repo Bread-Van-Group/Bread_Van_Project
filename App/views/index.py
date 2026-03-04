@@ -6,6 +6,12 @@ from App.database import db
 
 index_views = Blueprint('index_views', __name__, template_folder='../templates')
 
+#----------REMOVE THIS IN PRODUCTION--------------
+@index_views.route('/init', methods=['GET'])
+def init():
+    initialize()
+    return jsonify(message='db initialized!')
+#----------REMOVE THIS IN PRODUCTION--------------
 
 @index_views.route('/', methods=['GET'])
 def index():
@@ -46,11 +52,6 @@ def owner_report_api():
     period = request.args.get('period', 'week')
     data = get_report_data(period)
     return jsonify(data)
-
-@index_views.route('/init', methods=['GET'])
-def init():
-    initialize()
-    return jsonify(message='db initialized!')
 
 
 @index_views.route('/health', methods=['GET'])

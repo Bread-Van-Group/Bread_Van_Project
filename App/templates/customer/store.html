@@ -91,10 +91,33 @@ block head %}
     <span class="order-total-text">Total: </span
     ><span class="order-total-number" id="order-total">$0.00</span>
   </p>
-  <a class="checkout-btn" href="{{url_for('customer_views.customer_cart')}}"
-    ><i class="fa-solid fa-cart-shopping"></i>Checkout</a
-  >
+  <button class="checkout-btn" onclick="proceedToCheckout()">
+    <i class="fa-solid fa-cart-shopping"></i>Checkout
+  </button>
 </div>
 {% endblock %} {% block scripts %}
+<!--This script is needed here in order to get the jinja syntax-->
+<script>
+  //This stores the current order to be passed to the checkout page
+  const order = {{customer_order | tojson }};
+
+  //Proceed To Checkout Code
+  function proceedToCheckout(){
+
+    //An imaginary form is created to handle the flask post request
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = "{{ url_for('customer_views.customer_checkout') }}";
+
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "order";
+    input.value = JSON.stringify(order);
+
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
+  }
+</script>
 <script src="{{ url_for('static', filename='js/customer/store.js')}}"></script>
 {% endblock %}

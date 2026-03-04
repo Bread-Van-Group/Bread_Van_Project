@@ -1,0 +1,62 @@
+{% extends "customer/layout.html" %} {% block title %}Cart{% endblock %} {%
+block head %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='styles/customer/checkout.css') }}"
+/>
+{% endblock %} {% block content %}
+<div class="page-content">
+  <div class="back-btn" onclick="history.back()">
+    <i class="fa-solid fa-arrow-left"></i>
+  </div>
+
+  <div class="top-content">
+    <div class="map-container">
+      <div id="map" class="map"></div>
+    </div>
+    <div class="order-section">
+      <p class="order-header">My Order <span> ({{order | length}})</span></p>
+      <div class="order-items">
+        {% for item in order %}
+        <div class="order-item">
+          <p class="item-name">{{item.name}}</p>
+          <p class="item-quantity">x {{item.quantity}}</p>
+          <div class="item-details">
+            <p class="item-price">
+              <span> Unit Price: </span>${{ "%.2f" % item.price}}
+            </p>
+            <p class="item-total">
+              <span>Total:</span> ${{ "%.2f" % (item.price * item.quantity) }}
+            </p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <div class="checkout-section">
+    <p class="order-total"><span>Total: </span> ${{"%.2f" % order_total}}</p>
+    <button class="confirm-btn" onclick="makeOrder()">CONFIRM</button>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script src="{{url_for('static', filename='js/customer/map.js')}}"></script>
+<script src="{{url_for('static', filename='js/customer/checkout.js')}}"></script>
+<script>
+  function makeOrder() {
+    lat = 10.6405359397094;
+    lng = -61.39297485351563;
+
+    fetch("/api/customer/make-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lat: lat, lng: lng }),
+    }).then((response) => {
+      if (response.ok) {
+        window.location.href =
+          "{{ url_for('customer_views.customer_homepage') }}";
+      }
+    });
+  }
+</script>
+{% endblock %}
