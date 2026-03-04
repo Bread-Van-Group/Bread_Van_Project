@@ -23,7 +23,9 @@ socketio = SocketIO(cors_allowed_origins="*")
 
 @socketio.on("driver_location")
 def handle_driver_location(data):
-    print(data)
+    # Add a small delay or throttle on server side
+    import time
+    time.sleep(0.5) 
     socketio.emit("driver_update", data, skip_sid=request.sid)
 
 

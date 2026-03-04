@@ -46,8 +46,18 @@ L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
 //Getting the driver's live location
 const socket = io();
 var breadVanMarker = null;
+let lastUpdate = 0;
+const MIN_UPDATE_INTERVAL = 10000;
 
 socket.on("driver_update", function (data) {
+  const now = Date.now();
+
+  // Only update if enough time has passed
+  if (now - lastUpdate < MIN_UPDATE_INTERVAL) {
+    return;
+  }
+  lastUpdate = now;
+
   if (breadVanMarker == null) {
     breadVanMarker = L.marker([data.lat, data.lng], {
       icon: L.divIcon({
