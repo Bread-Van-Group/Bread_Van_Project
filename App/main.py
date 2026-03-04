@@ -19,7 +19,8 @@ from App.views import views, setup_admin
 
 socketio = SocketIO(
     cors_allowed_origins="*",
-    async_mode='threading'  
+    async_mode='gevent',
+    #async_mode='threading'  
 )
 
 #Websocket functions
