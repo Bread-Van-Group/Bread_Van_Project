@@ -17,7 +17,10 @@ from App.controllers import (
 
 from App.views import views, setup_admin
 
-socketio = SocketIO(cors_allowed_origins="*")
+socketio = SocketIO(
+    cors_allowed_origins="*",
+    async_mode='threading'  
+)
 
 #Websocket functions
 
