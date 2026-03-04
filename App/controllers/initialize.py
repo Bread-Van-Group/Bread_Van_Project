@@ -68,7 +68,7 @@ def initialize():
         name="Morning East Route",
         start_time=time(6, 0),
         end_time=time(10, 0),
-        day_of_week="Monday",
+        day_of_week= datetime.now().strftime("%A") ,
         owner_id=owner.owner_id,
         description="East Trinidad morning bread delivery",
     )
