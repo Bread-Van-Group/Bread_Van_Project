@@ -88,7 +88,7 @@ setInterval(() => {
     lat: 10.642156853165652,
     lng: -61.39825880527497,
   });
-}, 1000);
+}, 30000);
 
 // **NOTE** The code below will be used to get the driver's live location
 
