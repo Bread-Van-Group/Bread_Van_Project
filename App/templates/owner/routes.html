@@ -26,14 +26,13 @@
   </div>
 
   <div class="content-wrapper">
-
     <div class="main-content">
       <div class="routes-container">
 
-        <!-- Left Panel — switches between list view and editor view -->
+        <!-- Left Panel -->
         <div class="routes-list-panel">
 
-          <!--  LIST VIEW  -->
+          <!-- LIST VIEW -->
           <div id="panel-list-view">
             <div class="panel-header">
               <h2>My Routes</h2>
@@ -44,7 +43,7 @@
             </div>
           </div>
 
-          <!--  EDITOR VIEW  -->
+          <!-- EDITOR VIEW -->
           <div id="panel-editor-view" style="display:none;">
             <div class="panel-header">
               <h2 id="editor-title">New Route</h2>
@@ -52,31 +51,29 @@
             </div>
 
             <div class="editor-body">
-
               <div class="form-group">
                 <label>Route Name</label>
                 <input type="text" id="route-name" placeholder="e.g., Morning East Route" />
               </div>
 
-              <!-- Custom dropdown -->
               <div class="form-group">
                 <label>Day of Week</label>
                 <div class="custom-select" id="day-select">
-                  <button type="button" class="custom-select-trigger" id="day-select-trigger" aria-haspopup="listbox" aria-expanded="false">
+                  <button type="button" class="custom-select-trigger" id="day-select-trigger">
                     <span id="day-select-label">Monday</span>
                     <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"
                          stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                       <polyline points="6 9 12 15 18 9"/>
                     </svg>
                   </button>
-                  <ul class="custom-select-menu" id="day-select-menu" role="listbox">
-                    <li role="option" data-value="Monday">Monday</li>
-                    <li role="option" data-value="Tuesday">Tuesday</li>
-                    <li role="option" data-value="Wednesday">Wednesday</li>
-                    <li role="option" data-value="Thursday">Thursday</li>
-                    <li role="option" data-value="Friday">Friday</li>
-                    <li role="option" data-value="Saturday">Saturday</li>
-                    <li role="option" data-value="Sunday">Sunday</li>
+                  <ul class="custom-select-menu" id="day-select-menu">
+                    <li data-value="Monday">Monday</li>
+                    <li data-value="Tuesday">Tuesday</li>
+                    <li data-value="Wednesday">Wednesday</li>
+                    <li data-value="Thursday">Thursday</li>
+                    <li data-value="Friday">Friday</li>
+                    <li data-value="Saturday">Saturday</li>
+                    <li data-value="Sunday">Sunday</li>
                   </ul>
                 </div>
                 <input type="hidden" id="route-day" value="Monday" />
@@ -95,44 +92,38 @@
 
               <div class="form-group">
                 <label>Description <span class="optional-label">(optional)</span></label>
-                <textarea id="route-description" rows="2" placeholder="Brief description of this route"></textarea>
+                <textarea id="route-description" rows="2" placeholder="Brief description"></textarea>
               </div>
 
               <div class="location-box">
-                <div class="location-box-title">&#128205; Route Locations</div>
-                <p class="location-hint">Click the map to place start &amp; end points.</p>
-                <div class="location-row" id="start-location-row">
-                  <span class="loc-dot loc-dot-green"></span>
-                  <div id="start-location" class="loc-text">Click map to set</div>
-                  <button class="loc-reset-btn" id="start-reset-btn" onclick="resetPoint('start')" style="display:none;">Reset</button>
+                <div class="location-box-title">📍 Route Stops</div>
+                <p class="location-hint">Click the map to add stops in order. Add at least 2 stops.</p>
+                <div id="stops-list-container">
+                  <div class="loc-text">No stops added yet. Click the map to add stops.</div>
                 </div>
-                <div class="location-row" id="end-location-row">
-                  <span class="loc-dot loc-dot-red"></span>
-                  <div id="end-location" class="loc-text">Click map to set</div>
-                  <button class="loc-reset-btn" id="end-reset-btn" onclick="resetPoint('end')" style="display:none;">Reset</button>
-                </div>
+                <button class="loc-reset-btn" onclick="clearAllStops()" style="margin-top:8px; display:block; width:100%;">
+                  Clear All Stops
+                </button>
               </div>
-
-            </div><!-- editor-body -->
+            </div>
 
             <div class="editor-footer">
               <button class="footer-btn btn-cancel" onclick="hideRouteEditor()">Cancel</button>
               <button class="footer-btn btn-save" id="save-route-btn">Save Route</button>
             </div>
-          </div><!-- panel-editor-view -->
+          </div>
 
-        </div><!-- routes-list-panel -->
+        </div>
 
-        <!--  Map -->
+        <!-- Map -->
         <div class="map-panel">
           <div class="map-header">
             <div class="map-controls">
-              <button class="control-btn" id="edit-route-btn" style="display:none;">&#9998; Edit Route</button>
-              <button class="control-btn" id="view-routes-btn">Reset</button>
+              <button class="control-btn" id="edit-route-btn" style="display:none;">✏️ Edit Route</button>
+              <button class="control-btn" id="view-routes-btn">Reset View</button>
             </div>
           </div>
           <div id="map" class="map"></div>
-          <!-- Floating hint -->
           <div id="map-selection-hint"></div>
         </div>
 

@@ -263,21 +263,30 @@ def owner_dashboard_summary():
 @index_views.route('/api/owner/routes', methods=['GET'])
 @jwt_required()
 def get_owner_routes():
-    #Get all routes for the owner
     if current_user.role != 'owner':
         return jsonify(message='Unauthorized'), 403
 
     from App.controllers.owner import get_owner_routes
+    from App.models import RouteStop
+    from sqlalchemy import func
+
     routes = get_owner_routes(current_user.owner_id)
 
-    return jsonify([{
-        'route_id': r.route_id,
-        'name': r.name,
-        'start_time': r.start_time.strftime('%H:%M') if r.start_time else '',
-        'end_time': r.end_time.strftime('%H:%M') if r.end_time else '',
-        'day_of_week': r.day_of_week
-    } for r in routes])
+    result = []
+    for r in routes:
+        stop_count = db.session.execute(
+            db.select(func.count()).where(RouteStop.route_id == r.route_id)
+        ).scalar()
+        result.append({
+            'route_id': r.route_id,
+            'name': r.name,
+            'start_time': r.start_time.strftime('%H:%M') if r.start_time else '',
+            'end_time': r.end_time.strftime('%H:%M') if r.end_time else '',
+            'day_of_week': r.day_of_week,
+            'stops_count': stop_count
+        })
 
+    return jsonify(result)
 
 @index_views.route('/api/owner/inventory/low-stock', methods=['GET'])
 @jwt_required()
@@ -402,20 +411,19 @@ def delete_route_stop(route_id, stop_id):
 @index_views.route('/api/owner/routes', methods=['POST'])
 @jwt_required()
 def create_route():
-    #Create a new route
+    """Create a new route with stops"""
     if current_user.role != 'owner':
         return jsonify(message='Unauthorized'), 403
 
-    from App.controllers.route import create_route
+    from App.models import Route, RouteStop
     from datetime import time
 
     data = request.json
 
-    # Parse time strings
     start_time = time.fromisoformat(data['start_time'])
     end_time = time.fromisoformat(data['end_time'])
 
-    route = create_route(
+    route = Route(
         name=data['name'],
         start_time=start_time,
         end_time=end_time,
@@ -423,6 +431,21 @@ def create_route():
         owner_id=current_user.owner_id,
         description=data.get('description', '')
     )
+    db.session.add(route)
+    db.session.flush()  
+    
+    for stop_data in data.get('stops', []):
+        stop = RouteStop(
+            route_id=route.route_id,
+            address=stop_data.get('address', ''),
+            lat=stop_data['lat'],
+            lng=stop_data['lng'],
+            stop_order=stop_data['order'],
+            estimated_arrival_time=None  # Can calculate later if needed
+        )
+        db.session.add(stop)
+
+    db.session.commit()
 
     return jsonify(message='Route created', route_id=route.route_id)
 
@@ -430,11 +453,11 @@ def create_route():
 @index_views.route('/api/owner/routes/<int:route_id>', methods=['PUT'])
 @jwt_required()
 def update_route(route_id):
-    """Update an existing route"""
+    """Update an existing route and its stops"""
     if current_user.role != 'owner':
         return jsonify(message='Unauthorized'), 403
 
-    from App.models import Route
+    from App.models import Route, RouteStop
     from datetime import time
 
     route = Route.query.get(route_id)
@@ -443,11 +466,27 @@ def update_route(route_id):
 
     data = request.json
 
+    
     route.name = data['name']
     route.start_time = time.fromisoformat(data['start_time'])
     route.end_time = time.fromisoformat(data['end_time'])
     route.day_of_week = data['day_of_week']
     route.description = data.get('description', '')
+
+    
+    RouteStop.query.filter_by(route_id=route_id).delete()
+
+    
+    for stop_data in data.get('stops', []):
+        stop = RouteStop(
+            route_id=route.route_id,
+            address=stop_data.get('address', ''),
+            lat=stop_data['lat'],
+            lng=stop_data['lng'],
+            stop_order=stop_data['order'],
+            estimated_arrival_time=None
+        )
+        db.session.add(stop)
 
     db.session.commit()
 
@@ -457,18 +496,17 @@ def update_route(route_id):
 @index_views.route('/api/owner/routes/<int:route_id>', methods=['DELETE'])
 @jwt_required()
 def delete_route(route_id):
-    """Delete a route and all its stops"""
+    """Delete a route"""
     if current_user.role != 'owner':
         return jsonify(message='Unauthorized'), 403
 
-    from App.controllers.route import get_route_by_id, delete_route as controller_delete_route
+    from App.models import Route
 
-    route = get_route_by_id(route_id)
+    route = Route.query.get(route_id)
     if not route or route.owner_id != current_user.owner_id:
         return jsonify(message='Route not found'), 404
 
-    success = controller_delete_route(route_id)
-    if not success:
-        return jsonify(message='Failed to delete route'), 500
+    db.session.delete(route)
+    db.session.commit()
 
-    return jsonify(message='Route deleted'), 200
+    return jsonify(message='Route deleted')

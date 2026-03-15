@@ -60,37 +60,48 @@ def get_van_daily_inventory(van_id, target_date=None):
     ).all()
 
 
-def set_van_inventory(van_id, item_id, quantity_in_stock, target_date=None):
-    """
-    Upsert a DailyInventory record for a van + item + date.
-    quantity_available is set to match quantity_in_stock on creation
-    (reserved starts at 0).
-    """
-    target_date = target_date or date.today()
-    record = db.session.execute(
-        db.select(DailyInventory).filter_by(
-            van_id=van_id, item_id=item_id, date=target_date
-        )
-    ).scalar_one_or_none()
+# Replace the set_van_inventory function in App/controllers/van.py with this:
 
-    if record:
-        record.quantity_in_stock  = quantity_in_stock
-        record.quantity_available = quantity_in_stock - record.quantity_reserved
+def set_van_inventory(van_id, item_id, quantity, date):
+    """Set or delete daily inventory for a van"""
+    from App.models import DailyInventory
+    from App.database import db
+
+    # Find existing inventory record
+    existing = DailyInventory.query.filter_by(
+        van_id=van_id,
+        item_id=item_id,
+        date=date
+    ).first()
+
+    if quantity == 0:
+        # DELETE the record completely when quantity is 0
+        if existing:
+            db.session.delete(existing)
+            db.session.commit()
+            print(f"Deleted inventory: van_id={van_id}, item_id={item_id}, date={date}")
     else:
-        record = DailyInventory(
-            van_id=van_id,
-            date=target_date,
-            item_id=item_id,
-            quantity_in_stock=quantity_in_stock,
-            quantity_reserved=0,
-            quantity_available=quantity_in_stock,
-        )
-        db.session.add(record)
+        # CREATE or UPDATE the record
+        if existing:
+            # Update existing record
+            existing.quantity_available = quantity
+            existing.quantity_in_stock = quantity
+            print(f"Updated inventory: van_id={van_id}, item_id={item_id}, quantity={quantity}")
+        else:
+            # Create new record
+            new_inventory = DailyInventory(
+                van_id=van_id,
+                item_id=item_id,
+                date=date,
+                quantity_available=quantity,
+                quantity_in_stock=quantity
+            )
+            db.session.add(new_inventory)
+            print(f"Created inventory: van_id={van_id}, item_id={item_id}, quantity={quantity}")
 
-    db.session.commit()
-    return record
+        db.session.commit()
 
-
+    return True
 def reserve_inventory(van_id, item_id, quantity, target_date=None):
     """
     Reserve `quantity` units for a customer request.
