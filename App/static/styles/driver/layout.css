@@ -10,6 +10,10 @@
   --ink-muted: #7a5a3e;
   --ink-faint: #c8a98a;
   --white: #ffffff;
+  --red-deep: #c0392b;
+  --red-main: #e74c3c;
+  --green-deep: #229954;
+  --green-main: #27ae60;
   --shadow-warm: rgba(180, 80, 10, 0.12);
   --shadow-card: rgba(60, 30, 5, 0.1);
 }

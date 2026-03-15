@@ -1,108 +1,124 @@
-{% extends "customer/layout.html" %} {% block title %}Customer Home{% endblock
-%} {% block head %}
-<!-- Leaflet CSS -->
-<link
-  rel="stylesheet"
-  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-/>
+{% extends "customer/layout.html" %}
+{% block title %}Schedule{% endblock %}
 
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/customer/schedule.css') }}" />
+{% endblock %}
 
-<!-- Custom CSS -->
-<link
-  rel="stylesheet"
-  href="{{ url_for('static', filename='styles/customer/homepage.css') }}"
-/>
-{% endblock %} {% block content %}
+{% block content %}
+<div class="schedule-page">
 
-<div class="page-content">
-  <!-- Map Section -->
-  <div class="main-content-container">
-    <div class="content-navbar">
-      <button
-        id="map-button"
-        class="content-navbar-btn"
-        onclick="changeContent('map')"
-      >
-        <i class="fa-solid fa-map"></i><span>Map</span>
-      </button>
-      <button
-        id="order-button"
-        class="content-navbar-btn content-navbar-btn-inactive"
-        onclick="changeContent('order')"
-      >
-        <i class="fa-solid fa-basket-shopping"></i
-        ><span class="my-order-info"
-          >My Order: {%if orders %}<span
-            id="my-order-status"
-            class="my-order-status my-order-status-inactive"
-          >
-            Pending
-            <span class="loading-dots"
-              ><span>.</span> <span>.</span> <span>.</span></span
-            >
-            <i class="fa-solid fa-van-shuttle"></i
-          ></span>
-          {% else %} <span> No Order X</span> {% endif %}</span
-        >
-      </button>
+  <!-- Meta Info -->
+  <div class="schedule-meta">
+    <p class="schedule-meta-location">
+      <i class="fa-solid fa-location-dot" style="color: var(--orange-main);"></i>
+      Your Area: <strong>{{ current_user.area }}</strong>
+    </p>
+    <p class="schedule-meta-date">
+      Today:
+      <span id="today-date"></span>
+    </p>
+  </div>
+
+  <!-- Today's Schedule -->
+  <div class="schedule-card">
+    <div class="schedule-card-header">
+      Today's Schedule Detail:
+      <span id="today-date-header"></span>
     </div>
-    <div id="main-content" class="main-content">
-      <!-- Map Section -->
 
-      <div id="map" class="map"></div>
-      <div id="map-text" class="map-text">
-        There currently aren't any active drivers
-      </div>
+    <div class="stop-list">
+      {% if stops %}
+        {% for stop in stops %}
+        <div class="stop-item {% if stop.is_user_area %}user-area{% endif %}">
 
-      <!-- Orders Section -->
-      <div id="order-section" class="orders-section">
-        <div class="order-items">
-          {%if orders %} {% for order in orders %}
-          <div class="order-item">
-            <p class="item-name">{{order.item.name}}</p>
+          <!-- Time -->
+          <span class="stop-time">
+            {{ stop.estimated_arrival_time or '--:--' }}
+          </span>
 
-            <p class="item-quantity">x {{order.quantity}}</p>
+          <!-- Details -->
+          <div class="stop-details">
+            <div class="stop-title-row">
 
-            <div class="item-details">
-              <p class="item-price">
-                <span> Unit Price: </span>${{order.item.price}}0
-              </p>
-              <p class="item-total">
-                <span>Total:</span> ${{order.item.price * order.quantity}}0
-              </p>
+              <!-- Status Icon -->
+              {% if stop.status == 'cancelled' %}
+                <i class="fa-solid fa-circle-xmark stop-icon cancelled"></i>
+              {% elif stop.status == 'delayed' %}
+                <i class="fa-solid fa-clock stop-icon delayed"></i>
+              {% else %}
+                <i class="fa-solid fa-circle-check stop-icon on-time"></i>
+              {% endif %}
+
+              <span class="stop-area">{{ stop.address }}</span>
+
+              {% if stop.is_user_area %}
+                <span class="stop-your-area-badge">
+                  <i class="fa-solid fa-house"></i> Your Area
+                </span>
+              {% endif %}
+            </div>
+
+            <div class="stop-sub">
+              {% if stop.distance %}
+                <span class="stop-distance">
+                  <i class="fa-solid fa-route"></i> {{ stop.distance }}
+                </span>
+                <span style="color: var(--orange-light);">•</span>
+              {% endif %}
+
+              {% if stop.stock_status == 'full' %}
+                <span class="stop-stock">Full Stock</span>
+              {% elif stop.stock_status == 'low' %}
+                <span class="stop-stock low">Low Stock —</span>
+                <a class="stop-stock-link" href="{{ url_for('customer_views.customer_store') }}">
+                  See Available Stock
+                </a>
+              {% elif stop.stock_status == 'out' %}
+                <span class="stop-stock out">Out of Stock</span>
+              {% endif %}
             </div>
           </div>
-          {% endfor %} {% else %}
-          <div>none</div>
-          {% endif %}
-        </div>
-        <p class="order-total"><span>Total: </span>${{order_total}}</p>
-      </div>
 
-      <!-- Map Info Overlay -->
-      <!-- <div class="map-info">
-      <div class="map-info-item">
-        <span class="map-info-label">ETA:</span>
-        <span class="map-info-value" id="eta">5min</span>
-      </div>
-      <div class="map-info-item">
-        <span class="map-info-label">Distance:</span>
-        <span class="map-info-value" id="distance">5km</span>
-      </div>
-    </div> -->
+        </div>
+        {% endfor %}
+      {% else %}
+        <div style="padding: 24px; text-align: center; font-family: 'Caveat Brush', cursive; font-style: italic; color: var(--ink-faint); font-size: 1.2rem;">
+          No stops scheduled for today.
+        </div>
+      {% endif %}
     </div>
   </div>
 
-  <!-- Established Footer -->
-  <div class="established-footer">
-    <h3>Established</h3>
+  <!-- Legend -->
+  <div class="legend-card">
+    <div class="legend-header">Legend</div>
+    <div class="legend-body">
+      <div class="legend-item">
+        <i class="fa-solid fa-circle-check on-time"></i> On time
+      </div>
+      <div class="legend-item">
+        <i class="fa-solid fa-clock delayed"></i> Delayed
+      </div>
+      <div class="legend-item">
+        <i class="fa-solid fa-circle-xmark cancelled"></i> Cancelled
+      </div>
+      <div class="legend-item">
+        <i class="fa-solid fa-house your-area"></i> Your area
+      </div>
+    </div>
   </div>
+
 </div>
 
-{% endblock %} {% block scripts %}
-
-<script src="{{url_for('static', filename='js/customer/map.js')}}"></script>
-<script src="{{url_for('static', filename='js/customer/homepage.js')}}"></script>
+<script>
+  // Inject today's date in a readable format
+  const now = new Date();
+  const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+  const formatted = now.toLocaleDateString('en-GB', options);
+  document.getElementById('today-date').textContent = formatted;
+  document.getElementById('today-date-header').textContent = formatted;
+</script>
 {% endblock %}
+
+{% block scripts %}{% endblock %}

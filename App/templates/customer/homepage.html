@@ -1,14 +1,5 @@
 {% extends "customer/layout.html" %} {% block title %}Customer Home{% endblock
 %} {% block head %}
-<!-- Leaflet CSS -->
-<link
-  rel="stylesheet"
-  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-/>
-
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <!-- Custom CSS -->
 <link
   rel="stylesheet"
@@ -17,7 +8,6 @@
 {% endblock %} {% block content %}
 
 <div class="page-content">
-  <!-- Map Section -->
   <div class="main-content-container">
     <div class="content-navbar">
       <button
@@ -38,71 +28,60 @@
             id="my-order-status"
             class="my-order-status my-order-status-inactive"
           >
-            Pending
+            {% if status == 1 %} Pending {% elif status == 2%} En Route {% elif
+            status == 3%} Completed ✔{% elif status == 4%} Denied X {% endif %}
+            {% if status == 2 or status == 1 %}
             <span class="loading-dots"
               ><span>.</span> <span>.</span> <span>.</span></span
             >
-            <i class="fa-solid fa-van-shuttle"></i
-          ></span>
-          {% else %} <span> No Order X</span> {% endif %}</span
+            {% endif %} {% if status == 2 %}
+            <i class="fa-solid fa-van-shuttle"></i>
+            {% endif %}</span
+          >
+          {% else %}
+          <span
+            id="my-order-status"
+            class="my-order-status my-order-status-inactive"
+          >
+            No Order</span
+          >
+          {% endif %}</span
         >
       </button>
     </div>
     <div id="main-content" class="main-content">
-      <!-- Map Section -->
-
       <div id="map" class="map"></div>
       <div id="map-text" class="map-text">
         There currently aren't any active drivers
       </div>
 
-      <!-- Orders Section -->
       <div id="order-section" class="orders-section">
         <div class="order-items">
           {%if orders %} {% for order in orders %}
           <div class="order-item">
             <p class="item-name">{{order.item.name}}</p>
-
             <p class="item-quantity">x {{order.quantity}}</p>
-
             <div class="item-details">
               <p class="item-price">
                 <span> Unit Price: </span>${{order.item.price}}0
               </p>
               <p class="item-total">
-                <span>Total:</span> ${{order.item.price * order.quantity}}0
+                <span>Total:</span> ${{ "%.2f" % (order.item.price *
+                order.quantity) }}
               </p>
             </div>
           </div>
           {% endfor %} {% else %}
-          <div>none</div>
+          <div class="item-name">No Current Order</div>
           {% endif %}
         </div>
         <p class="order-total"><span>Total: </span>${{order_total}}</p>
       </div>
-
-      <!-- Map Info Overlay -->
-      <!-- <div class="map-info">
-      <div class="map-info-item">
-        <span class="map-info-label">ETA:</span>
-        <span class="map-info-value" id="eta">5min</span>
-      </div>
-      <div class="map-info-item">
-        <span class="map-info-label">Distance:</span>
-        <span class="map-info-value" id="distance">5km</span>
-      </div>
-    </div> -->
     </div>
-  </div>
-
-  <!-- Established Footer -->
-  <div class="established-footer">
-    <h3>Established</h3>
   </div>
 </div>
 
 {% endblock %} {% block scripts %}
-
 <script src="{{url_for('static', filename='js/customer/map.js')}}"></script>
 <script src="{{url_for('static', filename='js/customer/homepage.js')}}"></script>
 {% endblock %}

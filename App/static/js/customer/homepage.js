@@ -42,3 +42,27 @@ function changeContent(page) {
     map.style.opacity = 0;
   }
 }
+
+setInterval(() => {
+  const orderSection = document.querySelector("#order-section");
+
+  if (breadVanMarker == null && orderSection.style.opacity == 0) {
+    toggleMapInactive();
+  } else {
+    toggleMapActive();
+  }
+}, 1000);
+
+function toggleMapActive() {
+  const map = document.querySelector("#map");
+  const mapText = document.querySelector("#map-text");
+  map.style.opacity = 1;
+  mapText.style.opacity = 0;
+}
+
+function toggleMapInactive() {
+  const map = document.querySelector("#map");
+  const mapText = document.querySelector("#map-text");
+  map.style.opacity = 0.3;
+  mapText.style.opacity = 1;
+}

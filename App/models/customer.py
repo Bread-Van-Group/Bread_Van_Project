@@ -8,6 +8,7 @@ class Customer(User):
     name        = db.Column(db.String(100), nullable=False)
     address     = db.Column(db.String(255), nullable=True)
     phone       = db.Column(db.String(20),  nullable=True)
+    area        = db.Column(db.String(100), nullable=True) 
 
   
     requests     = db.relationship("CustomerRequest", backref="customer", lazy=True)
@@ -17,11 +18,12 @@ class Customer(User):
         "polymorphic_identity": "customer",
     }
 
-    def __init__(self, email, password, name, address=None, phone=None):
+    def __init__(self, email, password, name, address=None, phone=None, area=None):
         super().__init__(email=email, password=password, role="customer")
         self.name    = name
         self.address = address
         self.phone   = phone
+        self.area    = area 
 
     def get_json(self):
         base = super().get_json()
@@ -30,6 +32,7 @@ class Customer(User):
             "name":        self.name,
             "address":     self.address,
             "phone":       self.phone,
+            "area":        self.area, 
         })
         return base
 

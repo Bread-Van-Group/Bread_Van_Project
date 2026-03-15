@@ -82,11 +82,13 @@ var breadVanDummyMarker = L.marker([10.642156853165652, -61.39825880527497], {
   }),
 }).addTo(map);
 
-//Dummy Websocket Data
-socket.emit("driver_location", {
-  lat: 10.642156853165652,
-  lng: -61.39825880527497,
-});
+//Dummy websocket code with preset driver location
+setInterval(() => {
+  socket.emit("driver_location", {
+    lat: 10.642156853165652,
+    lng: -61.39825880527497,
+  });
+}, 3000);
 
 // **NOTE** The code below will be used to get the driver's live location
 
@@ -101,7 +103,6 @@ navigator.geolocation.watchPosition(success, error, {
 function success(position) {
   const lat = position.coords.latitude;
   const lon = position.coords.longitude;
-  const accuracy = position.coords.accuracy;
 
   //   socket.emit("driver_location", {
   //     lat: position.coords.latitude,

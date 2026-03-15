@@ -49,6 +49,7 @@ def initialize():
         name="Bob Customer",
         address="789 Pine Road, Port of Spain",
         phone="868-200-0001",
+        area="Port of Spain",
     )
     print(f"✓ Customer created: {customer.email}")
 
@@ -67,7 +68,7 @@ def initialize():
         name="Morning East Route",
         start_time=time(6, 0),
         end_time=time(10, 0),
-        day_of_week="Monday",
+        day_of_week= datetime.now().strftime("%A") ,
         owner_id=owner.owner_id,
         description="East Trinidad morning bread delivery",
     )
@@ -247,4 +248,4 @@ def initialize():
     db.session.commit()
     print(f"✓ Dummy transactions: {tx_count} transactions seeded over last 30 days")
 
-    print("\n✅ Database initialised successfully.")
+    print("\n✓ Database initialised successfully.")

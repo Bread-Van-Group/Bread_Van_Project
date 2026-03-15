@@ -1,6 +1,15 @@
 <!doctype html>
 <html>
   <head>
+    <!-- Leaflet CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <!-- Font Awesome Icons -->
     <link
       rel="stylesheet"
@@ -28,11 +37,12 @@
       href="{{ url_for('static', filename='styles/customer/layout.css') }}"
     />
 
-    <!-- Material Icons -->
+    <!--Leaflet Routing Machine CSS and JS-->
     <link
-      href="https://fonts.googleapis.com/icon?family=Material+Icons"
       rel="stylesheet"
+      href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css"
     />
+    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     {% block head %}{% endblock %}
@@ -48,14 +58,19 @@
       <!-- Navigation Bar -->
       <div class="nav-container">
         <a
-          class="nav-btn active"
+          id="home"
+          class="nav-btn"
           href="{{ url_for('customer_views.customer_homepage') }}"
           ><i class="fa-solid fa-home"></i><span>Home</span></a
         >
-        <a class="nav-btn" href="{{ url_for('customer_views.customer_stock') }}"
+        <a
+          id="store"
+          class="nav-btn"
+          href="{{ url_for('customer_views.customer_store') }}"
           ><i class="fa-solid fa-store"></i><span>Store</span></a
         >
         <a
+          id="schedule"
           class="nav-btn"
           href="{{ url_for('customer_views.customer_schedule') }}"
           ><i class="fa-solid fa-calendar"></i><span>Schedule</span></a
@@ -68,18 +83,40 @@
 
     <!--Web Socket Code-->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-    <script src="{{url_for('static', filename='js/customer/layout.js')}}"></script>
     <script>
-      M.AutoInit();
+      function showToast(message) {
+        const toast = document.createElement("div");
+        toast.className = "toast";
+        toast.innerText = message;
+        document.body.appendChild(toast);
 
-      {% with messages = get_flashed_messages() %}
-        {% if messages %}
-          {% for message in messages %}
-            M.toast({html: '{{ message }}'})
-          {% endfor %}
-        {% endif %}
-      {% endwith %}
+        setTimeout(() => toast.classList.add("show"), 10);
+        setTimeout(() => {
+          toast.classList.remove("show");
+          setTimeout(() => toast.remove(), 300);
+        }, 2500);
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const params = new URLSearchParams(window.location.search);
+        const message = params.get("message");
+        if (message) showToast(message);
+      });
+    </script>
+    <!--Navbar Code -->
+    <script>
+      const currentURL = "{{ request.path  }}";
+      var id = "";
+
+      if (currentURL == String("/customer/checkout")) {
+        id = "store";
+      } else {
+        id = currentURL.slice(currentURL.lastIndexOf("/") + 1);
+      }
+
+      const currentNavBtn = document.querySelector(`#${id}`);
+
+      currentNavBtn.classList.add("active");
     </script>
 
     {% block scripts %}{% endblock %}

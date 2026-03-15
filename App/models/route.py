@@ -18,7 +18,7 @@ class Route(db.Model):
                             default=lambda: datetime.now(UTC_MINUS_4))
 
     # Relationships
-    stops         = db.relationship("RouteStop",    backref="route", lazy=True)
+    stops = db.relationship("RouteStop", backref="route", lazy=True, cascade="all, delete-orphan", passive_deletes=True)
     driver_routes = db.relationship("DriverRoute",  backref="route", lazy=True)
 
     def __init__(self, name, start_time, end_time, day_of_week, owner_id, description=None):

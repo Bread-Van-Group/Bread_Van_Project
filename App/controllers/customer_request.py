@@ -8,6 +8,12 @@ def get_request_by_id(request_id):
         .filter_by(request_id=request_id)
     ).scalar_one_or_none()
 
+def get_requests_by_stop_id(stop_id):
+    return db.session.scalars(
+        db.select(CustomerRequest)
+        .filter_by(stop_id=stop_id)
+    ).all()
+
 def create_customer_request(customer_id, van_id, stop_id, item_id, quantity,status_id):
     """
     Place a new customer request for an item at a given route stop.
@@ -37,7 +43,7 @@ def create_customer_request(customer_id, van_id, stop_id, item_id, quantity,stat
     return new_request
 
 
-def update_request_status(request_id, status_id, fulfilled=False):
+def update_request_status(request_id, status_id, stop_id = None, fulfilled=False):
     """Update the status (and optionally fulfilled_time) of a customer request."""
     from datetime import datetime, timedelta, timezone
     UTC_MINUS_4 = timezone(timedelta(hours=-4))
@@ -49,6 +55,13 @@ def update_request_status(request_id, status_id, fulfilled=False):
     request.status_id = status_id
     if fulfilled:
         request.fulfilled_time = datetime.now(UTC_MINUS_4)
+
+    if status_id == 4:
+        van_id = get_active_van().van_id
+        requests = get_requests_by_stop_id(stop_id)
+
+        for request in requests:
+            reserve_inventory(van_id, request.item_id, -request.quantity)
 
     db.session.commit()
     return request

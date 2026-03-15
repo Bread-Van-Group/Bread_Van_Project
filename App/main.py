@@ -17,13 +17,23 @@ from App.controllers import (
 
 from App.views import views, setup_admin
 
-socketio = SocketIO(cors_allowed_origins="*")
+socketio = SocketIO(
+    cors_allowed_origins="*",
+
+    #Use below code for production
+    # async_mode='gevent',
+
+    #Uncomment below code for development
+    async_mode='threading'  
+)
 
 #Websocket functions
 
 @socketio.on("driver_location")
 def handle_driver_location(data):
-    print(data)
+    # Add a small delay or throttle on server side
+    import time
+    time.sleep(0.5) 
     socketio.emit("driver_update", data, skip_sid=request.sid)
 
 

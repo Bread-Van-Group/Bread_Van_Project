@@ -5,6 +5,8 @@ from App.models import InventoryItem, ProductPairing, DailyInventory
 def get_item_by_id(item_id):
     return db.session.get(InventoryItem, item_id)
 
+def get_daily_inventory_item(daily_id):
+    return db.session.get(DailyInventory, daily_id).get_json()
 
 def get_all_items():
     return db.session.scalars(db.select(InventoryItem)).all()
@@ -76,9 +78,9 @@ def increment_pairing(item1_id, item2_id):
     db.session.commit()
     return pairing
 
-def get_daily_inventory():
+def get_daily_inventory(date):
     daily_inventory = db.session.execute(
-        db.select(DailyInventory)
+        db.select(DailyInventory).filter_by(date=date)
     ).scalars().all()
     
     return [inventory_item.get_json() for inventory_item in daily_inventory]

@@ -4,7 +4,6 @@
 
 {% block head %}
   <link rel="stylesheet" href="{{ url_for('static', filename='styles/owner/report.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles/owner/homepage.css') }}">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   {{ super() }}
 {% endblock %}
@@ -17,13 +16,13 @@
     <a class="sidebar-btn" href="{{ url_for('index_views.owner_homepage') }}">Dashboard</a>
     <a class="sidebar-btn active" href="{{ url_for('index_views.owner_report') }}">Reports</a>
     <a class="sidebar-btn" href="{{ url_for('index_views.owner_inventory') }}">Set Inventory</a>
-    <a class="sidebar-btn" href="#">Routes</a>
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_routes') }}">Routes</a>
     <a class="sidebar-btn sidebar-logout" href="{{ url_for('auth_views.logout') }}">Logout</a>
   </div>
 
   <!-- Main Content Area -->
   <div class="content-wrapper">
-    <div class="header">Welcome, Owner!</div>
+
 
     <div class="page-container">
       <div class="report-container">

@@ -1,0 +1,246 @@
+/* ─── Page Content ───────────────────────────────────────────────── */
+.schedule-page {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 12px 12px 0 12px;
+  padding-bottom: calc(56px + env(safe-area-inset-bottom));
+  gap: 16px;
+  overflow-y: auto;
+}
+
+.schedule-page::-webkit-scrollbar { width: 2vw; }
+.schedule-page::-webkit-scrollbar-track { background: transparent; }
+.schedule-page::-webkit-scrollbar-thumb {
+  background: var(--orange-light);
+  border-radius: 20px;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+
+/* ─── Header Info ───────────────────────────────────────────────── */
+.schedule-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 16px;
+  background: white;
+  border-radius: 15px;
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+    rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+}
+
+.schedule-meta-location {
+  font-family: "Caveat Brush", cursive;
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--ink-muted);
+}
+
+.schedule-meta-date {
+  font-family: "Caveat Brush", cursive;
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--ink-muted);
+}
+
+.schedule-meta-date span {
+  font-family: "Shadows Into Light Two", cursive;
+  font-size: 1.1rem;
+  font-style: italic;
+  background-color: var(--orange-light);
+  color: var(--orange-deep);
+  padding: 2px 10px;
+  border-radius: 10px;
+  margin-left: 4px;
+}
+
+/* ─── Schedule Card ───────────────────────────────────────────────── */
+.schedule-card {
+  background: white;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+    rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+}
+
+.schedule-card-header {
+  background: linear-gradient(145deg, #e07b39, #c66a2e);
+  padding: 10px 16px;
+  text-align: center;
+  font-family: "Caveat Brush", cursive;
+  font-style: italic;
+  font-size: 1.2rem;
+  color: white;
+  letter-spacing: 0.5px;
+}
+
+/* ─── Stop Item ───────────────────────────────────────────────── */
+.stop-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.stop-item {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px dashed #ece9df;
+  position: relative;
+  transition: background 0.2s ease;
+}
+
+.stop-item:last-child {
+  border-bottom: none;
+}
+
+.stop-item.user-area {
+  background-color: var(--orange-blush);
+}
+
+/* Time */
+.stop-time {
+  font-family: "Shadows Into Light Two", cursive;
+  font-size: 1rem;
+  font-style: italic;
+  color: var(--ink-muted);
+  min-width: 52px;
+  padding-top: 2px;
+  flex-shrink: 0;
+}
+
+/* Stop Details */
+.stop-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.stop-title-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.stop-icon {
+  font-size: 1.1rem;
+}
+
+/* Status colours on icons */
+.stop-icon.on-time  { color: var(--green-main); }
+.stop-icon.delayed  { color: #f39c12; }
+.stop-icon.cancelled { color: var(--red-main); }
+
+.stop-area {
+  font-family: "Caveat Brush", cursive;
+  font-size: 1.35rem;
+  font-style: italic;
+  color: var(--orange-deep);
+  line-height: 1;
+}
+
+.stop-your-area-badge {
+  margin-left: auto;
+  font-family: "Shadows Into Light Two", cursive;
+  font-size: 0.8rem;
+  font-style: italic;
+  background-color: var(--orange-main);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.stop-sub {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.stop-distance {
+  font-family: "Shadows Into Light Two", cursive;
+  font-size: 0.9rem;
+  color: var(--ink-faint);
+  font-style: italic;
+}
+
+.stop-stock {
+  font-family: "Shadows Into Light Two", cursive;
+  font-size: 0.9rem;
+  color: var(--ink-muted);
+  font-style: italic;
+}
+
+.stop-stock.low {
+  color: #f39c12;
+}
+
+.stop-stock.out {
+  color: var(--red-main);
+}
+
+.stop-stock-link {
+  font-family: "Shadows Into Light Two", cursive;
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--orange-deep);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ─── Legend ───────────────────────────────────────────────── */
+.legend-card {
+  background: white;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+    rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+  align-self: center;
+  width: 60%;
+  min-width: 240px;
+  margin-bottom: 8px;
+}
+
+.legend-header {
+  background: linear-gradient(145deg, #e07b39, #c66a2e);
+  padding: 8px 16px;
+  text-align: center;
+  font-family: "Caveat Brush", cursive;
+  font-style: italic;
+  font-size: 1.1rem;
+  color: white;
+  letter-spacing: 0.5px;
+}
+
+.legend-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 20px;
+}
+
+.legend-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  font-family: "Shadows Into Light Two", cursive;
+  font-size: 1rem;
+  font-style: italic;
+  color: var(--ink-muted);
+}
+
+.legend-item i { font-size: 1.1rem; }
+.legend-item i.on-time   { color: var(--green-main); }
+.legend-item i.delayed   { color: #f39c12; }
+.legend-item i.cancelled { color: var(--red-main); }
+.legend-item i.your-area { color: var(--orange-main); }

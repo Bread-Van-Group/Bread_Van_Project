@@ -46,10 +46,20 @@ L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
 //Getting the driver's live location
 const socket = io();
 var breadVanMarker = null;
+let lastUpdate = 0;
+const MIN_UPDATE_INTERVAL = 3000;
 
 socket.on("driver_update", function (data) {
+  const now = Date.now();
+
+  // Only update if enough time has passed
+  if (now - lastUpdate < MIN_UPDATE_INTERVAL) {
+    return;
+  }
+  lastUpdate = now;
+
   if (breadVanMarker == null) {
-    breadVanDummyMarker = L.marker([data.lat, data.lng], {
+    breadVanMarker = L.marker([data.lat, data.lng], {
       icon: L.divIcon({
         html: vanSVG,
         iconSize: [40, 40],
@@ -61,13 +71,25 @@ socket.on("driver_update", function (data) {
   }
 });
 
-if (breadVanMarker == null) {
-  toggleMapInactive();
-}
+//Routing Code
+let routingControl = null;
 
-function toggleMapInactive() {
-  const map = document.querySelector("#map");
-  const mapText = document.querySelector("#map-text");
-  map.style.opacity = 0.3;
-  mapText.style.opacity = 1;
+function buildRoute(waypoints) {
+  if (routingControl) {
+    routingControl.setWaypoints(waypoints);
+  } else {
+    routingControl = L.Routing.control({
+      waypoints: waypoints,
+      show: false,
+      collapsible: false,
+      createMarker: function (i, wp, nWps) {
+        return null;
+      },
+    }).addTo(map);
+
+    routingControl.on("routesfound", function () {
+      const container = routingControl.getContainer();
+      if (container) container.style.display = "none";
+    });
+  }
 }
