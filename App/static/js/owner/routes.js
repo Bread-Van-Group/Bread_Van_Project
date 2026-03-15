@@ -1,62 +1,85 @@
 let map;
-let routes               = [];
-let selectedRoute        = null;
-let routePolylines       = [];
-let startMarker          = null;
-let endMarker            = null;
-let startLocation        = null;
-let endLocation          = null;
-let isSelectingLocation  = false;
-let selectingFor         = null;
+let routes = [];
+let selectedRoute = null;
+let routePolylines = [];
+let stops = []; // Array of {lat, lng, order} objects
+let stopMarkers = []; // Array of marker objects
 let activeRoutingControl = null;
-let isEditing            = false;
+let isSelectingLocation = false;
+let isEditing = false;
 
-//  Icons
-let greenIcon, redIcon;
-function createIcons() {
-  const shadow = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png';
-  const base   = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img';
-  const opts   = { iconSize:[25,41], iconAnchor:[12,41], popupAnchor:[1,-34], shadowSize:[41,41], shadowUrl:shadow };
-  greenIcon = L.icon({ ...opts, iconUrl:`${base}/marker-icon-2x-green.png` });
-  redIcon   = L.icon({ ...opts, iconUrl:`${base}/marker-icon-2x-red.png` });
+// Icons
+let numberIcons = {}; // Cache for numbered markers
+function createNumberedIcon(number) {
+  if (!numberIcons[number]) {
+    // Create custom icon with number
+
+    const html = `<div class="numbered-marker-inner">${number}</div>`;
+    numberIcons[number] = L.divIcon({
+      html: html,
+      className: 'numbered-marker',
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+      popupAnchor: [0, -32]
+    });
+  }
+  return numberIcons[number];
 }
 
-//  Routing
-function buildRoutingPath(start, end) {
+// Routing
+function buildRoutingPath() {
   clearRoutingPath();
+  if (stops.length < 2) return;
+
+  const waypoints = stops.map(s => L.latLng(s.lat, s.lng));
   activeRoutingControl = L.Routing.control({
-    waypoints: [L.latLng(start.lat, start.lng), L.latLng(end.lat, end.lng)],
-    show: false, addWaypoints: false, draggableWaypoints: false,
-    fitSelectedRoutes: true, createMarker: () => null,
-    lineOptions: { styles: [{ color:'#0077be', weight:5, opacity:0.85 }] }
+    waypoints: waypoints,
+    show: false,
+    addWaypoints: false,
+    draggableWaypoints: false,
+    fitSelectedRoutes: true,
+    createMarker: () => null, // We create our own markers
+    lineOptions: {
+      styles: [{ className: 'route-path-line' }]
+    }
   }).addTo(map);
 }
+
 function clearRoutingPath() {
-  if (activeRoutingControl) { map.removeControl(activeRoutingControl); activeRoutingControl = null; }
-}
-function clearMap() {
-  clearRoutingPath();
-  routePolylines.forEach(l => map.removeLayer(l)); routePolylines = [];
-  map.eachLayer(layer => { if (layer instanceof L.Marker) map.removeLayer(layer); });
+  if (activeRoutingControl) {
+    map.removeControl(activeRoutingControl);
+    activeRoutingControl = null;
+  }
 }
 
-//  Map init
+function clearMap() {
+  clearRoutingPath();
+  routePolylines.forEach(l => map.removeLayer(l));
+  routePolylines = [];
+  stopMarkers.forEach(m => map.removeLayer(m));
+  stopMarkers = [];
+  map.eachLayer(layer => {
+    if (layer instanceof L.Marker) map.removeLayer(layer);
+  });
+}
+
+// Map init
 function initMap() {
   map = L.map('map').setView([10.6409, -61.3953], 13);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors', maxZoom: 19
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 19
   }).addTo(map);
-  createIcons();
   map.on('click', handleMapClick);
 }
 
-//  Custom dropdown
+// Custom dropdown
 function initDayDropdown() {
-  const wrapper  = document.getElementById('day-select');
-  const trigger  = document.getElementById('day-select-trigger');
-  const menu     = document.getElementById('day-select-menu');
-  const label    = document.getElementById('day-select-label');
-  const hidden   = document.getElementById('route-day');
+  const wrapper = document.getElementById('day-select');
+  const trigger = document.getElementById('day-select-trigger');
+  const menu = document.getElementById('day-select-menu');
+  const label = document.getElementById('day-select-label');
+  const hidden = document.getElementById('route-day');
 
   trigger.addEventListener('click', e => {
     e.stopPropagation();
@@ -69,13 +92,12 @@ function initDayDropdown() {
       menu.querySelectorAll('li').forEach(x => x.classList.remove('selected'));
       li.classList.add('selected');
       label.textContent = li.dataset.value;
-      hidden.value      = li.dataset.value;
+      hidden.value = li.dataset.value;
       wrapper.classList.remove('open');
       trigger.setAttribute('aria-expanded', false);
     });
   });
 
-  // Close when clicking outside
   document.addEventListener('click', e => {
     if (!wrapper.contains(e.target)) {
       wrapper.classList.remove('open');
@@ -85,112 +107,128 @@ function initDayDropdown() {
 }
 
 function setDropdownValue(value) {
-  const menu   = document.getElementById('day-select-menu');
-  const label  = document.getElementById('day-select-label');
+  const menu = document.getElementById('day-select-menu');
+  const label = document.getElementById('day-select-label');
   const hidden = document.getElementById('route-day');
   menu.querySelectorAll('li').forEach(li => {
     li.classList.toggle('selected', li.dataset.value === value);
   });
   label.textContent = value;
-  hidden.value      = value;
+  hidden.value = value;
 }
 
-//  Map hint
+// Map hint
 function updateMapHint() {
   const hint = document.getElementById('map-selection-hint');
-  if (!isSelectingLocation) { hint.style.display = 'none'; return; }
-  hint.style.display = 'block';
-  if (selectingFor === 'start') {
-    hint.textContent = '🟢 Click map to set Start Point';
-    Object.assign(hint.style, { borderColor:'#22c55e', background:'rgba(34,197,94,0.12)', color:'#166534' });
-  } else {
-    hint.textContent = '🔴 Click map to set End Point';
-    Object.assign(hint.style, { borderColor:'#ef4444', background:'rgba(239,68,68,0.12)', color:'#991b1b' });
+  if (!isSelectingLocation) {
+    hint.style.display = 'none';
+    return;
   }
+  hint.style.display = 'block';
+  hint.textContent = `📍 Click map to add Stop `;
+  hint.style.borderColor = '#0077be';
+  hint.style.background = 'rgba(0,119,190,0.12)';
+  hint.style.color = '#014361';
 }
 
-//  Map click
+// Render stop markers
+function renderStops() {
+  // Clear existing markers
+  stopMarkers.forEach(m => map.removeLayer(m));
+  stopMarkers = [];
+
+  // Create numbered markers for each stop
+  stops.forEach((stop, index) => {
+    const marker = L.marker([stop.lat, stop.lng], {
+      icon: createNumberedIcon(index + 1)
+    }).addTo(map);
+
+    marker.bindPopup(`
+      <strong>Stop #${index + 1}</strong><br>
+      <button onclick="removeStop(${index})" style="
+        background: #ef4444;
+        color: white;
+        border: none;
+        padding: 4px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-top: 8px;
+      ">Remove Stop</button>
+    `);
+
+    stopMarkers.push(marker);
+  });
+
+  // Update routing
+  buildRoutingPath();
+
+  // Update stops list display
+  updateStopsList();
+}
+
+function updateStopsList() {
+  const container = document.getElementById('stops-list-container');
+  if (stops.length === 0) {
+    container.innerHTML = '<div class="loc-text">No stops added yet. Click the map to add stops.</div>';
+    return;
+  }
+
+  let html = '';
+  stops.forEach((stop, index) => {
+    html += `
+      <div class="location-row">
+        <span class="loc-dot" style="background: #0077be;">${index + 1}</span>
+        <div class="loc-text set">Stop #${index + 1}: (${stop.lat.toFixed(4)}, ${stop.lng.toFixed(4)})</div>
+        <button class="loc-reset-btn" onclick="removeStop(${index})">Remove</button>
+      </div>
+    `;
+  });
+  container.innerHTML = html;
+}
+
+// Map click - add stop
 function handleMapClick(e) {
   if (!isSelectingLocation) return;
   const { lat, lng } = e.latlng;
 
-  if (selectingFor === 'start') {
-    if (startMarker) map.removeLayer(startMarker);
-    startMarker   = L.marker([lat, lng], { icon: greenIcon }).addTo(map).bindPopup('<strong>Start</strong>').openPopup();
-    startLocation = { lat, lng };
-    setLocDisplay('start', lat, lng);
-    selectingFor  = endLocation ? null : 'end';
-    if (!selectingFor) stopSelecting();
+  // Add stop to array
+  stops.push({ lat, lng, order: stops.length });
 
-  } else if (selectingFor === 'end') {
-    if (endMarker) map.removeLayer(endMarker);
-    endMarker   = L.marker([lat, lng], { icon: redIcon }).addTo(map).bindPopup('<strong>End</strong>').openPopup();
-    endLocation = { lat, lng };
-    setLocDisplay('end', lat, lng);
-    selectingFor = startLocation ? null : 'start';
-    if (!selectingFor) stopSelecting();
-  }
-
-  if (startLocation && endLocation) buildRoutingPath(startLocation, endLocation);
+  // Render all stops
+  renderStops();
   updateMapHint();
+}
+
+function removeStop(index) {
+  stops.splice(index, 1);
+  // Reorder remaining stops
+  stops.forEach((stop, idx) => {
+    stop.order = idx;
+  });
+  renderStops();
+
+  // Close any open popups
+  map.closePopup();
+}
+
+function clearAllStops() {
+  stops = [];
+  renderStops();
 }
 
 function stopSelecting() {
   isSelectingLocation = false;
   document.getElementById('map').classList.remove('map-clickable');
+  updateMapHint();
 }
 
-function setLocDisplay(which, lat, lng) {
-  const textEl  = document.getElementById(`${which}-location`);
-  const resetEl = document.getElementById(`${which}-reset-btn`);
-  textEl.textContent = `(${lat.toFixed(4)}, ${lng.toFixed(4)})`;
-  textEl.classList.add('set');
-  resetEl.style.display = 'inline-block';
-}
-
-function clearLocDisplay(which) {
-  const textEl  = document.getElementById(`${which}-location`);
-  const resetEl = document.getElementById(`${which}-reset-btn`);
-  textEl.textContent = 'Click map to set';
-  textEl.classList.remove('set');
-  resetEl.style.display = 'none';
-}
-
-function resetPoint(which) {
-  if (which === 'start') {
-    if (startMarker) { map.removeLayer(startMarker); startMarker = null; }
-    startLocation = null;
-    clearLocDisplay('start');
-  } else {
-    if (endMarker) { map.removeLayer(endMarker); endMarker = null; }
-    endLocation = null;
-    clearLocDisplay('end');
-  }
-  clearRoutingPath();
+function startSelecting() {
   isSelectingLocation = true;
-  selectingFor = which;
   document.getElementById('map').classList.add('map-clickable');
   updateMapHint();
 }
 
-function setSelecting(which) {
-  isSelectingLocation = true;
-  selectingFor = which;
-  document.getElementById('map').classList.add('map-clickable');
-  updateMapHint();
-}
-
-//  Panel switching
-function showEditorPanel() {
-  document.getElementById('panel-list-view').style.display   = 'none';
-  document.getElementById('panel-editor-view').style.display = 'flex';
-}
-function showListPanel() {
-  document.getElementById('panel-editor-view').style.display = 'none';
-  document.getElementById('panel-list-view').style.display   = 'flex';
-}
-
-// Load & render routes
+// Load routes
 async function loadRoutes() {
   try {
     const res = await fetch('/api/owner/routes');
@@ -199,267 +237,235 @@ async function loadRoutes() {
   } catch (err) {
     console.error('Failed to load routes:', err);
     document.getElementById('routes-list').innerHTML =
-      '<div style="text-align:center;padding:40px;color:#e74c3c;">Failed to load routes</div>';
+      '<div style="text-align:center;padding:40px;color:#94a3b8;">Failed to load routes</div>';
   }
 }
 
 function renderRoutesList() {
   const list = document.getElementById('routes-list');
-  if (!routes.length) {
-    list.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;">No routes yet. Click "+ Add Route" to create one.</div>';
+  if (routes.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;">No routes yet</div>';
     return;
   }
-  list.innerHTML = routes.map(r => `
-    <div class="route-card ${selectedRoute?.route_id === r.route_id ? 'active' : ''}"
-         onclick="selectRoute(${r.route_id})">
+
+  list.innerHTML = routes.map(route => `
+    <div class="route-card ${selectedRoute && selectedRoute.route_id === route.route_id ? 'active' : ''}"
+         onclick="selectRoute(${route.route_id})">
       <div class="route-card-header">
-        <div class="route-card-name">${r.name}</div>
+        <div class="route-card-name">${route.name}</div>
         <div class="route-card-actions">
-          <button class="route-edit-btn" onclick="event.stopPropagation(); openEditEditor(${r.route_id})" title="Edit">&#9998;</button>
-          <button class="route-delete-btn" onclick="event.stopPropagation(); deleteRoute(${r.route_id}, '${r.name.replace(/'/g, "\\'")}')" title="Delete">&#128465;</button>
+          <button class="route-edit-btn" onclick="event.stopPropagation(); editRoute(${route.route_id})">✎</button>
+          <button class="route-delete-btn" onclick="event.stopPropagation(); deleteRoute(${route.route_id})">🗙</button>
         </div>
       </div>
-      <div class="route-card-detail">Time: ${r.start_time} – ${r.end_time}</div>
-      <span class="route-card-day">${r.day_of_week}</span>
+      <div class="route-card-detail">⏰ ${route.start_time} - ${route.end_time}</div>
+      <div class="route-card-detail">📍 ${route.stops_count || 0} stops</div>
+      <span class="route-card-day">${route.day_of_week}</span>
     </div>
   `).join('');
 }
 
-// Select route and view on map
+// Select route - display on map
 async function selectRoute(routeId) {
   selectedRoute = routes.find(r => r.route_id === routeId);
   renderRoutesList();
   clearMap();
 
-  const editBtn = document.getElementById('edit-route-btn');
-  if (editBtn) editBtn.style.display = 'inline-block';
-
   try {
-    const res   = await fetch(`/api/owner/routes/${routeId}/stops`);
-    const stops = await res.json();
-    if (!stops?.length) { showNoStopsHint(); return; }
+    const res = await fetch(`/api/owner/routes/${routeId}/stops`);
+    const stopsData = await res.json();
 
-    stops.sort((a, b) => a.stop_order - b.stop_order);
-    const first = stops[0], last = stops[stops.length - 1];
-
-    L.marker([first.lat, first.lng], { icon: greenIcon }).addTo(map).bindPopup('<strong>Start</strong>');
-    if (stops.length > 1) {
-      L.marker([last.lat, last.lng], { icon: redIcon }).addTo(map).bindPopup('<strong>End</strong>');
-      buildRoutingPath({ lat:first.lat, lng:first.lng }, { lat:last.lat, lng:last.lng });
-    } else {
-      map.setView([first.lat, first.lng], 14);
+    if (stopsData.length === 0) {
+      alert('This route has no stops yet');
+      return;
     }
-  } catch (err) { console.error('Failed to load stops:', err); }
-}
 
-function showNoStopsHint() {
-  const hint = document.getElementById('map-selection-hint');
-  hint.textContent = 'No location data — click ✎ Edit Route to set start & end points.';
-  Object.assign(hint.style, { borderColor:'#f59e0b', background:'rgba(245,158,11,0.12)', color:'#92400e', display:'block', pointerEvents:'none' });
-  setTimeout(() => { hint.style.display = 'none'; }, 5000);
+    // Display stops
+    stopsData.forEach((stop, idx) => {
+      const marker = L.marker([stop.lat, stop.lng], {
+        icon: createNumberedIcon(idx + 1)
+      }).addTo(map);
+      marker.bindPopup(`<strong>Stop #${idx + 1}</strong><br>${stop.address || ''}`);
+      stopMarkers.push(marker);
+    });
+
+    // Build route
+    const waypoints = stopsData.map(s => L.latLng(s.lat, s.lng));
+    if (waypoints.length > 1) {
+      activeRoutingControl = L.Routing.control({
+        waypoints: waypoints,
+        show: false,
+        addWaypoints: false,
+        draggableWaypoints: false,
+        fitSelectedRoutes: true,
+        createMarker: () => null,
+        lineOptions: {
+          styles: [{ className: 'route-path-line' }]
+        }
+      }).addTo(map);
+    } else {
+      map.setView([stopsData[0].lat, stopsData[0].lng], 14);
+    }
+  } catch (err) {
+    console.error('Failed to load stops:', err);
+  }
 }
 
 function viewAllRoutes() {
   selectedRoute = null;
   renderRoutesList();
   clearMap();
-  const editBtn = document.getElementById('edit-route-btn');
-  if (editBtn) editBtn.style.display = 'none';
   map.setView([10.6409, -61.3953], 13);
 }
 
-// Open mapeditor
-function resetEditorFields() {
-  // Clear markers & path
-  if (startMarker) { map.removeLayer(startMarker); startMarker = null; }
-  if (endMarker)   { map.removeLayer(endMarker);   endMarker   = null; }
-  clearRoutingPath();
-  startLocation = null;
-  endLocation   = null;
-  clearLocDisplay('start');
-  clearLocDisplay('end');
-  isSelectingLocation = false;
-  selectingFor = null;
-  document.getElementById('map').classList.remove('map-clickable');
-  updateMapHint();
-}
+// Show/hide editor
+function showRouteEditor(editing = false) {
+  document.getElementById('panel-list-view').style.display = 'none';
+  document.getElementById('panel-editor-view').style.display = 'flex';
 
-async function openEditEditor(routeId) {
-  selectedRoute = routes.find(r => r.route_id === routeId);
-  renderRoutesList();
-  await showRouteEditor(true);
-}
-
-async function showRouteEditor(editing = false) {
   isEditing = editing;
-  resetEditorFields();
+  clearAllStops();
 
   if (editing && selectedRoute) {
-    document.getElementById('editor-title').textContent     = 'Edit Route';
-    document.getElementById('route-name').value             = selectedRoute.name;
-    document.getElementById('route-start-time').value       = selectedRoute.start_time;
-    document.getElementById('route-end-time').value         = selectedRoute.end_time;
-    document.getElementById('route-description').value      = selectedRoute.description || '';
+    document.getElementById('editor-title').textContent = 'Edit Route';
+    document.getElementById('route-name').value = selectedRoute.name;
     setDropdownValue(selectedRoute.day_of_week);
-    await loadExistingEndpointsIntoEditor(selectedRoute.route_id);
-  } else {
-    document.getElementById('editor-title').textContent     = 'New Route';
-    document.getElementById('route-name').value             = '';
-    document.getElementById('route-start-time').value       = '06:00';
-    document.getElementById('route-end-time').value         = '10:00';
-    document.getElementById('route-description').value      = '';
-    setDropdownValue('Monday');
+    document.getElementById('route-start-time').value = selectedRoute.start_time;
+    document.getElementById('route-end-time').value = selectedRoute.end_time;
+    document.getElementById('route-description').value = selectedRoute.description || '';
 
-    // Immediately enter selection mode
-    isSelectingLocation = true;
-    selectingFor = 'start';
-    document.getElementById('map').classList.add('map-clickable');
-    updateMapHint();
+    // Load existing stops
+    loadRouteStopsForEdit(selectedRoute.route_id);
+  } else {
+    document.getElementById('editor-title').textContent = 'New Route';
+    document.getElementById('route-name').value = '';
+    setDropdownValue('Monday');
+    document.getElementById('route-start-time').value = '06:00';
+    document.getElementById('route-end-time').value = '10:00';
+    document.getElementById('route-description').value = '';
   }
 
-  showEditorPanel();
+  startSelecting();
 }
 
-async function loadExistingEndpointsIntoEditor(routeId) {
+async function loadRouteStopsForEdit(routeId) {
   try {
-    const res   = await fetch(`/api/owner/routes/${routeId}/stops`);
-    const stops = await res.json();
-
-    if (!stops?.length) {
-      isSelectingLocation = true; selectingFor = 'start';
-      document.getElementById('map').classList.add('map-clickable');
-      updateMapHint(); return;
-    }
-
-    stops.sort((a, b) => a.stop_order - b.stop_order);
-    const first = stops[0], last = stops[stops.length - 1];
-
-    startLocation = { lat:first.lat, lng:first.lng };
-    startMarker   = L.marker([first.lat, first.lng], { icon:greenIcon }).addTo(map).bindPopup('<strong>Start</strong>').openPopup();
-    setLocDisplay('start', first.lat, first.lng);
-
-    if (stops.length > 1) {
-      endLocation = { lat:last.lat, lng:last.lng };
-      endMarker   = L.marker([last.lat, last.lng], { icon:redIcon }).addTo(map).bindPopup('<strong>End</strong>');
-      setLocDisplay('end', last.lat, last.lng);
-      buildRoutingPath(startLocation, endLocation);
-    }
-
-    isSelectingLocation = true; selectingFor = 'start';
-    document.getElementById('map').classList.add('map-clickable');
-    updateMapHint();
+    const res = await fetch(`/api/owner/routes/${routeId}/stops`);
+    const stopsData = await res.json();
+    stops = stopsData.map((s, idx) => ({
+      lat: s.lat,
+      lng: s.lng,
+      order: idx
+    }));
+    renderStops();
   } catch (err) {
-    console.error('Could not load stops for editing:', err);
-    isSelectingLocation = true; selectingFor = 'start';
-    document.getElementById('map').classList.add('map-clickable');
-    updateMapHint();
+    console.error('Failed to load stops:', err);
   }
 }
 
 function hideRouteEditor() {
-  resetEditorFields();
-  showListPanel();
-  isEditing = false;
+  document.getElementById('panel-list-view').style.display = 'flex';
+  document.getElementById('panel-editor-view').style.display = 'none';
+  stopSelecting();
+  clearAllStops();
+  clearMap();
+  if (selectedRoute) selectRoute(selectedRoute.route_id);
 }
 
-//Save route
-async function saveRoute() {
-  const name        = document.getElementById('route-name').value.trim();
-  const day         = document.getElementById('route-day').value;
-  const startTime   = document.getElementById('route-start-time').value;
-  const endTime     = document.getElementById('route-end-time').value;
-  const description = document.getElementById('route-description').value.trim();
-
-  if (!name)                           { alert('Please enter a route name'); return; }
-  if (!startLocation || !endLocation)  { alert('Please set both start and end locations on the map'); return; }
-
-  const url    = isEditing ? `/api/owner/routes/${selectedRoute.route_id}` : '/api/owner/routes';
-  const method = isEditing ? 'PUT' : 'POST';
-
-  try {
-    const res = await fetch(url, {
-      method, headers: { 'Content-Type':'application/json' },
-      body: JSON.stringify({ name, day_of_week:day, start_time:startTime, end_time:endTime, description })
-    });
-    if (!res.ok) throw new Error(`${res.status}: ${await res.text().catch(()=>'')}`);
-
-    let routeId = isEditing ? selectedRoute.route_id : null;
-    if (!routeId) {
-      try { const b = await res.clone().json(); routeId = b?.route_id ?? b?.id ?? null; } catch(_){}
-      if (!routeId) { await loadRoutes(); routeId = routes[routes.length-1]?.route_id ?? null; }
-    }
-    if (!routeId) { alert('Route saved but could not store location data.'); hideRouteEditor(); await loadRoutes(); return; }
-
-    await replaceRouteEndpoints(routeId, startLocation, endLocation);
-
-    hideRouteEditor();
-    await loadRoutes();
-    await selectRoute(routeId);
-
-  } catch (err) {
-    console.error('Save failed:', err);
-    alert(`Failed to save route\n${err.message}`);
-  }
+function editRoute(routeId) {
+  selectedRoute = routes.find(r => r.route_id === routeId);
+  showRouteEditor(true);
 }
 
-async function replaceRouteEndpoints(routeId, start, end) {
-  try {
-    const res   = await fetch(`/api/owner/routes/${routeId}/stops`);
-    const stops = await res.json();
-    await Promise.all(
-      stops.filter(s => s.stop_order === 0 || s.stop_order === 1)
-           .map(s => fetch(`/api/owner/routes/${routeId}/stops/${s.stop_id}`, { method:'DELETE' }).catch(()=>{}))
-    );
-  } catch(_){}
-
-  for (const stop of [
-    { lat:start.lat, lng:start.lng, address:'Start', stop_order:0, estimated_arrival_time:null },
-    { lat:end.lat,   lng:end.lng,   address:'End',   stop_order:1, estimated_arrival_time:null }
-  ]) {
-    try {
-      const r = await fetch(`/api/owner/routes/${routeId}/stops`, {
-        method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(stop)
-      });
-      if (!r.ok) console.warn('Stop save failed:', r.status);
-    } catch(err) { console.warn('Stop error:', err); }
-  }
-}
-
-//  Delete route
-async function deleteRoute(routeId, routeName) {
-  if (!confirm(`Delete route "${routeName}"?\n\nThis will permanently remove the route and all its stops.`)) return;
+async function deleteRoute(routeId) {
+  const route = routes.find(r => r.route_id === routeId);
+  if (!confirm(`Delete route "${route.name}"?`)) return;
 
   try {
     const res = await fetch(`/api/owner/routes/${routeId}`, { method: 'DELETE' });
-    if (!res.ok) throw new Error(`${res.status}: ${await res.text().catch(() => '')}`);
-
-    // If the deleted route was selected, clear the map
-    if (selectedRoute?.route_id === routeId) {
-      selectedRoute = null;
+    if (res.ok) {
+      alert('✅ Route deleted');
+      await loadRoutes();
       clearMap();
-      const editBtn = document.getElementById('edit-route-btn');
-      if (editBtn) editBtn.style.display = 'none';
+      selectedRoute = null;
     }
-
-    await loadRoutes();
   } catch (err) {
-    console.error('Delete failed:', err);
-    alert(`Failed to delete route\n${err.message}`);
+    console.error('Failed to delete:', err);
+    alert('❌ Failed to delete route');
   }
 }
 
-// Init
+// Save route
+async function saveRoute() {
+  const name = document.getElementById('route-name').value.trim();
+  const day = document.getElementById('route-day').value;
+  const startTime = document.getElementById('route-start-time').value;
+  const endTime = document.getElementById('route-end-time').value;
+  const description = document.getElementById('route-description').value.trim();
+
+  if (!name) {
+    alert('Please enter a route name');
+    return;
+  }
+
+  if (stops.length < 2) {
+    alert('Please add at least 2 stops to the route');
+    return;
+  }
+
+  const routeData = {
+    name,
+    day_of_week: day,
+    start_time: startTime,
+    end_time: endTime,
+    description,
+    stops: stops.map((stop, index) => ({
+      lat: stop.lat,
+      lng: stop.lng,
+      order: index,
+      address: '' // You can add address lookup here if needed
+    }))
+  };
+
+  try {
+    const url = isEditing && selectedRoute
+      ? `/api/owner/routes/${selectedRoute.route_id}`
+      : '/api/owner/routes';
+
+    const res = await fetch(url, {
+      method: isEditing && selectedRoute ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(routeData)
+    });
+
+    if (res.ok) {
+      alert('✅ Route saved successfully!');
+      hideRouteEditor();
+      await loadRoutes();
+    } else {
+      throw new Error('Save failed');
+    }
+  } catch (err) {
+    console.error('Failed to save route:', err);
+    alert('❌ Failed to save route');
+  }
+}
+
+// Initialize
 document.addEventListener('DOMContentLoaded', async () => {
   initMap();
   initDayDropdown();
   await loadRoutes();
 
   document.getElementById('add-route-btn').addEventListener('click', () => {
-    selectedRoute = null; showRouteEditor(false);
+    selectedRoute = null;
+    showRouteEditor(false);
   });
+
   document.getElementById('edit-route-btn').addEventListener('click', () => {
     if (selectedRoute) showRouteEditor(true);
   });
+
   document.getElementById('view-routes-btn').addEventListener('click', viewAllRoutes);
   document.getElementById('save-route-btn').addEventListener('click', saveRoute);
 });

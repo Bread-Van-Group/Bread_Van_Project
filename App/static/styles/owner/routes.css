@@ -589,7 +589,29 @@
   white-space: nowrap;
   box-shadow: 0 4px 12px var(--shadow-warm);
 }
+/* ─── Numbered map markers ───────────────────────────────────── */
+.numbered-marker-inner {
+  background: linear-gradient(135deg, var(--white), var(--white));
+  color: var(--orange-warm);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 16px;
+  border: 3px solid var(--orange-warm);
+  box-shadow: 0 2px 8px var(--shadow-warm);
+  font-family: "Caveat Brush", cursive;
+}
 
+/* ─── Route path line ────────────────────────────────────────── */
+.route-path-line {
+  stroke: var(--red-main);
+  stroke-width: 5;
+  stroke-opacity: 0.85;
+}
 /* ─── Responsive ─────────────────────────────────────────────── */
 @media (max-width: 1024px) {
   .routes-container { flex-direction: column; }

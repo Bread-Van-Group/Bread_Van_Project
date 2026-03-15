@@ -5,7 +5,7 @@ let customViewDate = null;
 let editingDate = null;
 let selectedItems = new Map();
 let editingProduct = null;
-
+let deletedItems = new Set();
 // Helper: Get unique categories from items
 function getUniqueCategories() {
   const categories = [...new Set(allItems.map(item => item.category || 'Uncategorized'))];
@@ -281,15 +281,34 @@ async function loadExistingInventoryForEdit() {
   }
 }
 
+
+
 function toggleItem(itemId) {
   if (selectedItems.has(itemId)) {
+
     selectedItems.delete(itemId);
+    deletedItems.add(itemId);
   } else {
+
     selectedItems.set(itemId, 10);
+    deletedItems.delete(itemId);
   }
-  document.querySelector(`[data-item-id="${itemId}"]`).classList.toggle('selected');
+
+  // Update the catalog item's visual state
+  const catalogCard = document.querySelector(`[data-item-id="${itemId}"]`);
+  if (catalogCard) {
+    catalogCard.classList.toggle('selected');
+  }
   renderSelectedItems();
 }
+
+
+function removeItem(itemId) {
+  selectedItems.delete(itemId);
+  deletedItems.add(itemId);
+  renderSelectedItems();
+}
+
 
 function renderSelectedItems() {
   const list = document.getElementById('selected-items-list');
@@ -297,6 +316,7 @@ function renderSelectedItems() {
     list.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8;">No items selected yet</div>';
     return;
   }
+
   list.innerHTML = Array.from(selectedItems.entries()).map(([itemId, quantity]) => {
     const item = allItems.find(i => i.item_id === itemId);
     return `<div class="selected-item">
@@ -312,27 +332,37 @@ function renderSelectedItems() {
       </div>
     </div>`;
   }).join('');
+
   document.querySelectorAll('.catalog-item').forEach(el => {
     const id = parseInt(el.dataset.itemId);
     el.classList.toggle('selected', selectedItems.has(id));
   });
 }
 
-function updateQuantity(itemId, newQuantity) {
-  selectedItems.set(itemId, parseInt(newQuantity) || 0);
-}
-
-function removeItem(itemId) {
-  selectedItems.delete(itemId);
-  renderSelectedItems();
-}
-
 async function saveInventory() {
   if (!vanId || !editingDate) return;
-  const items = Array.from(selectedItems.entries()).map(([item_id, quantity]) => ({
-    item_id: parseInt(item_id),
-    quantity: parseInt(quantity)
-  }));
+
+  // Include both selected items AND deleted items (with quantity 0)
+  const items = [];
+
+  // Add selected items
+  selectedItems.forEach((quantity, item_id) => {
+    items.push({
+      item_id: parseInt(item_id),
+      quantity: parseInt(quantity)
+    });
+  });
+
+  // Add deleted items with quantity 0 to remove them
+  deletedItems.forEach(item_id => {
+    if (!selectedItems.has(item_id)) { // Only if not re-added
+      items.push({
+        item_id: parseInt(item_id),
+        quantity: 0
+      });
+    }
+  });
+
   try {
     const res = await fetch(`/api/owner/vans/${vanId}/inventory`, {
       method: 'POST',
@@ -341,6 +371,7 @@ async function saveInventory() {
     });
     if (res.ok) {
       alert('✅ Inventory saved successfully!');
+      deletedItems.clear(); // Clear after successful save
       exitEditMode();
       await loadInventoryView();
     } else {
@@ -356,9 +387,9 @@ function exitEditMode() {
   document.getElementById('view-mode').style.display = 'block';
   document.getElementById('edit-mode').style.display = 'none';
   selectedItems.clear();
+  deletedItems.clear(); // Also clear deleted items
   editingDate = null;
 }
-
 // CSV Import
 async function handleCSVUpload(event) {
   const file = event.target.files[0];
