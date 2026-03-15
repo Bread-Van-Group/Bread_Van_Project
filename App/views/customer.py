@@ -1,6 +1,6 @@
 from flask import Blueprint, session, redirect,flash, render_template, request, jsonify, url_for
 from flask_jwt_extended import jwt_required, current_user, verify_jwt_in_request, get_jwt_identity
-from App.controllers import (initialize, get_todays_route, add_stop_to_route, get_active_van, create_customer_request, get_daily_inventory_item, get_daily_inventory, get_customer_requests, get_customer_request_total)
+from App.controllers import (initialize, get_today_customer_requests, delete_today_pending_customer_order,  get_active_van_plate, get_todays_route, add_stop_to_route, get_active_van,  create_customer_request, get_daily_inventory_item, get_daily_inventory, get_customer_requests, get_customer_request_total)
 from App.controllers.transaction import get_report_data
 
 from datetime import date, time
@@ -16,9 +16,10 @@ def customer_homepage():
     if current_user.role != 'customer':
         return redirect(url_for('index_views.index'))
     customer_id = get_jwt_identity()
-    orders = get_customer_requests(customer_id)
+    orders = get_today_customer_requests(customer_id)
+    status = orders[-1]['status_id']
     order_total = get_customer_request_total(customer_id)
-    return render_template('customer/homepage.html', orders=orders, order_total = order_total)
+    return render_template('customer/homepage.html', status = status, orders=orders, order_total = order_total)
 
 @customer_views.route('/customer/schedule', methods=['GET'])
 @jwt_required()
@@ -57,7 +58,7 @@ def customer_checkout():
         order = json.loads(request.form.get('order'))
 
         if len(order) == 0:
-             return redirect(url_for('customer_views.customer_store', error="Your cart is empty, please add items to it first"))
+             return redirect(url_for('customer_views.customer_store', message="Your cart is empty, please add items to it first"))
 
         session['order'] = order
         return redirect(url_for('customer_views.customer_checkout'))
@@ -68,49 +69,96 @@ def customer_checkout():
     for item in order:
         order_total += item['price'] * item['quantity']
 
-    return render_template('customer/checkout.html', order=order, order_total =order_total )
+    van_plate = get_active_van_plate()
+
+    return render_template('customer/checkout.html', order=order, order_total =order_total, van_plate = van_plate )
 
 # ── API Routes ────────────────────────────────────────────────────────────────
-
 @customer_views.route('/api/customer/item/<int:item_id>', methods=['GET'])
 @jwt_required()
 def get_store_item(item_id):
+    if current_user.role != 'customer':
+        return jsonify(message='Unauthorized'), 403
+
     store_item = get_daily_inventory_item(item_id)
     return jsonify(store_item), 200
 
 @customer_views.route('/api/customer/update-session', methods =['POST'])
 @jwt_required()
 def update_customer_session():
+    if current_user.role != 'customer':
+        return jsonify(message='Unauthorized'), 403
+
     order = request.get_json().get("order")
     session['order'] = order
     return '', 200
 
+@customer_views.route('/api/customer/delete-order', methods=['POST'])
+@jwt_required()
+def delete_customer_orders():
+    if current_user.role != 'customer':
+        return jsonify(message='Unauthorized'), 403
+    
+    customer_id = get_jwt_identity()
+    isDeleted = delete_today_pending_customer_order(customer_id)
+
+    if isDeleted:
+        return '', 200
+    else:
+        return redirect(url_for('customer_views.customer_checkout', message="Could not make new order, please try again later"))
+
+
+@customer_views.route('/api/customer/get-order', methods=['GET'])
+@jwt_required()
+def get_active_order():
+    if current_user.role != 'customer':
+        return jsonify(message='Unauthorized'), 403
+    
+    customer_id = get_jwt_identity()
+    active_requests = get_customer_requests(customer_id)
+
+    return active_requests
+
 @customer_views.route('/api/customer/make-order', methods=['POST'])
 @jwt_required()
 def customer_make_request():
+    if current_user.role != 'customer':
+        return jsonify(message='Unauthorized'), 403
+
     data = request.get_json()
     
     lat = data.get('lat')
     lng = data.get('lng')
+    hasExistingOrder = data.get('hasExistingOrder')
+
     order = session.get('order', [])
-
-    new_stop = add_stop_to_route(
-        route_id=get_todays_route().route_id,
-        address="Placeholder",
-        lat=lat,
-        lng=lng,
-        stop_order=0,
-        estimated_arrival_time=time(7, 15),
-    )
-
+    
+    if not hasExistingOrder:
+        new_stop = add_stop_to_route(
+            route_id=get_todays_route().route_id,
+            address="Placeholder",
+            lat=lat,
+            lng=lng,
+            stop_order=0,
+            estimated_arrival_time=time(7, 15),
+        )
+    
     for item in order:
+        if hasExistingOrder:
+            existingOrders = get_customer_requests(get_jwt_identity())
+            status_id = existingOrders[0]['status_id']
+            new_stop_id = existingOrders[0]['stop_id']
+        else:
+            status_id = 1
+            new_stop_id = new_stop.stop_id
+
         new_request = create_customer_request(
             customer_id=get_jwt_identity(),
             van_id=get_active_van().van_id,
-            stop_id=new_stop.stop_id,
+            stop_id=new_stop_id,
             item_id=item['inventory_id'],
             quantity=item['quantity'],
-            status_id=1
+            status_id=status_id
         )
 
     session.pop('order', None) 

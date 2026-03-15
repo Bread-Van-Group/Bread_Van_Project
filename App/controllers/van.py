@@ -12,6 +12,13 @@ def get_active_van():
         .filter_by(status="active")
     ).scalar_one_or_none()
 
+def get_active_van_plate():
+    van = db.session.execute(
+        db.select(Van)
+        .filter_by(status="active")
+    ).scalar_one_or_none()
+
+    return van.license_plate
 
 def get_all_vans():
     return db.session.scalars(db.select(Van)).all()

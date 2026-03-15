@@ -28,13 +28,24 @@
             id="my-order-status"
             class="my-order-status my-order-status-inactive"
           >
-            Pending
+            {% if status == 1 %} Pending {% elif status == 2%} En Route {% elif
+            status == 3%} Completed ✔{% elif status == 4%} Denied X {% endif %}
+            {% if status == 2 or status == 1 %}
             <span class="loading-dots"
               ><span>.</span> <span>.</span> <span>.</span></span
             >
-            <i class="fa-solid fa-van-shuttle"></i
-          ></span>
-          {% else %} <span> No Order X</span> {% endif %}</span
+            {% endif %} {% if status == 2 %}
+            <i class="fa-solid fa-van-shuttle"></i>
+            {% endif %}</span
+          >
+          {% else %}
+          <span
+            id="my-order-status"
+            class="my-order-status my-order-status-inactive"
+          >
+            No Order</span
+          >
+          {% endif %}</span
         >
       </button>
     </div>
@@ -61,7 +72,7 @@
             </div>
           </div>
           {% endfor %} {% else %}
-          <div>none</div>
+          <div class="item-name">No Current Order</div>
           {% endif %}
         </div>
         <p class="order-total"><span>Total: </span>${{order_total}}</p>

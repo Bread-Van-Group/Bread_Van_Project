@@ -75,7 +75,7 @@ def driver_deny_request(stop_id):
     pending_stops = get_pending_stops()
     stop = get_stop_by_id(stop_id)
     for request in stop.customer_requests:
-        if not update_request_status(request.request_id, 4, False):
+        if not update_request_status(request.request_id, 4, stop_id, False):
             flash('Error Could not accept request.', 'error')
             return render_template('driver/requests_page.html', pending_stops=pending_stops)
 

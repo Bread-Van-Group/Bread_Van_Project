@@ -6,6 +6,23 @@ block head %}
 />
 {% endblock %} {% block content %}
 <div class="page-content">
+  <div class="modal-dimmer" id="modal-dimmer"></div>
+
+  <div id="order-modal" class="order-modal">
+    <div class="order-modal-content">
+      <div class="order-modal-close-button" onclick="closeModal()">X</div>
+      <p class="order-modal-text">You already have an existing order!</p>
+      <div class="order-modal-btns">
+        <div class="order-modal-btn" onclick="createNewOrder()">
+          Create New Order
+        </div>
+        <div class="order-modal-btn" onclick="createOrder(true)">
+          Add To Existing Order
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="back-btn" onclick="history.back()">
     <i class="fa-solid fa-arrow-left"></i>
   </div>
@@ -40,23 +57,97 @@ block head %}
   </div>
 </div>
 {% endblock %} {% block scripts %}
+<script>
+  van_plate = {{van_plate | tojson}}
+</script>
 <script src="{{url_for('static', filename='js/customer/map.js')}}"></script>
 <script src="{{url_for('static', filename='js/customer/checkout.js')}}"></script>
 <script>
-  function makeOrder() {
+  function closeModal() {
+    orderModal = document.querySelector("#order-modal");
+    overlay = document.querySelector("#modal-dimmer");
+
+    orderModal.style.zIndex = "-100";
+    orderModal.style.opacity = 0;
+
+    overlay.style.zIndex = "-99";
+  }
+
+  function displayOrderDecisionModal() {
+    orderModal = document.querySelector("#order-modal");
+    overlay = document.querySelector("#modal-dimmer");
+
+    orderModal.style.zIndex = "100";
+    orderModal.style.opacity = 1;
+
+    overlay.style.zIndex = "99";
+  }
+
+  async function getActiveOrder() {
+    const res = await fetch("/api/customer/get-order");
+    const json = await res.json();
+
+    return json;
+  }
+
+  function createOrder(hasExistingOrder) {
+    //Product Code
+    // if (customerMarker) {
+    //   lat = customerMarker.getLatLng().lat;
+    //   lng = customerMarker.getLatLng().lng;
+
+    //   fetch("/api/customer/make-order", {
+    //     method: "POST",
+    //     headers: { "Content-Type": "application/json" },
+    //     body: JSON.stringify({ lat: lat, lng: lng, isExisting: hasExistingOrder, }),
+    //   }).then((response) => {
+    //     if (response.ok) {
+    //       window.location.href =
+    //         "{{ url_for('customer_views.customer_homepage') }}";
+    //     }
+    //   });
+    // }
+
+    //Test Code
     lat = 10.6405359397094;
     lng = -61.39297485351563;
 
     fetch("/api/customer/make-order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ lat: lat, lng: lng }),
+      body: JSON.stringify({
+        lat: lat,
+        lng: lng,
+        hasExistingOrder: hasExistingOrder,
+      }),
     }).then((response) => {
       if (response.ok) {
         window.location.href =
-          "{{ url_for('customer_views.customer_homepage') }}";
+          "{{ url_for('customer_views.customer_homepage', message='Order Created!') }}";
       }
     });
+  }
+
+  function createNewOrder() {
+    fetch("/api/customer/delete-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    }).then((response) => {
+      if (response.ok) {
+        createOrder(false);
+      }
+    });
+  }
+
+  async function makeOrder() {
+    activeOrder = await getActiveOrder();
+
+    if (activeOrder.length != 0) {
+      displayOrderDecisionModal();
+      return;
+    }
+
+    createOrder(false);
   }
 </script>
 {% endblock %}

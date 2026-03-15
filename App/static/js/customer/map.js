@@ -47,7 +47,7 @@ L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
 const socket = io();
 var breadVanMarker = null;
 let lastUpdate = 0;
-const MIN_UPDATE_INTERVAL = 10000;
+const MIN_UPDATE_INTERVAL = 3000;
 
 socket.on("driver_update", function (data) {
   const now = Date.now();

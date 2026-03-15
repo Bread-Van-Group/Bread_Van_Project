@@ -38,7 +38,7 @@
   position: relative;
   border-radius: 15px 15px 0px 0px;
   font-family: "Caveat Brush", cursive;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 400;
   font-style: italic;
   text-decoration: none;
@@ -58,7 +58,6 @@
   background: linear-gradient(145deg, #e07c39ae, #c66b2ea8);
   opacity: 0.9;
   transform: translateY(1vh);
-  font-size: 1.1rem;
 }
 
 .content-navbar-btn i {

@@ -88,7 +88,7 @@ setInterval(() => {
     lat: 10.642156853165652,
     lng: -61.39825880527497,
   });
-}, 10000);
+}, 3000);
 
 // **NOTE** The code below will be used to get the driver's live location
 
@@ -103,7 +103,6 @@ navigator.geolocation.watchPosition(success, error, {
 function success(position) {
   const lat = position.coords.latitude;
   const lon = position.coords.longitude;
-  const accuracy = position.coords.accuracy;
 
   //   socket.emit("driver_location", {
   //     lat: position.coords.latitude,

@@ -6,13 +6,7 @@ const customerMarkerIcon = L.divIcon({
   className: "marker-icon ",
 });
 
-//This gets the customer location
-// navigator.geolocation.watchPosition(success, error, {
-//   enableHighAccuracy: true,
-//   maximumAge: 1000,
-//   timeout: 10000,
-// });
-
+//----------------------------TESTING CODE---------------------------
 //Dummy Customer Location
 var dummyCustomerMarker = L.marker([10.6405359397094, -61.39297485351563], {
   icon: customerMarkerIcon,
@@ -27,6 +21,29 @@ breadVanMarker = L.marker([10.642156853165652, -61.39825880527497], {
   }),
 }).addTo(map);
 
+//Popup Code
+const vanDistanceMetres = breadVanMarker
+  .getLatLng()
+  .distanceTo(dummyCustomerMarker.getLatLng());
+const vanDistanceKm = (vanDistanceMetres / 1000).toFixed(2);
+
+const popupContent = `
+      <div class="popup-container">
+        <p class="popup-van-plate">Plate No. : <span>${van_plate}</span></p>
+        <p class="popup-van-dist">Distance : <span>${vanDistanceKm}km</span></p>
+      </div>
+`;
+
+if (breadVanMarker) {
+  breadVanMarker
+    .bindPopup(popupContent, {
+      autoClose: false,
+      closeOnClick: false,
+    })
+    .openPopup();
+}
+
+//Build the route between customer and driver
 const waypoints = [breadVanMarker.getLatLng(), dummyCustomerMarker.getLatLng()];
 buildRoute(waypoints);
 
@@ -38,3 +55,94 @@ const avgLat = (m1.lat + m2.lat) / 2;
 const avgLng = (m1.lng + m2.lng) / 2;
 
 map.flyTo([avgLat, avgLng], 15);
+
+//--------------------------PRODUCTION CODE BELOW---------------
+
+// var isCentered = false;
+// var popupOpened = false;
+// var customerMarker = null;
+
+// //This gets the customer location
+// navigator.geolocation.watchPosition(success, error, {
+//   enableHighAccuracy: true,
+//   maximumAge: 1000,
+//   timeout: 10000,
+// });
+
+// function success(position) {
+//   const lat = position.coords.latitude;
+//   const lon = position.coords.longitude;
+
+//   if (!customerMarker) {
+//     customerMarker = L.marker([lat, lon], {
+//       icon: customerMarkerIcon,
+//     }).addTo(map);
+//   } else {
+//     customerMarker.setLatLng([lat, lon]);
+//   }
+// }
+
+// function error(err) {
+//   if (err.code === 1) {
+//     alert("Error: Please allow geolocation access");
+//   } else {
+//     alert("Error: Position is unavailable!");
+//   }
+// }
+
+// setInterval(() => {
+//   if (breadVanMarker != null && customerMarker != null) {
+//     //Popup Code
+//     const vanDistanceMetres = breadVanMarker
+//       .getLatLng()
+//       .distanceTo(customerMarker.getLatLng());
+//     const vanDistanceKm = (vanDistanceMetres / 1000).toFixed(2);
+
+//     const popupContent = `
+//       <div class="popup-container">
+//         <p class="popup-van-plate">Plate No. : <span>${van_plate}</span></p>
+//         <p class="popup-van-dist">Distance : <span>${vanDistanceKm}km</span></p>
+//       </div>
+//     `;
+
+//     //Bind the popup once marker detected
+//     if (!popupOpened) {
+//       breadVanMarker
+//         .setIcon(
+//           L.divIcon({
+//             html: vanSVG,
+//             iconSize: [30, 30],
+//             className: "van-icon",
+//           }),
+//         )
+//         .bindPopup(popupContent, {
+//           autoClose: false,
+//           closeOnClick: false,
+//         })
+//         .openPopup();
+
+//       popupOpened = true;
+//     }
+
+//     //Build the route between customer and driver
+//     const waypoints = [breadVanMarker.getLatLng(), customerMarker.getLatLng()];
+//     buildRoute(waypoints);
+
+//     centerMap();
+//   }
+// }, 1000);
+
+// function centerMap() {
+//   if (isCentered) return;
+
+//   //Do this to fly to center of driver and customer
+//   const m1 = breadVanMarker.getLatLng();
+//   const m2 = customerMarker.getLatLng();
+
+//   const avgLat = (m1.lat + m2.lat) / 2;
+//   const avgLng = (m1.lng + m2.lng) / 2;
+
+//   map.flyTo([avgLat, avgLng], 15);
+
+//   isCentered = true;
+// }
