@@ -17,7 +17,10 @@ def customer_homepage():
         return redirect(url_for('index_views.index'))
     customer_id = get_jwt_identity()
     orders = get_today_customer_requests(customer_id)
-    status = orders[-1]['status_id']
+
+    if(orders):
+        status = orders[-1]['status_id']
+        
     order_total = get_customer_request_total(customer_id)
     return render_template('customer/homepage.html', status = status, orders=orders, order_total = order_total)
 
