@@ -57,7 +57,7 @@ block head %}
     {% endif %}
     <div class="store-card-details">
       <p class="store-card-name">{{store_item.item.name}}</p>
-      <p class="store-card-price">${{store_item.item.price}}0</p>
+      <p class="store-card-price">${{ "%.2f" % store_item.item.price}}</p>
       {% if store_item.quantity_available != 0 %}
       <p class="store-card-in-stock-marker">In Stock</p>
       {% else %}

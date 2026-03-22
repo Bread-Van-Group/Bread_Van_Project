@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, render_template, request, jsonify, url_for, flash
+from flask import Blueprint, session, redirect, render_template, request, jsonify, url_for, flash
 from flask_jwt_extended import jwt_required, current_user, verify_jwt_in_request, get_jwt_identity
 from jwt import ExpiredSignatureError
 from App.controllers import (
@@ -28,6 +28,9 @@ driver_views = Blueprint('driver_views', __name__, template_folder='../templates
 @driver_views.route('/driver/home', methods=['GET'])
 @jwt_required() 
 def driver_homepage():
+    if current_user.role != 'driver':
+        return redirect(url_for('index_views.index'))
+
     driver_id = int(get_jwt_identity())
     return render_template('driver/homepage.html')
 
@@ -35,6 +38,9 @@ def driver_homepage():
 @driver_views.route('/driver/inventory', methods=['GET'])
 @jwt_required() 
 def driver_inventory_page():
+    if current_user.role != 'driver':
+        return redirect(url_for('index_views.index'))
+
     driver_id = int(get_jwt_identity())
 
     today = date.today()
@@ -46,6 +52,9 @@ def driver_inventory_page():
 @driver_views.route('/driver/requests', methods=['GET'])
 @jwt_required() 
 def driver_requests_page():
+    if current_user.role != 'driver':
+        return redirect(url_for('index_views.index'))
+
     driver_id = int(get_jwt_identity())
     pending_stops = get_pending_stops()
     return render_template('driver/requests_page.html', pending_stops=pending_stops)
@@ -53,6 +62,9 @@ def driver_requests_page():
 @driver_views.route('/driver/requests/accept/<int:stop_id>', methods=['GET'])
 @jwt_required() 
 def driver_accept_request(stop_id):
+    if current_user.role != 'driver':
+        return redirect(url_for('index_views.index'))
+
     driver_id = int(get_jwt_identity())
     pending_stops = get_pending_stops()
     stop = get_stop_by_id(stop_id)
@@ -71,6 +83,9 @@ def driver_accept_request(stop_id):
 @driver_views.route('/driver/requests/deny/<int:stop_id>', methods=['GET'])
 @jwt_required() 
 def driver_deny_request(stop_id):
+    if current_user.role != 'driver':
+        return redirect(url_for('index_views.index'))
+
     driver_id = int(get_jwt_identity())
     pending_stops = get_pending_stops()
     stop = get_stop_by_id(stop_id)
@@ -81,6 +96,21 @@ def driver_deny_request(stop_id):
 
     pending_stops = get_pending_stops()
     return render_template('driver/requests_page.html', pending_stops=pending_stops)
+
+@driver_views.route('/driver/transaction', methods=['GET'])
+@jwt_required() 
+def driver_transaction_page():
+    if current_user.role != 'driver':
+        return redirect(url_for('index_views.index'))
+
+    today = date.today()
+
+    daily_inventory = get_daily_inventory(today)
+
+    transaction_items = session.get('transaction_items', [])
+
+    return render_template('driver/transactions.html', transaction_items = transaction_items, daily_inventory=daily_inventory)
+
 
 # ── API Routes ────────────────────────────────────────────────────────────────
 
