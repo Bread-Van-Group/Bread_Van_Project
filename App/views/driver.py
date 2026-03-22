@@ -2,7 +2,6 @@ from flask import Blueprint, session, redirect, render_template, request, jsonif
 from flask_jwt_extended import jwt_required, current_user, verify_jwt_in_request, get_jwt_identity
 from jwt import ExpiredSignatureError
 from App.controllers import (
-    get_driver_by_id,
     get_driver_routes,
     assign_driver_to_route,
     unassign_driver_from_route,
@@ -10,9 +9,9 @@ from App.controllers import (
     get_active_stops,
     get_daily_inventory,
     get_stop_by_id,
-    set_request_confirmed,
     update_request_status,
-    add_stop_to_end_of_route
+    add_stop_to_end_of_route,
+    get_todays_route,
 )
 from App.controllers.route import get_route_stops
 from App.models import CustomerRequest, RouteStop, Customer, InventoryItem, Status
@@ -55,8 +54,8 @@ def driver_requests_page():
     if current_user.role != 'driver':
         return redirect(url_for('index_views.index'))
 
-    driver_id = int(get_jwt_identity())
     pending_stops = get_pending_stops()
+
     return render_template('driver/requests_page.html', pending_stops=pending_stops)
 
 @driver_views.route('/driver/requests/accept/<int:stop_id>', methods=['GET'])
@@ -64,16 +63,14 @@ def driver_requests_page():
 def driver_accept_request(stop_id):
     if current_user.role != 'driver':
         return redirect(url_for('index_views.index'))
-
-    driver_id = int(get_jwt_identity())
-    pending_stops = get_pending_stops()
-    stop = get_stop_by_id(stop_id)
-    for request in stop.customer_requests:
-        if not set_request_confirmed(request.request_id):
-            flash('Error Could not accept request.', 'error')
-            return render_template('driver/requests_page.html', pending_stops=pending_stops)
     
-    if not add_stop_to_end_of_route(stop.route_id, stop_id):
+    pending_stops = get_pending_stops()
+
+    if not update_request_status(2, stop_id):
+        flash('Error Could not accept request.', 'error')
+        return render_template('driver/requests_page.html', pending_stops=pending_stops)
+
+    if not add_stop_to_end_of_route(get_todays_route().route_id, stop_id):
         flash('Error Could not accept request.', 'error')
         return render_template('driver/requests_page.html', pending_stops=pending_stops)
 
@@ -86,13 +83,14 @@ def driver_deny_request(stop_id):
     if current_user.role != 'driver':
         return redirect(url_for('index_views.index'))
 
-    driver_id = int(get_jwt_identity())
     pending_stops = get_pending_stops()
+
     stop = get_stop_by_id(stop_id)
-    for request in stop.customer_requests:
-        if not update_request_status(request.request_id, 4, stop_id, False):
-            flash('Error Could not accept request.', 'error')
-            return render_template('driver/requests_page.html', pending_stops=pending_stops)
+
+
+    if not update_request_status(4, stop_id, False):
+        flash('Error Could not deny request.', 'error')
+        return render_template('driver/requests_page.html', pending_stops=pending_stops)
 
     pending_stops = get_pending_stops()
     return render_template('driver/requests_page.html', pending_stops=pending_stops)
@@ -211,33 +209,21 @@ def complete_request(request_id):
 @driver_views.route('/api/driver/active-stops', methods=['GET'])
 @jwt_required()
 def get_active_requests():
-    """
-    Return all active customer requests as map markers.
-    Each entry includes lat/lng (from the route stop), customer name,
-    address, and the list of pre-ordered items — matching what the
-    map JS expects.
-    """
     if current_user.role != 'driver':
         return jsonify(message='Unauthorized'), 403
 
     # Get pending requests
-    requests = get_active_stops()
+    stops = get_active_stops()
 
-    return requests
+    return stops
 
 @driver_views.route('/api/driver/pending-stops', methods=['GET'])
 @jwt_required()
 def get_pending_requests():
-    """
-    Return all pending customer requests as map markers.
-    Each entry includes lat/lng (from the route stop), customer name,
-    address, and the list of pre-ordered items — matching what the
-    map JS expects.
-    """
     if current_user.role != 'driver':
         return jsonify(message='Unauthorized'), 403
 
     # Get pending requests
-    requests = get_pending_stops()
+    stops = get_pending_stops()
 
-    return requests
+    return stops

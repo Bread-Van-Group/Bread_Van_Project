@@ -1,9 +1,9 @@
 from App.database import db
 from .user import create_driver, create_customer, create_owner
-from .customer_request import create_customer_request, set_request_confirmed
+from .customer_request import create_customer_request
 from .status import create_status
 from .inventory_item import create_item
-from .route import create_route, add_stop_to_route
+from .route import create_route, add_customer_stop_to_route
 from .van import create_van, assign_van_to_route, set_van_inventory
 from .driver import assign_driver_to_route
 from .transaction import create_transaction
@@ -51,7 +51,25 @@ def initialize():
         phone="868-200-0001",
         area="Port of Spain",
     )
-    print(f"✓ Customer created: {customer.email}")
+
+    customer2 = create_customer(
+        email="customer2@test.com",
+        password="password",
+        name="Bob Customer",
+        address="789 Pine Road, Port of Spain",
+        phone="868-200-0001",
+        area="Port of Spain",
+    )
+    customer3 = create_customer(
+        email="customer3@test.com",
+        password="password",
+        name="Bob Customer",
+        address="789 Pine Road, Port of Spain",
+        phone="868-200-0001",
+        area="Port of Spain",
+    )
+
+    print(f"✓ Customers created")
 
     # ── Inventory Items ───────────────────────────────────────────────────────
     hops   = create_item("Hops Bread",  price=3.50, category="bread",   description="Classic hops rolls, baked fresh daily")
@@ -73,41 +91,26 @@ def initialize():
         description="East Trinidad morning bread delivery",
     )
 
-    stop1 = add_stop_to_route(
+    stop1 = add_customer_stop_to_route(
         route_id=route.route_id,
+        customer_id=customer2.customer_id,
         address="123 Main Street, St. Augustine",
         lat=10.640808716845667,
         lng=-61.39583945274354,
         stop_order=1,
-        estimated_arrival_time=time(6, 30),
+        status_id=2,
     )
 
-    stop2 = add_stop_to_route(
+    stop2 = add_customer_stop_to_route(
         route_id=route.route_id,
+        customer_id=customer3.customer_id,
         address="456 Oak Avenue, Toco",
         lat=10.64294795513197,
         lng=-61.395367383956916,
         stop_order=2,
-        estimated_arrival_time=time(7, 15),
+        status_id=2,
     )
 
-    stop3 = add_stop_to_route(
-        route_id=route.route_id,
-        address="That Street Dey",
-        lat=10.639817798264305, 
-        lng=-61.39347910881043,
-        stop_order=0,
-        estimated_arrival_time=time(7, 15),
-    )
-
-    stop4 = add_stop_to_route(
-        route_id=route.route_id,
-        address="The Other Street Dey",
-        lat=10.64161027605682,
-        lng=-61.39279246330262,
-        stop_order=0,
-        estimated_arrival_time=time(7, 15),
-    )
 
     print(f"✓ Route created   : {route.name} with 4 stops")
 
@@ -144,51 +147,17 @@ def initialize():
     request1 = create_customer_request(
         customer_id=customer.customer_id,
         van_id=van.van_id,
-        stop_id=stop1.stop_id,
+        stop_id=stop1['stop_id'],
         item_id= hops.item_id,
         quantity= 1,
-        status_id=2
     )
 
     request2 = create_customer_request(
         customer_id=customer.customer_id,
         van_id=van.van_id,
-        stop_id=stop1.stop_id,
+        stop_id=stop1['stop_id'],
         item_id= bara.item_id,
         quantity= 1,
-        status_id=2
-    )
-
-    request3 = create_customer_request(
-        customer_id=customer.customer_id,
-        van_id=van.van_id,
-        stop_id=stop2.stop_id,
-        item_id= bara.item_id,
-        quantity= 1,
-        status_id=2
-    )
-
-    #Set the preset requests which are confirmed to adhere to db rules
-    set_request_confirmed(request1.request_id)
-    set_request_confirmed(request2.request_id)
-    set_request_confirmed(request3.request_id)
-
-    request4 = create_customer_request(
-        customer_id=customer.customer_id,
-        van_id=van.van_id,
-        stop_id=stop3.stop_id,
-        item_id= salt.item_id,
-        quantity= 1,
-        status_id=1
-    )
-
-    request5 = create_customer_request(
-        customer_id=customer.customer_id,
-        van_id=van.van_id,
-        stop_id=stop4.stop_id,
-        item_id= channa.item_id,
-        quantity= 1,
-        status_id=1
     )
 
     print(f"✓ Requests created for stop orders")
@@ -232,7 +201,7 @@ def initialize():
                 van_id=van.van_id,
                 total_amount=round(total, 2),
                 items=order_items,
-                stop_id=stop.stop_id,
+                stop_id=stop['stop_id'],
                 payment_method=random.choice(['cash', 'card']),
             )
 
