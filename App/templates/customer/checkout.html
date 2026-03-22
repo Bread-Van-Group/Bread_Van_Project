@@ -90,8 +90,8 @@ block head %}
     return json;
   }
 
-  function createOrder(hasExistingOrder) {
-    //Product Code
+  function createOrder() {
+    //Production Code
     // if (customerMarker) {
     //   lat = customerMarker.getLatLng().lat;
     //   lng = customerMarker.getLatLng().lng;
@@ -118,7 +118,6 @@ block head %}
       body: JSON.stringify({
         lat: lat,
         lng: lng,
-        hasExistingOrder: hasExistingOrder,
       }),
     }).then((response) => {
       if (response.ok) {
@@ -134,7 +133,7 @@ block head %}
       headers: { "Content-Type": "application/json" },
     }).then((response) => {
       if (response.ok) {
-        createOrder(false);
+        createOrder();
       }
     });
   }
@@ -142,12 +141,12 @@ block head %}
   async function makeOrder() {
     activeOrder = await getActiveOrder();
 
-    if (activeOrder.length != 0) {
+    if (activeOrder.response) {
       displayOrderDecisionModal();
       return;
     }
 
-    createOrder(false);
+    createOrder();
   }
 </script>
 {% endblock %}

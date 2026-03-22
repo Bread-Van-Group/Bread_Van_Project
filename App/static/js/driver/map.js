@@ -54,13 +54,7 @@ const selectedMarkerIcon = L.divIcon({
 //Testing Map config
 var map = L.map("map", {
   center: [10.64179, -61.400861],
-  //   maxBounds: [
-  //     [10.63555, -61.38032],
-  //     [10.64829, -61.41387],
-  //   ],
-  maxBoundsViscosity: 1.0,
   zoom: 17,
-  //   minZoom: 17,
   maxZoom: 18,
   scrollWheelZoom: true,
   wheelPxPerZoomLevel: 200,

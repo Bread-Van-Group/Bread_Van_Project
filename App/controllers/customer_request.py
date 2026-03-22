@@ -14,7 +14,7 @@ def get_requests_by_stop_id(stop_id):
         .filter_by(stop_id=stop_id)
     ).all()
 
-def create_customer_request(customer_id, van_id, stop_id, item_id, quantity,status_id):
+def create_customer_request(customer_id, van_id, stop_id, item_id, quantity):
     """
     Place a new customer request for an item at a given route stop.
 
@@ -24,7 +24,6 @@ def create_customer_request(customer_id, van_id, stop_id, item_id, quantity,stat
         stop_id:     ID of the route_stop where the customer will be.
         item_id:     ID of the inventory item being requested.
         quantity:    Number of units requested.
-        status_id:   Initial status (1:"pending", 2:"confirmed", 3:"fufilled", 4:"cancelled").
 
     Returns:
         The newly created CustomerRequest instance.
@@ -36,47 +35,19 @@ def create_customer_request(customer_id, van_id, stop_id, item_id, quantity,stat
         stop_id=stop_id,
         item_id=item_id,
         quantity=quantity,
-        status_id=status_id,
     )
+
+    van_id = get_active_van().van_id
+
+    try:
+        reserve_inventory(van_id, item_id, new_request.quantity)
+    except Exception as e:
+        db.session.rollback()
+        print(f"Unexpected error: {e}")
+        return None
+
     db.session.add(new_request)
     db.session.commit()
     return new_request
 
-
-def update_request_status(request_id, status_id, stop_id = None, fulfilled=False):
-    """Update the status (and optionally fulfilled_time) of a customer request."""
-    from datetime import datetime, timedelta, timezone
-    UTC_MINUS_4 = timezone(timedelta(hours=-4))
-
-    request = db.session.get(CustomerRequest, request_id)
-    if not request:
-        return None
-
-    request.status_id = status_id
-    if fulfilled:
-        request.fulfilled_time = datetime.now(UTC_MINUS_4)
-
-    if status_id == 4:
-        van_id = get_active_van().van_id
-        requests = get_requests_by_stop_id(stop_id)
-
-        for request in requests:
-            reserve_inventory(van_id, request.item_id, -request.quantity)
-
-    db.session.commit()
-    return request
-
-def set_request_confirmed(request_id):
-    update_request_status(request_id, 2, False)
-
-    request = get_request_by_id(request_id)
-    inventory_item_id = request.item.item_id
-    van_id = get_active_van().van_id
-
-    try:
-        reserve_inventory(van_id, inventory_item_id, request.quantity)
-        return True
-    except Exception as e:
-        db.session.rollback()
-        print(f"Unexpected error: {e}")
-        return False
+    

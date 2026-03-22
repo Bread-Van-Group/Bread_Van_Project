@@ -1,7 +1,9 @@
 from App.database import db
-from App.models import Route, RouteStop, CustomerRequest, Status
+from App.models import Route, RouteStop
 from sqlalchemy import func
 from datetime import datetime
+from App.controllers.van import reserve_inventory, get_active_van 
+from App.controllers.customer_request import get_requests_by_stop_id
 
 
 def get_route_by_id(route_id):
@@ -21,23 +23,22 @@ def get_stop_by_id(stop_id):
 def get_all_routes():
     return db.session.scalars(db.select(Route)).all()
 
+#Status id 1 = pending
+#Status id 2 = confirmed
+
 def get_pending_stops():
-    pending_stops = db.session.execute(
+    pending_stops = active_stops = db.session.execute(
         db.select(RouteStop)
-        .join(RouteStop.customer_requests)
-        .join(CustomerRequest.status)
-        .filter(Status.status_name == "pending")
+        .filter(RouteStop.status_id == 1)
         .distinct()
     ).scalars().all()
 
     return [pending_stop.get_json() for pending_stop in pending_stops]
 
 def get_active_stops():
-    active_stops = db.session.execute(
+    active_stops = active_stops = db.session.execute(
         db.select(RouteStop)
-        .join(RouteStop.customer_requests)
-        .join(CustomerRequest.status)
-        .filter(Status.status_name == "confirmed")
+        .filter(RouteStop.status_id == 2)
         .distinct()
     ).scalars().all()
 
@@ -66,6 +67,49 @@ def get_route_stops(route_id):
         .filter_by(route_id=route_id)
         .order_by(RouteStop.stop_order)
     ).all()
+
+def add_customer_stop_to_route(route_id, customer_id, address, lat, lng, stop_order, status_id):
+    #The owner_id is null to denote this as a customer made stop
+    
+    stop = RouteStop(
+        route_id=route_id,
+        owner_id=None,
+        customer_id=customer_id,
+        address=address,
+        lat=lat,
+        lng=lng,
+        stop_order=stop_order,
+        status_id=status_id,
+        estimated_arrival_time=None,
+        fulfilled_time=None
+    )
+
+    db.session.add(stop)
+    db.session.commit()
+    return stop.get_json()
+
+def update_request_status(status_id, stop_id , fulfilled=False):
+    """Update the status (and optionally fulfilled_time) of a customer request."""
+    from datetime import datetime, timedelta, timezone
+    UTC_MINUS_4 = timezone(timedelta(hours=-4))
+
+    request = get_stop_by_id(stop_id)
+    if not request:
+        return None
+
+    request.status_id = status_id
+    if fulfilled:
+        request.fulfilled_time = datetime.now(UTC_MINUS_4)
+
+    if status_id == 3 or status_id == 4:
+        van_id = get_active_van().van_id
+        requests = get_requests_by_stop_id(stop_id)
+
+        for request in requests:
+            reserve_inventory(van_id, request.item_id, -request.quantity)
+
+    db.session.commit()
+    return request
 
 
 def add_stop_to_route(route_id, address, lat, lng, stop_order, estimated_arrival_time=None):
@@ -106,6 +150,7 @@ def remove_stop_from_route(stop_id):
     stop = db.session.get(RouteStop, stop_id)
     if not stop:
         return False
+    
     db.session.delete(stop)
     db.session.commit()
     return True

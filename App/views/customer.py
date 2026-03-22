@@ -1,6 +1,6 @@
 from flask import Blueprint, session, redirect,flash, render_template, request, jsonify, url_for
 from flask_jwt_extended import jwt_required, current_user, verify_jwt_in_request, get_jwt_identity
-from App.controllers import (initialize, get_today_customer_requests, delete_today_pending_customer_order,  get_active_van_plate, get_todays_route, add_stop_to_route, get_active_van,  create_customer_request, get_daily_inventory_item, get_daily_inventory, get_customer_requests, get_customer_request_total)
+from App.controllers import (get_today_customer_request, delete_today_pending_customer_order,  get_active_van_plate, get_todays_route, add_customer_stop_to_route, get_active_van,  create_customer_request, get_daily_inventory_item, get_daily_inventory, get_customer_request_total)
 from App.controllers.transaction import get_report_data
 
 from datetime import date, time
@@ -16,13 +16,13 @@ def customer_homepage():
     if current_user.role != 'customer':
         return redirect(url_for('index_views.index'))
     customer_id = get_jwt_identity()
-    orders = get_today_customer_requests(customer_id)
+    stop = get_today_customer_request(customer_id)
 
-    if(orders):
-        status = orders[-1]['status_id']
-        
-    order_total = get_customer_request_total(customer_id)
-    return render_template('customer/homepage.html', status = status, orders=orders, order_total = order_total)
+    if stop:
+        order_total = get_customer_request_total(customer_id, stop['stop_id'])
+    else:
+        order_total = 0
+    return render_template('customer/homepage.html', stop=stop, order_total = order_total)
 
 @customer_views.route('/customer/schedule', methods=['GET'])
 @jwt_required()
@@ -45,6 +45,10 @@ def customer_store():
         return redirect(url_for('index_views.index'))
     
     today = date.today()
+    stop = get_today_customer_request(get_jwt_identity())
+
+    if stop and (stop['status_id'] == 3 or stop['status_id'] == 4):
+        return redirect(url_for('customer_views.customer_homepage', message="You have already made an order for today.The store is now unavailable until tomorrow."))
 
     store_items = get_daily_inventory(today)
     customer_order = session.get('order', [])
@@ -117,10 +121,12 @@ def get_active_order():
     if current_user.role != 'customer':
         return jsonify(message='Unauthorized'), 403
     
-    customer_id = get_jwt_identity()
-    active_requests = get_customer_requests(customer_id)
+    active_order = get_today_customer_request(get_jwt_identity())
 
-    return active_requests
+    if active_order:
+        return jsonify({"response":True})
+    else:
+        return jsonify({"response":False})
 
 @customer_views.route('/api/customer/make-order', methods=['POST'])
 @jwt_required()
@@ -132,36 +138,30 @@ def customer_make_request():
     
     lat = data.get('lat')
     lng = data.get('lng')
-    hasExistingOrder = data.get('hasExistingOrder')
+    stop = get_today_customer_request(get_jwt_identity())
 
     order = session.get('order', [])
-    
-    if not hasExistingOrder:
-        new_stop = add_stop_to_route(
+
+    #Create stop if there isnt an existing one
+    if not stop:
+        stop = add_customer_stop_to_route(
             route_id=get_todays_route().route_id,
+            customer_id=get_jwt_identity(),
             address="Placeholder",
             lat=lat,
             lng=lng,
             stop_order=0,
-            estimated_arrival_time=time(7, 15),
+            status_id=1
         )
+        
     
     for item in order:
-        if hasExistingOrder:
-            existingOrders = get_customer_requests(get_jwt_identity())
-            status_id = existingOrders[0]['status_id']
-            new_stop_id = existingOrders[0]['stop_id']
-        else:
-            status_id = 1
-            new_stop_id = new_stop.stop_id
-
         new_request = create_customer_request(
             customer_id=get_jwt_identity(),
             van_id=get_active_van().van_id,
-            stop_id=new_stop_id,
+            stop_id=stop['stop_id'],
             item_id=item['inventory_id'],
             quantity=item['quantity'],
-            status_id=status_id
         )
 
     session.pop('order', None) 

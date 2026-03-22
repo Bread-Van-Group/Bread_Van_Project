@@ -24,17 +24,18 @@
       >
         <i class="fa-solid fa-basket-shopping"></i
         ><span class="my-order-info"
-          >My Order: {%if orders %}<span
+          >My Order: {%if stop %}<span
             id="my-order-status"
             class="my-order-status my-order-status-inactive"
           >
-            {% if status == 1 %} Pending {% elif status == 2%} En Route {% elif
-            status == 3%} Completed ✔{% elif status == 4%} Denied X {% endif %}
-            {% if status == 2 or status == 1 %}
+            {% if stop.status_id == 1 %} Pending {% elif stop.status_id == 2%}
+            En Route {% elif stop.status_id == 3%} Completed ✔{% elif
+            stop.status_id == 4%} Denied X {% endif %} {% if stop.status_id == 2
+            or stop.status_id == 1 %}
             <span class="loading-dots"
               ><span>.</span> <span>.</span> <span>.</span></span
             >
-            {% endif %} {% if status == 2 %}
+            {% endif %} {% if stop.status_id == 2 %}
             <i class="fa-solid fa-van-shuttle"></i>
             {% endif %}</span
           >
@@ -52,12 +53,13 @@
     <div id="main-content" class="main-content">
       <div id="map" class="map"></div>
       <div id="map-text" class="map-text">
-        There currently aren't any active drivers
+        The Bakery Hasn't Started A Route Yet
       </div>
 
       <div id="order-section" class="orders-section">
         <div class="order-items">
-          {%if orders %} {% for order in orders %}
+          {%if stop.customer_requests %} {% for order in stop.customer_requests
+          %}
           <div class="order-item">
             <p class="item-name">{{order.item.name}}</p>
             <p class="item-quantity">x {{order.quantity}}</p>
@@ -71,13 +73,16 @@
               </p>
             </div>
           </div>
-          {% endfor %} {% else %}
+          {% endfor %} {% elif stop %}
+          <div class="item-name">Stop Request Made</div>
+          {% else %}
           <div class="item-name">No Current Order</div>
           {% endif %}
         </div>
         <p class="order-total"><span>Total: </span>${{order_total}}</p>
       </div>
     </div>
+    <button class="stop-request-btn" onclick="">Request Stop</button>
   </div>
 </div>
 
