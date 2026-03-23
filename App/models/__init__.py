@@ -12,3 +12,6 @@ from .daily_inventory import DailyInventory
 from .customer_request import CustomerRequest
 from .transaction import Transaction, TransactionItem
 from .product_pairing  import ProductPairing
+from .region import Region
+from .route_area import RouteArea
+from .route_history import RouteHistory

@@ -24,25 +24,38 @@ def get_all_users_json():
 
 # create users
 
-def create_driver(email, password, name, address=None, phone=None):
+def create_driver(email, password, name, owner_id=None, address=None, phone=None):
+
     if get_user_by_email(email):
         return None
-    driver = Driver(email=email, password=password, name=name,
-                    address=address, phone=phone)
+    driver = Driver(
+        email=email,
+        password=password,
+        name=name,
+        owner_id=owner_id,
+        address=address,
+        phone=phone,
+    )
     db.session.add(driver)
     db.session.commit()
     return driver
 
 
-def create_customer(email, password, name, address=None, phone=None, area=None):
+def create_customer(email, password, name, address=None, phone=None, region_id=None):
+
     if get_user_by_email(email):
         return None
-    customer = Customer(email=email, password=password, name=name,
-                        address=address, phone=phone, area=area)
+    customer = Customer(
+        email=email,
+        password=password,
+        name=name,
+        address=address,
+        phone=phone,
+        region_id=region_id,
+    )
     db.session.add(customer)
     db.session.commit()
     return customer
-
 
 def create_owner(email, password):
     if get_user_by_email(email):
