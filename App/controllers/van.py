@@ -7,10 +7,10 @@ def get_van_by_id(van_id):
     return db.session.get(Van, van_id)
 
 def get_active_van():
+    from App.models import Van
     return db.session.execute(
-        db.select(Van)
-        .filter_by(status="active")
-    ).scalar_one_or_none()
+        db.select(Van).filter_by(status='active')
+    ).scalars().first()  # ✅ Returns first active van
 
 def get_active_van_plate():
     van = db.session.execute(
