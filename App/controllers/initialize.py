@@ -7,6 +7,7 @@ from .route import create_route, add_customer_stop_to_route
 from .van import create_van, assign_van_to_route, set_van_inventory
 from .driver import assign_driver_to_route
 from .transaction import create_transaction
+from .region import *
 from App.models import Transaction
 from datetime import time, date, datetime, timedelta, timezone
 import random
@@ -27,6 +28,12 @@ def initialize():
 
     print("✓ Statuses created")
 
+    # ── Regions ───────────────────────────────────────────────────────────────
+    region_pos = create_region("Port of Spain", "Capital city and surrounding area")
+    region_chag = create_region("Chaguanas", "Central Trinidad commercial hub")
+    region_sf = create_region("San Fernando", "South Trinidad industrial city")
+
+    print("✓ Regions created")
     # ── Users ─────────────────────────────────────────────────────────────────
     owner = create_owner(
         email="owner@test.com",
@@ -38,6 +45,7 @@ def initialize():
         email="driver@test.com",
         password="password",
         name="John Driver",
+        owner_id=owner.owner_id,
         address="123 Main Street, Port of Spain",
         phone="868-100-0001",
     )
@@ -48,25 +56,25 @@ def initialize():
         password="password",
         name="Bob Customer",
         address="789 Pine Road, Port of Spain",
-        phone="868-200-0001",
-        area="Port of Spain",
+        phone="868-100-0001",
+        region_id=region_pos.region_id,
     )
 
     customer2 = create_customer(
         email="customer2@test.com",
         password="password",
-        name="Bob Customer",
-        address="789 Pine Road, Port of Spain",
-        phone="868-200-0001",
-        area="Port of Spain",
+        name="Alice Customer",
+        address="12 High Street, Chaguanas",
+        phone="868-200-0002",
+        region_id=region_chag.region_id,
     )
     customer3 = create_customer(
         email="customer3@test.com",
         password="password",
-        name="Bob Customer",
-        address="789 Pine Road, Port of Spain",
-        phone="868-200-0001",
-        area="Port of Spain",
+        name="Charlie Customer",
+        address="45 Coffee Street, San Fernando",
+        phone="868-300-0003",
+        region_id=region_sf.region_id,
     )
 
     print(f"✓ Customers created")
@@ -112,7 +120,7 @@ def initialize():
     )
 
 
-    print(f"✓ Route created   : {route.name} with 4 stops")
+    print(f"✓ Route created   : {route.name} with 2 stops")
 
     # ── Van ───────────────────────────────────────────────────────────────────
     van = create_van(
@@ -161,6 +169,7 @@ def initialize():
     )
 
     print(f"✓ Requests created for stop orders")
+
     # ── Driver Assignment ─────────────────────────────────────────────────────
     assign_driver_to_route(driver.driver_id, route.route_id)
     print(f"✓ Driver assigned to route")

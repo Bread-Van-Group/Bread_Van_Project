@@ -9,4 +9,7 @@ from .route import *
 from .inventory_item import *
 from .transaction import *
 from .status import *
+from .region import *
+from .route_area import *
+from .route_history import *
 from .initialize import *
