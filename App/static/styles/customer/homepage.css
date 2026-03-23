@@ -1,5 +1,6 @@
 /* ─── Page Content ───────────────────────────────────────────────── */
 .page-content {
+  position: relative;
   display: flex;
   flex-direction: column;
   padding: 12px;
@@ -22,6 +23,7 @@
   box-shadow:
     rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
     rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+  z-index: 2;
 }
 
 .content-navbar {
@@ -143,49 +145,6 @@
   color: var(--ink);
   transition: all 0.5s ease-in-out;
   z-index: 2;
-}
-
-/* Map Info Footer (ETA and Distance) */
-.map-info {
-  z-index: 2;
-  position: absolute;
-  bottom: 16px;
-  left: 16px;
-  right: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  padding: 16px 32px;
-  border-radius: 15px;
-  box-shadow:
-    rgba(60, 64, 67, 0.3) 0px 2px 4px 0px,
-    rgba(60, 64, 67, 0.15) 0px 4px 8px 2px;
-  font-family: "Shadows Into Light Two", cursive;
-  font-size: 1.4rem;
-  font-weight: 600;
-  color: #333;
-}
-
-.map-info-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.map-info-label {
-  font-family: "Caveat Brush", cursive;
-  font-size: 1.6rem;
-  color: #e07b39;
-  font-weight: 400;
-}
-
-.map-info-value {
-  font-family: "Shadows Into Light Two", cursive;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #333;
 }
 
 /* ─── Orders Section ───────────────────────────────────────────────── */
@@ -380,6 +339,126 @@
   color: white;
   background: linear-gradient(145deg, #e07b39, #c66a2e);
   transition: all 0.3s ease-in-out;
+}
+
+/* ─── Stop Request Modal ───────────────────────────────────────────────── */
+.modal-dimmer {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: -99;
+}
+
+.map-instructions {
+  position: absolute;
+  opacity: 0;
+  z-index: -100;
+
+  top: 1vh;
+  left: 0vw;
+
+  padding: 8px;
+  border-radius: 15px;
+
+  background-color: white;
+  color: var(--orange-deep);
+
+  text-align: center;
+  font-family: "Shadows Into Light Two", cursive;
+  font-size: 1rem;
+  font-style: italic;
+
+  box-shadow:
+    rgba(0, 0, 0, 0.07) 0px 1px 2px,
+    rgba(0, 0, 0, 0.07) 0px 2px 4px,
+    rgba(0, 0, 0, 0.07) 0px 4px 8px,
+    rgba(0, 0, 0, 0.07) 0px 8px 16px,
+    rgba(0, 0, 0, 0.07) 0px 16px 32px,
+    rgba(0, 0, 0, 0.07) 0px 32px 64px;
+}
+
+.stop-request-modal {
+  display: flex;
+  opacity: 0;
+
+  position: absolute;
+  padding: 15px;
+  top: 30vh;
+  left: 10vw;
+  width: 80vw;
+  height: auto;
+  background: var(--white);
+  border-radius: 15px;
+
+  box-shadow:
+    rgba(0, 0, 0, 0.07) 0px 1px 2px,
+    rgba(0, 0, 0, 0.07) 0px 2px 4px,
+    rgba(0, 0, 0, 0.07) 0px 4px 8px,
+    rgba(0, 0, 0, 0.07) 0px 8px 16px,
+    rgba(0, 0, 0, 0.07) 0px 16px 32px,
+    rgba(0, 0, 0, 0.07) 0px 32px 64px;
+
+  z-index: -100;
+  transition: all ease-in-out 0.3s;
+}
+
+.stop-request-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.stop-request-close-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  border-radius: 50%;
+  background-color: var(--red-deep);
+  color: white;
+
+  font-family: "Shadows Into Light Two", cursive;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 2px 6px;
+}
+
+.stop-request-modal-text {
+  margin-top: 1.1rem;
+  text-align: center;
+  font-family: "Caveat Brush", cursive;
+  font-size: 1.3rem;
+  font-style: italic;
+  color: var(--orange-deep);
+}
+
+.stop-request-modal-btns {
+  display: flex;
+  flex-direction: row;
+  gap: 1vw;
+  justify-content: space-evenly;
+}
+
+.stop-request-modal-btn {
+  text-align: center;
+  border-radius: 15px;
+  padding: 8px;
+
+  font-family: "Caveat Brush", cursive;
+  font-size: 1.12rem;
+  font-style: italic;
+  color: white;
+
+  box-shadow:
+    rgba(0, 0, 0, 0.12) 0px 1px 3px,
+    rgba(0, 0, 0, 0.24) 0px 1px 2px;
+}
+
+.stop-request-modal-btn:first-child {
+  background-color: var(--orange-deep);
+}
+
+.stop-request-modal-btn:last-child {
+  background-color: var(--ink-muted);
 }
 
 /* Mobile Responsive */

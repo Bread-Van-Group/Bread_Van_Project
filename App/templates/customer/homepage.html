@@ -8,6 +8,28 @@
 {% endblock %} {% block content %}
 
 <div class="page-content">
+  <div class="modal-dimmer" id="modal-dimmer"></div>
+  <div class="map-instructions" id="map-instructions">
+    Click on the map to choose desired order drop off location
+  </div>
+
+  <div id="stop-request-modal" class="stop-request-modal">
+    <div class="stop-request-modal-content">
+      <div class="stop-request-close-button" onclick="closeModal()">X</div>
+      <p class="stop-request-modal-text">
+        Make Stop Request at your current location or choose another location?
+      </p>
+      <div class="stop-request-modal-btns">
+        <div class="stop-request-modal-btn" onclick="createStopRequest()">
+          Current Location
+        </div>
+        <div class="stop-request-modal-btn" onclick="enableMarkerAdding()">
+          Different Location
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="main-content-container">
     <div class="content-navbar">
       <button
@@ -82,11 +104,145 @@
         <p class="order-total"><span>Total: </span>${{order_total}}</p>
       </div>
     </div>
-    <button class="stop-request-btn" onclick="">Request Stop</button>
+    <button class="stop-request-btn" onclick="openModal()">Request Stop</button>
   </div>
 </div>
 
 {% endblock %} {% block scripts %}
 <script src="{{url_for('static', filename='js/customer/map.js')}}"></script>
 <script src="{{url_for('static', filename='js/customer/homepage.js')}}"></script>
+<!--This Script is For Making Stop Requests Without an Order-->
+<script>
+  let checkOrderIntervalId = null;
+  let isAddingMarker = false;
+
+  const customerStop = {{stop |tojson }}
+
+  //If a customer order was made, periodically check if
+  //the order is the same as the customer location
+  //If not, create a new order marker on map
+  if (customerStop) {
+    checkOrderIntervalId = setInterval(() => {
+      if (
+        customerMarker &&
+        !(
+          customerMarker.getLatLng().lat.toFixed(4) ==
+            customerStop.lat.toFixed(4) &&
+          customerMarker.getLatLng().lng.toFixed(4) ==
+            customerStop.lng.toFixed(4)
+        )
+      ) {
+        orderMarker = L.marker([customerStop.lat, customerStop.lng], {
+          icon: orderMarkerIcon,
+          iconSize: [40, 40],
+          className: "marker-icon",
+        }).addTo(map);
+
+        clearInterval(checkOrderIntervalId);
+      }
+    }, 1000);
+  }
+
+  //This code is toggled when the customer chooses a new location
+  map.on("click", function (e) {
+    if (isAddingMarker) {
+      const lat = e.latlng.lat;
+      const lng = e.latlng.lng;
+
+      isAddingMarker = false;
+      closeModal();
+
+      fetch("/api/customer/make-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          lat: lat,
+          lng: lng,
+        }),
+      }).then((response) => {
+        if (response.ok) {
+          window.location.href =
+            "{{ url_for('customer_views.customer_homepage',message='Stop Requested!') }}";
+        }
+      });
+    }
+  });
+
+  async function getActiveOrder() {
+    const res = await fetch("/api/customer/get-order");
+    const json = await res.json();
+
+    return json;
+  }
+
+  function enableMarkerAdding() {
+    dimmer = document.querySelector("#modal-dimmer");
+    modal = document.querySelector("#stop-request-modal");
+    instructions = document.querySelector("#map-instructions");
+
+    dimmer.style.zIndex = "1";
+
+    modal.style.zIndex = "-100";
+    modal.style.opacity = 0;
+
+    instructions.style.zIndex = "100";
+    instructions.style.opacity = 1;
+
+    isAddingMarker = true;
+  }
+
+  function createStopRequest() {
+    if (customerMarker) {
+      lat = customerMarker.getLatLng().lat;
+      lng = customerMarker.getLatLng().lng;
+
+      fetch("/api/customer/make-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          lat: lat,
+          lng: lng,
+        }),
+      }).then((response) => {
+        if (response.ok) {
+          window.location.href =
+            "{{ url_for('customer_views.customer_homepage',message='Stop Requested!') }}";
+        }
+      });
+    }
+  }
+
+  async function openModal() {
+    activeOrder = await getActiveOrder();
+
+    if (activeOrder.response) {
+      window.location.href =
+        "{{url_for('customer_views.customer_homepage', message='You have a request made already')}}";
+      return;
+    }
+
+    dimmer = document.querySelector("#modal-dimmer");
+    modal = document.querySelector("#stop-request-modal");
+
+    dimmer.style.zIndex = "99";
+    modal.style.zIndex = "100";
+    modal.style.opacity = 1;
+  }
+
+  function closeModal() {
+    dimmer = document.querySelector("#modal-dimmer");
+    modal = document.querySelector("#stop-request-modal");
+    instructions = document.querySelector("#map-instructions");
+
+    dimmer.style.zIndex = "-99";
+
+    modal.style.zIndex = "-100";
+    modal.style.opacity = 0;
+
+    instructions.style.zIndex = "-100";
+    instructions.style.opacity = 0;
+  }
+</script>
+<!--This script handles order section functionality-->
+<script></script>
 {% endblock %}

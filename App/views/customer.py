@@ -166,3 +166,25 @@ def customer_make_request():
 
     session.pop('order', None) 
     return '', 200
+
+@customer_views.route('/api/customer/make-stop-request', methods=['POST'])
+@jwt_required()
+def customer_request_stop():
+    if current_user.role != 'customer':
+        return jsonify(message='Unauthorized'), 403
+
+    data = request.get_json()
+    lat = data.get('lat')
+    lng = data.get('lng')
+
+    stop = add_customer_stop_to_route(
+            route_id=get_todays_route().route_id,
+            customer_id=get_jwt_identity(),
+            address="Placeholder",
+            lat=lat,
+            lng=lng,
+            stop_order=0,
+            status_id=1
+    )
+
+    return '', 200

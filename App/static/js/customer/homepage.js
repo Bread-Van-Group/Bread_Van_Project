@@ -58,6 +58,7 @@ function toggleMapActive() {
   const mapText = document.querySelector("#map-text");
   map.style.opacity = 1;
   mapText.style.opacity = 0;
+  mapText.style.zIndex = -2;
 }
 
 function toggleMapInactive() {
@@ -65,4 +66,5 @@ function toggleMapInactive() {
   const mapText = document.querySelector("#map-text");
   map.style.opacity = 0.3;
   mapText.style.opacity = 1;
+  mapText.style.zIndex = 2;
 }

@@ -34,24 +34,6 @@ const selectedMarkerIcon = L.divIcon({
 });
 
 //Map initialization
-
-//Production Map Config
-// var map = L.map("map", {
-//   center: [10.234144, -61.43942],
-//   zoom: 16,
-//   maxBoundsViscosity: 1.0,
-//   minZoom: 16,
-//   maxZoom: 18,
-//   zoomControl: false,
-//   scrollWheelZoom: true,
-//   wheelPxPerZoomLevel: 200,
-//   maxBounds: [
-//     [10.24166, -61.45022],
-//     [10.2274, -61.42478],
-//   ],
-// });
-
-//Testing Map config
 var map = L.map("map", {
   center: [10.64179, -61.400861],
   zoom: 17,
@@ -68,21 +50,21 @@ L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
 }).addTo(map);
 
 //Dummy Driver Location
-var breadVanDummyMarker = L.marker([10.642156853165652, -61.39825880527497], {
-  icon: L.divIcon({
-    html: vanSVG,
-    iconSize: [40, 40],
-    className: "van-icon",
-  }),
-}).addTo(map);
+// var breadVanDummyMarker = L.marker([10.642156853165652, -61.39825880527497], {
+//   icon: L.divIcon({
+//     html: vanSVG,
+//     iconSize: [40, 40],
+//     className: "van-icon",
+//   }),
+// }).addTo(map);
 
 //Dummy websocket code with preset driver location
-setInterval(() => {
-  socket.emit("driver_location", {
-    lat: 10.642156853165652,
-    lng: -61.39825880527497,
-  });
-}, 3000);
+// setInterval(() => {
+//   socket.emit("driver_location", {
+//     lat: 10.642156853165652,
+//     lng: -61.39825880527497,
+//   });
+// }, 3000);
 
 // **NOTE** The code below will be used to get the driver's live location
 
@@ -98,13 +80,19 @@ function success(position) {
   const lat = position.coords.latitude;
   const lon = position.coords.longitude;
 
-  //   socket.emit("driver_location", {
-  //     lat: position.coords.latitude,
-  //     lng: position.coords.longitude,
-  //   });
+  socket.emit("driver_location", {
+    lat: position.coords.latitude,
+    lng: position.coords.longitude,
+  });
 
   if (!driverLocation) {
-    driverLocation = L.marker([lat, lon]).addTo(map);
+    driverLocation = L.marker([lat, lon], {
+      icon: L.divIcon({
+        html: vanSVG,
+        iconSize: [40, 40],
+        className: "van-icon",
+      }),
+    }).addTo(map);
   } else {
     driverLocation.setLatLng([lat, lon]);
   }
@@ -152,7 +140,7 @@ async function initMap() {
 
           //Rebuild the route without the previously selected new marker
           const waypoints = [
-            breadVanDummyMarker.getLatLng(),
+            driverLocation.getLatLng(),
             ...markers.map((m) => L.latLng(m.lat, m.lng)),
           ];
           buildRoute(waypoints);
