@@ -74,17 +74,17 @@ async function hideSideContent() {
 
   await sleep(500);
 
-  map.flyTo(breadVanDummyMarker.getLatLng(), 17);
+  map.flyTo(driverLocation.getLatLng(), 17);
   map.closePopup();
 }
 
 //All execution of other code afterwards
 (async () => {
   await initMap();
-  map.flyTo(breadVanDummyMarker.getLatLng(), 17);
+  map.flyTo(driverLocation.getLatLng(), 17);
 
   const waypoints = [
-    breadVanDummyMarker.getLatLng(),
+    driverLocation.getLatLng(),
     ...markers.map((marker) => L.latLng(marker.lat, marker.lng)),
   ];
 
