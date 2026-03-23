@@ -26,7 +26,7 @@ def create_customer_request(customer_id, van_id, stop_id, item_id, quantity):
         quantity:    Number of units requested.
 
     Returns:
-        The newly created CustomerRequest instance.
+        The newly created CustomerRequest instance, or None if insufficient stock.
     """
 
     new_request = CustomerRequest(
@@ -39,11 +39,8 @@ def create_customer_request(customer_id, van_id, stop_id, item_id, quantity):
 
     van_id = get_active_van().van_id
 
-    try:
-        reserve_inventory(van_id, item_id, new_request.quantity)
-    except Exception as e:
-        db.session.rollback()
-        print(f"Unexpected error: {e}")
+    result = reserve_inventory(van_id, item_id, new_request.quantity)
+    if result is None:
         return None
 
     db.session.add(new_request)
