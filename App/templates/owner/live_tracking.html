@@ -1,0 +1,134 @@
+{% extends "owner/layout.html" %}
+
+{% block title %}Live Tracking{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/owner/homepage.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/owner/live_tracking.css') }}">
+  {{ super() }}
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  <div class="sidebar">
+    <div class="sidebar-logo">LOGO</div>
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_homepage') }}">Dashboard</a>
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_report') }}">Reports</a>
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_inventory') }}">Set Inventory</a>
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_routes') }}">Routes</a>
+    <a class="sidebar-btn active" href="{{ url_for('index_views.owner_tracking') }}">Driver Tracking</a>
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_fleet') }}"> Management</a>
+    <a class="sidebar-btn sidebar-logout" href="{{ url_for('auth_views.logout') }}">Logout</a>
+  </div>
+
+  <div class="content-wrapper">
+    <div class="main-content">
+      
+      <div class="tracking-header">
+        <h1>📍 Live Tracking</h1>
+        <div class="header-controls">
+          <button class="refresh-btn" id="refresh-btn" onclick="refreshTracking()">
+            <span class="icon">🔄</span> Refresh
+          </button>
+          <div class="auto-refresh-toggle">
+            <label>
+              <input type="checkbox" id="auto-refresh-toggle" checked />
+              Auto-refresh (30s)
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">🚐</div>
+          <div class="stat-content">
+            <div class="stat-value" id="active-vans">0</div>
+            <div class="stat-label">Active Vans</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🛣️</div>
+          <div class="stat-content">
+            <div class="stat-value" id="active-routes">0</div>
+            <div class="stat-label">Routes Today</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">👥</div>
+          <div class="stat-content">
+            <div class="stat-value" id="active-drivers">0</div>
+            <div class="stat-label">Active Drivers</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📦</div>
+          <div class="stat-content">
+            <div class="stat-value" id="total-inventory">0</div>
+            <div class="stat-label">Total Items</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Tracking Layout -->
+      <div class="tracking-layout">
+        
+        <!-- Map Panel -->
+        <div class="map-panel">
+          <div class="map-header">
+            <h2>🗺️ Van Locations</h2>
+            <div class="map-legend">
+              <span class="legend-item">
+                <span class="legend-dot active"></span> Active
+              </span>
+              <span class="legend-item">
+                <span class="legend-dot inactive"></span> Inactive
+              </span>
+            </div>
+          </div>
+          <div id="tracking-map" class="tracking-map"></div>
+        </div>
+
+        <!-- Side Panel -->
+        <div class="info-panel">
+          
+          <!-- Van Details -->
+          <div class="info-card">
+            <h3>🚐 Van Status</h3>
+            <div class="van-list" id="van-status-list">
+              <div class="empty-state">No vans tracked</div>
+            </div>
+          </div>
+
+          <!-- Today's Routes -->
+          <div class="info-card">
+            <h3>📋 Today's Routes</h3>
+            <div class="routes-list" id="today-routes-list">
+              <div class="empty-state">No routes scheduled</div>
+            </div>
+          </div>
+
+          <!-- Inventory Alert -->
+          <div class="info-card alert-card">
+            <h3>⚠️ Low Stock Alerts</h3>
+            <div class="alerts-list" id="low-stock-alerts">
+              <div class="empty-state">All stock levels OK</div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/owner/live_tracking.js') }}"></script>
+{% endblock %}

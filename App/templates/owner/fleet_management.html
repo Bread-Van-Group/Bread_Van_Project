@@ -1,0 +1,168 @@
+{% extends "owner/layout.html" %}
+
+{% block title %}Fleet Management{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/owner/fleet_management.css') }}">
+  {{ super() }}
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  <div class="sidebar">
+    <div class="sidebar-logo">LOGO</div>
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_homepage') }}">Dashboard</a>
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_report') }}">Reports</a>
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_inventory') }}">Set Inventory</a>
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_routes') }}">Routes</a>
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_tracking') }}">Driver Tracking</a>
+    <a class="sidebar-btn active" href="{{ url_for('index_views.owner_fleet') }}">Management</a>
+    <a class="sidebar-btn sidebar-logout" href="{{ url_for('auth_views.logout') }}">Logout</a>
+  </div>
+
+  <div class="content-wrapper">
+    <div class="main-content">
+
+      <div class="fleet-header">
+        <h1>🚛 Fleet Management</h1>
+      </div>
+
+      <!-- Quick Assign Bar -->
+      <div class="quick-assign-bar">
+        <h2>⚡ Quick Assign</h2>
+        <div class="quick-assign-controls">
+
+          <div class="quick-assign-field">
+            <div class="custom-select" id="qa-driver-select">
+              <button type="button" class="custom-select-trigger" id="qa-driver-trigger">
+                <span id="qa-driver-label">-- Select Driver --</span>
+                <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </button>
+              <ul class="custom-select-menu" id="qa-driver-menu">
+                <li data-value="">-- Select Driver --</li>
+              </ul>
+            </div>
+            <input type="hidden" id="assign-driver-select" value="" />
+          </div>
+
+          <span class="assign-arrow">→</span>
+
+          <div class="quick-assign-field">
+            <div class="custom-select" id="qa-van-select">
+              <button type="button" class="custom-select-trigger" id="qa-van-trigger">
+                <span id="qa-van-label">-- Select Van --</span>
+                <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </button>
+              <ul class="custom-select-menu" id="qa-van-menu">
+                <li data-value="">-- Select Van --</li>
+              </ul>
+            </div>
+            <input type="hidden" id="assign-van-select" value="" />
+          </div>
+
+          <button class="assign-btn" id="quick-assign-btn">Assign</button>
+        </div>
+      </div>
+
+      <!-- Main Grid -->
+      <div class="fleet-grid">
+
+        <!-- Drivers Panel -->
+        <div class="fleet-panel">
+          <div class="fleet-panel-header">
+            <h2>👤 Drivers</h2>
+            <button class="add-fleet-btn" id="add-driver-btn">+ Add Driver</button>
+          </div>
+          <div class="fleet-list" id="drivers-list">
+            <div class="empty-state">Loading drivers…</div>
+          </div>
+        </div>
+
+        <!-- Vans Panel -->
+        <div class="fleet-panel">
+          <div class="fleet-panel-header">
+            <h2>🚐 Vans</h2>
+            <button class="add-fleet-btn" id="add-van-btn">+ Add Van</button>
+          </div>
+          <div class="fleet-list" id="vans-list">
+            <div class="empty-state">Loading vans…</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Add Driver Modal -->
+<div class="modal-overlay" id="driver-modal" style="display:none;">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Add Driver</h2>
+      <button class="modal-close" onclick="hideDriverModal()">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Name *</label>
+        <input type="text" id="driver-name" placeholder="Full name" />
+      </div>
+      <div class="form-group">
+        <label>Email *</label>
+        <input type="email" id="driver-email" placeholder="driver@email.com" />
+      </div>
+      <div class="form-group">
+        <label>Password *</label>
+        <input type="password" id="driver-password" placeholder="Password" />
+      </div>
+      <div class="form-group">
+        <label>Phone</label>
+        <input type="text" id="driver-phone" placeholder="868-XXX-XXXX" />
+      </div>
+      <div class="form-group">
+        <label>Address</label>
+        <input type="text" id="driver-address" placeholder="Street address" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="footer-btn btn-cancel" onclick="hideDriverModal()">Cancel</button>
+      <button class="footer-btn btn-save" id="save-driver-btn">Save Driver</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Van Modal -->
+<div class="modal-overlay" id="van-modal" style="display:none;">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Add Van</h2>
+      <button class="modal-close" onclick="hideVanModal()">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>License Plate *</label>
+        <input type="text" id="van-license-plate" placeholder="e.g. PBK 1234" />
+      </div>
+      <div class="form-group">
+        <label>Model</label>
+        <input type="text" id="van-model" placeholder="e.g. Toyota HiAce" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="footer-btn btn-cancel" onclick="hideVanModal()">Cancel</button>
+      <button class="footer-btn btn-save" id="save-van-btn">Save Van</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/owner/fleet_management.js') }}"></script>
+{% endblock %}

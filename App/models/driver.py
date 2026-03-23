@@ -30,16 +30,18 @@ class Driver(User):
 
     def get_json(self):
         base = super().get_json()
+        assigned_van = getattr(self, 'assigned_van', None)
+        # assigned_van is a list backref when lazy=True — grab first item if populated
+        if isinstance(assigned_van, list):
+            assigned_van = assigned_van[0] if assigned_van else None
         base.update({
-            "driver_id": self.driver_id,
-            "name": self.name,
-            "address": self.address,
-            "phone": self.phone,
-            "owner_id": self.owner_id,
-            "assigned_van_id": self.assigned_van.van_id if hasattr(self,
-                                                                   'assigned_van') and self.assigned_van else None,
-            "assigned_van_plate": self.assigned_van.license_plate if hasattr(self,
-                                                                             'assigned_van') and self.assigned_van else None,
+            "driver_id":          self.driver_id,
+            "name":               self.name,
+            "address":            self.address,
+            "phone":              self.phone,
+            "owner_id":           self.owner_id,
+            "assigned_van_id":    assigned_van.van_id        if assigned_van else None,
+            "assigned_van_plate": assigned_van.license_plate if assigned_van else None,
         })
         return base
 
