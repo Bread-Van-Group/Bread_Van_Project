@@ -163,6 +163,16 @@
   transition: all 0.5s ease-in-out;
 }
 
+.order-info {
+  text-align: center;
+  font-family: "Shadows Into Light Two", cursive;
+  font-weight: 400;
+  font-style: italic;
+  font-size: 1.8rem;
+  color: var(--orange-deep);
+  background-color: var(--orange-light);
+}
+
 .order-items {
   display: flex;
   flex-direction: column;
@@ -282,6 +292,38 @@
   text-transform: uppercase;
 }
 
+.order-mng-panel {
+  display: flex;
+  flex-direction: row;
+  margin-top: 1vh;
+  justify-content: space-around;
+}
+
+.order-mng-btn {
+  border-radius: 15px;
+  border: none;
+
+  padding: 8px 12px;
+
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 400;
+  font-style: italic;
+  font-family: "Caveat Brush", cursive;
+  color: var(--orange-deep);
+
+  box-shadow:
+    rgba(9, 30, 66, 0.25) 0px 1px 1px,
+    rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;
+  color: white;
+  background: linear-gradient(145deg, #e07b39, #c66a2e);
+  transition: all 0.3s ease-in-out;
+}
+
+.order-mng-btn:nth-child(3) {
+  background: linear-gradient(145deg, var(--red-main), var(--red-deep));
+}
+
 .order-total {
   display: flex;
   justify-content: space-between;
@@ -295,7 +337,7 @@
   background: white;
   border-radius: 16px;
   padding: 12px 18px;
-  margin-top: 5vh;
+  margin-top: 2vh;
 
   box-shadow:
     rgba(224, 123, 57, 0.18) 0px 0px 0px 1.5px,
@@ -341,7 +383,7 @@
   transition: all 0.3s ease-in-out;
 }
 
-/* ─── Stop Request Modal ───────────────────────────────────────────────── */
+/* ───  Modals ───────────────────────────────────────────────── */
 .modal-dimmer {
   position: fixed;
   inset: 0;
@@ -377,7 +419,7 @@
     rgba(0, 0, 0, 0.07) 0px 32px 64px;
 }
 
-.stop-request-modal {
+.modal {
   display: flex;
   opacity: 0;
 
@@ -408,7 +450,7 @@
   flex-direction: column;
 }
 
-.stop-request-close-button {
+.modal-close-button {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
@@ -422,7 +464,7 @@
   padding: 2px 6px;
 }
 
-.stop-request-modal-text {
+.modal-text {
   margin-top: 1.1rem;
   text-align: center;
   font-family: "Caveat Brush", cursive;
@@ -431,14 +473,14 @@
   color: var(--orange-deep);
 }
 
-.stop-request-modal-btns {
+.modal-btns {
   display: flex;
   flex-direction: row;
   gap: 1vw;
   justify-content: space-evenly;
 }
 
-.stop-request-modal-btn {
+.modal-btn {
   text-align: center;
   border-radius: 15px;
   padding: 8px;
@@ -453,11 +495,11 @@
     rgba(0, 0, 0, 0.24) 0px 1px 2px;
 }
 
-.stop-request-modal-btn:first-child {
+.modal-btn:first-child {
   background-color: var(--orange-deep);
 }
 
-.stop-request-modal-btn:last-child {
+.modal-btn:last-child {
   background-color: var(--ink-muted);
 }
 

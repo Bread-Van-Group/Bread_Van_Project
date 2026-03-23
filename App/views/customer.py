@@ -1,6 +1,6 @@
 from flask import Blueprint, session, redirect,flash, render_template, request, jsonify, url_for
 from flask_jwt_extended import jwt_required, current_user, verify_jwt_in_request, get_jwt_identity
-from App.controllers import (get_today_customer_request, delete_today_pending_customer_order,  get_active_van_plate, get_todays_route, add_customer_stop_to_route, get_active_van,  create_customer_request, get_daily_inventory_item, get_daily_inventory, get_customer_request_total)
+from App.controllers import (edit_customer_stop,get_today_customer_request, delete_today_pending_customer_order,  get_active_van_plate, get_todays_route, add_customer_stop_to_route, get_active_van,  create_customer_request, get_daily_inventory_item, get_daily_inventory, get_customer_request_total)
 from App.controllers.transaction import get_report_data
 
 from datetime import date, time
@@ -112,7 +112,7 @@ def delete_customer_orders():
     if isDeleted:
         return '', 200
     else:
-        return redirect(url_for('customer_views.customer_checkout', message="Could not make new order, please try again later"))
+        return redirect(url_for('customer_views.customer_checkout', message="Could not delete order, please try again later"))
 
 
 @customer_views.route('/api/customer/get-order', methods=['GET'])
@@ -153,6 +153,8 @@ def customer_make_request():
             stop_order=0,
             status_id=1
         )
+    else:
+        edit_customer_stop(stop['stop_id'], lat, lng)
         
     
     for item in order:
@@ -176,8 +178,16 @@ def customer_request_stop():
     data = request.get_json()
     lat = data.get('lat')
     lng = data.get('lng')
+    loc_change = data.get('locationChanged')
+    stop = get_today_customer_request(get_jwt_identity())
 
-    stop = add_customer_stop_to_route(
+    if loc_change:
+        status = 1 #Have the status go back to pending since location change
+    else:
+        status = stop['status_id']
+
+    if not stop:
+        stop = add_customer_stop_to_route(
             route_id=get_todays_route().route_id,
             customer_id=get_jwt_identity(),
             address="Placeholder",
@@ -185,6 +195,30 @@ def customer_request_stop():
             lng=lng,
             stop_order=0,
             status_id=1
+        )
+    else:
+        edit_customer_stop(stop['stop_id'], lat, lng, status)
+
+    return '', 200
+
+@customer_views.route('/api/customer/clear-requests', methods=['POST'])
+@jwt_required()
+def customer_clear_request_items():
+    if current_user.role != 'customer':
+        return jsonify(message='Unauthorized'), 403
+    
+    customer_id = get_jwt_identity()
+    stop = get_today_customer_request(customer_id)
+    isDeleted = delete_today_pending_customer_order(customer_id)
+
+    stop = add_customer_stop_to_route(
+            route_id=get_todays_route().route_id,
+            customer_id=get_jwt_identity(),
+            address=stop["address"],
+            lat=stop['lat'],
+            lng=stop['lng'],
+            stop_order=stop['stop_order'],
+            status_id=stop['status_id']
     )
 
     return '', 200

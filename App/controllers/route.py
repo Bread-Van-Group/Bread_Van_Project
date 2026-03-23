@@ -88,6 +88,21 @@ def add_customer_stop_to_route(route_id, customer_id, address, lat, lng, stop_or
     db.session.commit()
     return stop.get_json()
 
+def edit_customer_stop(id, lat, lng, status):
+    stop = get_stop_by_id(id)
+
+    if not stop:
+        return False
+    
+    stop.lat = lat
+    stop.lng = lng
+    stop.status_id = status
+    
+    db.session.add(stop)
+    db.session.commit()
+
+    return True
+
 def update_request_status(status_id, stop_id , fulfilled=False):
     """Update the status (and optionally fulfilled_time) of a customer request."""
     from datetime import datetime, timedelta, timezone
