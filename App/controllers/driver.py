@@ -47,3 +47,48 @@ def unassign_driver_from_route(driver_id, route_id):
     db.session.delete(driver_route)
     db.session.commit()
     return True
+
+
+def assign_van_to_driver(van_id, driver_id):
+    """
+    Set a driver as the current driver of a van.
+    Also updates Van.current_driver_id via the Van model helper.
+    Returns the updated Van, or None if either record is not found.
+    """
+    van = db.session.get(Van, van_id)
+    driver = db.session.get(Driver, driver_id)
+    if not van or not driver:
+        return None
+    van.assign_driver(driver_id)
+    db.session.commit()
+    return van
+
+
+def unassign_van_from_driver(van_id):
+    """
+    Remove the driver assignment from a van.
+    """
+    van = db.session.get(Van, van_id)
+    if not van:
+        return None
+    van.unassign_driver()
+    db.session.commit()
+    return van
+
+
+
+def update_driver_info(driver_id, name=None, address=None, phone=None, owner_id=None):
+    """
+    Partially update a driver's profile fields.
+    Only non-None arguments are applied.
+    Returns the updated Driver, or None if not found.
+    """
+    driver = get_driver_by_id(driver_id)
+    if not driver:
+        return None
+    if name is not None: driver.name = name
+    if address is not None: driver.address = address
+    if phone is not None: driver.phone = phone
+    if owner_id is not None: driver.owner_id = owner_id
+    db.session.commit()
+    return driver

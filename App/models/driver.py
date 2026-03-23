@@ -1,34 +1,45 @@
 from App.database import db
 from .user import User
 
+
 class Driver(User):
     __tablename__ = "drivers"
 
     driver_id = db.Column(db.Integer, db.ForeignKey("users.user_id"), primary_key=True)
-    name      = db.Column(db.String(100), nullable=False)
-    address   = db.Column(db.String(255), nullable=True)
-    phone     = db.Column(db.String(20),  nullable=True)
+    name = db.Column(db.String(100), nullable=False)
+    address = db.Column(db.String(255), nullable=True)
+    phone = db.Column(db.String(20), nullable=True)
 
+    # NEW: Link to owner (which owner employs this driver)
+    owner_id = db.Column(db.Integer, db.ForeignKey("owners.owner_id"), nullable=True)
 
-    driver_routes    = db.relationship("DriverRoute", backref="driver", lazy=True)
+    # Relationships
+    driver_routes = db.relationship("DriverRoute", backref="driver", lazy=True)
+    # 'assigned_van' relationship created by Van model's backref
 
     __mapper_args__ = {
         "polymorphic_identity": "driver",
     }
 
-    def __init__(self, email, password, name, address=None, phone=None):
+    def __init__(self, email, password, name, owner_id=None, address=None, phone=None):
         super().__init__(email=email, password=password, role="driver")
-        self.name    = name
+        self.name = name
+        self.owner_id = owner_id
         self.address = address
-        self.phone   = phone
+        self.phone = phone
 
     def get_json(self):
         base = super().get_json()
         base.update({
             "driver_id": self.driver_id,
-            "name":      self.name,
-            "address":   self.address,
-            "phone":     self.phone,
+            "name": self.name,
+            "address": self.address,
+            "phone": self.phone,
+            "owner_id": self.owner_id,
+            "assigned_van_id": self.assigned_van.van_id if hasattr(self,
+                                                                   'assigned_van') and self.assigned_van else None,
+            "assigned_van_plate": self.assigned_van.license_plate if hasattr(self,
+                                                                             'assigned_van') and self.assigned_van else None,
         })
         return base
 
