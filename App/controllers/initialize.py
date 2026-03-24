@@ -3,7 +3,7 @@ from .user import create_driver, create_customer, create_owner
 from .request_item import create_customer_request
 from .status import create_status
 from .inventory_item import create_item
-from .route import create_route
+from .route import create_route, add_stop_to_route
 from .stop_request import add_customer_stop_to_route
 from .van import create_van, assign_van_to_route, set_van_inventory
 from .driver import assign_driver_to_route
@@ -119,6 +119,14 @@ def initialize():
         day_of_week=datetime.now().strftime("%A"),
         owner_id=owner.owner_id,
         description="East Trinidad morning bread delivery",
+    )
+
+    owner_stop1 = add_stop_to_route(
+        route_id=  route.route_id,
+        address= "Somewhere in St Augustine",
+        lat=10.640908716845667,
+        lng=-61.39593945274354,
+        stop_order=1
     )
 
     stop1 = add_customer_stop_to_route(

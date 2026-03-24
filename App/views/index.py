@@ -353,7 +353,6 @@ def get_route_stops(route_id):
         'lat': float(s.lat),
         'lng': float(s.lng),
         'stop_order': s.stop_order,
-        'estimated_arrival_time': s.estimated_arrival_time.strftime('%H:%M') if s.estimated_arrival_time else ''
     } for s in stops])
 
 
@@ -497,14 +496,10 @@ def update_route(route_id):
         stop = RouteStop(
             route_id=route.route_id,
             owner_id=current_user.owner_id,
-            customer_id=None,
             address=stop_data.get('address', ''),
             lat=stop_data['lat'],
             lng=stop_data['lng'],
             stop_order=stop_data['order'],
-            status_id=None,
-            fulfilled_time=None,
-            estimated_arrival_time=None,
         )
         db.session.add(stop)
 

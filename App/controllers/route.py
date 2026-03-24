@@ -42,14 +42,13 @@ def get_route_stops(route_id):
     ).all()
 
 
-def add_stop_to_route(route_id, address, lat, lng, stop_order, estimated_arrival_time=None):
+def add_stop_to_route(route_id, address, lat, lng, stop_order):
     stop = RouteStop(
         route_id=route_id,
         address=address,
         lat=lat,
         lng=lng,
         stop_order=stop_order,
-        estimated_arrival_time=estimated_arrival_time,
     )
     db.session.add(stop)
     db.session.commit()
