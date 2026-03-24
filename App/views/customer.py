@@ -1,6 +1,18 @@
 from flask import Blueprint, session, redirect,flash, render_template, request, jsonify, url_for
 from flask_jwt_extended import jwt_required, current_user, verify_jwt_in_request, get_jwt_identity
-from App.controllers import (edit_customer_stop,get_today_customer_request, delete_today_pending_customer_order,  get_active_van_plate, get_todays_route, add_customer_stop_to_route, get_active_van,  create_customer_request, get_daily_inventory_item, get_daily_inventory, get_customer_request_total)
+from App.controllers import (
+    edit_customer_stop,
+    get_today_customer_request, 
+    delete_today_pending_customer_order,  
+    get_active_van_plate, 
+    get_todays_route, 
+    add_customer_stop_to_route, 
+    get_active_van,  
+    create_customer_request, 
+    get_daily_inventory_item, 
+    get_daily_inventory, 
+    get_customer_request_total
+)
 from App.controllers.transaction import get_report_data
 
 from datetime import date, time
@@ -159,8 +171,6 @@ def customer_make_request():
     
     for item in order:
         new_request = create_customer_request(
-            customer_id=get_jwt_identity(),
-            van_id=get_active_van().van_id,
             stop_id=stop['stop_id'],
             item_id=item['inventory_id'],
             quantity=item['quantity'],
@@ -180,15 +190,14 @@ def customer_request_stop():
     lng = data.get('lng')
     loc_change = data.get('locationChanged')
     stop = get_today_customer_request(get_jwt_identity())
+    todays_route = get_todays_route()    
 
-    if loc_change:
-        status = 1 #Have the status go back to pending since location change
-    else:
-        status = stop['status_id']
+    if not todays_route:
+         return '', 400
 
     if not stop:
         stop = add_customer_stop_to_route(
-            route_id=get_todays_route().route_id,
+            route_id=todays_route.route_id,
             customer_id=get_jwt_identity(),
             address="Placeholder",
             lat=lat,
@@ -197,6 +206,11 @@ def customer_request_stop():
             status_id=1
         )
     else:
+        if loc_change:
+            status = 1 #Have the status go back to pending since location change
+        else:
+            status = stop['status_id']
+
         edit_customer_stop(stop['stop_id'], lat, lng, status)
 
     return '', 200

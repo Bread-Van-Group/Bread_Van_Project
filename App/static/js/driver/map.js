@@ -96,6 +96,14 @@ function success(position) {
   } else {
     driverLocation.setLatLng([lat, lon]);
   }
+
+  //Recalculate the route
+  const waypoints = [
+    driverLocation.getLatLng(),
+    ...markers.map((marker) => L.latLng(marker.lat, marker.lng)),
+  ];
+
+  buildRoute(waypoints);
 }
 
 function error(err) {

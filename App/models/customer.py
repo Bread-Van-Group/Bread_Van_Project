@@ -14,7 +14,7 @@ class Customer(User):
     region_id = db.Column(db.Integer, db.ForeignKey("regions.region_id"), nullable=True)
 
     # Relationships
-    requests = db.relationship("CustomerRequest", backref="customer", lazy=True)
+    requests = db.relationship("StopRequest", backref="customer", lazy=True)
     transactions = db.relationship("Transaction", backref="customer", lazy=True)
     # 'region' relationship created by Region model's backref
 

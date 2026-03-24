@@ -197,7 +197,7 @@
           </button>
         </div>
         {% endif %}
-        <p class="order-total"><span>Total: </span>${{order_total}}</p>
+        <p class="order-total"><span>Total: </span>${{"%.2f" % order_total}}</p>
       </div>
     </div>
     <button class="stop-request-btn" onclick="openStopModal()">
@@ -308,6 +308,10 @@
         if (response.ok) {
           window.location.href =
             "{{ url_for('customer_views.customer_homepage',message='Stop Requested!') }}";
+        }
+        else{
+          window.location.href =
+            "{{ url_for('customer_views.customer_homepage',message='Could Not Request Stop, Please Try Later') }}";
         }
       });
     }
