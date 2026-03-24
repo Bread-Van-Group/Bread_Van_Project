@@ -134,6 +134,7 @@ def initialize():
 
     owner_stop1 = add_stop_to_route(
         route_id=  route.route_id,
+        owner_id= owner.owner_id,
         address= "Somewhere in St Augustine",
         lat=10.640908716845667,
         lng=-61.39593945274354,

@@ -150,6 +150,7 @@ def customer_make_request():
     
     lat = data.get('lat')
     lng = data.get('lng')
+    address = data.get('address')
     stop = get_today_customer_request(get_jwt_identity())
 
     order = session.get('order', [])
@@ -159,7 +160,7 @@ def customer_make_request():
         stop = add_customer_stop_to_route(
             route_id=get_todays_route().route_id,
             customer_id=get_jwt_identity(),
-            address="Placeholder",
+            address=address,
             lat=lat,
             lng=lng,
             stop_order=0,
@@ -189,6 +190,8 @@ def customer_request_stop():
     lat = data.get('lat')
     lng = data.get('lng')
     loc_change = data.get('locationChanged')
+    address = data.get('address')
+
     stop = get_today_customer_request(get_jwt_identity())
     todays_route = get_todays_route()    
 
@@ -199,7 +202,7 @@ def customer_request_stop():
         stop = add_customer_stop_to_route(
             route_id=todays_route.route_id,
             customer_id=get_jwt_identity(),
-            address="Placeholder",
+            address=address,
             lat=lat,
             lng=lng,
             stop_order=0,

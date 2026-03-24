@@ -70,8 +70,17 @@
     <div class="modal-content">
       <div class="modal-close-button" onclick="closeModal('edit-modal')">X</div>
       <p class="modal-text" style="font-size: 1.2rem">
-        Change Request to your current location or another location? (Warning:
-        Your order will need to be confirmed by the driver again!)
+        Change Request to your current location or another location?
+        <span
+          class="descriptor-info"
+          style="
+            margin-bottom: 2vh;
+            background-color: var(--orange-light);
+            font-size: 0.8rem;
+          "
+          >(Warning:Your order will need to be confirmed by the driver
+          again!)</span
+        >
       </p>
       <div class="modal-btns">
         <div class="modal-btn" onclick="editStopLocation(true)">
@@ -250,12 +259,14 @@
   }
 
   //This code is toggled when the customer chooses a new location
-  map.on("click", function (e) {
+  map.on("click", async function (e) {
     if (isAddingMarker) {
       const lat = e.latlng.lat;
       const lng = e.latlng.lng;
 
       isAddingMarker = false;
+      addressData = await reverseGeocode(lat, lng);
+      address = addressData.display_name.replace(", Trinidad and Tobago", "");
 
       fetch("/api/customer/make-stop-request", {
         method: "POST",
@@ -263,7 +274,8 @@
         body: JSON.stringify({
           lat: lat,
           lng: lng,
-          locationChanged: locationChanged
+          locationChanged: locationChanged,
+          address: address,
         }),
       }).then((response) => {
         if (response.ok) {
@@ -297,11 +309,13 @@
     isAddingMarker = true;
   }
 
-  function createStopRequest() {
-
+  async function createStopRequest() {
     if (customerMarker) {
       lat = customerMarker.getLatLng().lat;
       lng = customerMarker.getLatLng().lng;
+
+      addressData = await reverseGeocode(lat, lng);
+      address = addressData.display_name.replace(", Trinidad and Tobago", "");
 
       fetch("/api/customer/make-stop-request", {
         method: "POST",
@@ -309,14 +323,14 @@
         body: JSON.stringify({
           lat: lat,
           lng: lng,
-          locationChanged: locationChanged
+          locationChanged: locationChanged,
+          address: address,
         }),
       }).then((response) => {
         if (response.ok) {
           window.location.href =
             "{{ url_for('customer_views.customer_homepage',message='Stop Requested!') }}";
-        }
-        else{
+        } else {
           window.location.href =
             "{{ url_for('customer_views.customer_homepage',message='Could Not Request Stop, Please Try Later') }}";
         }
@@ -343,8 +357,7 @@
 
   function closeModal(modalId) {
     dimmer = document.querySelector("#modal-dimmer");
-    modal = document.querySelector('#' +String(modalId));
-
+    modal = document.querySelector("#" + String(modalId));
 
     //Map instructions
     instructions = document.querySelector("#map-instructions");
