@@ -12,6 +12,7 @@ from App.controllers import (
     update_request_status,
     add_stop_to_end_of_route,
     get_todays_route,
+    get_van_by_driver
 )
 from App.controllers.route import get_route_stops
 
@@ -109,6 +110,14 @@ def driver_transaction_page():
 
 
 # ── API Routes ────────────────────────────────────────────────────────────────
+@driver_views.route('/api/driver/plate', methods=['GET'])
+@jwt_required()
+def get_driver_plate():
+    if current_user.role != 'driver':
+        return jsonify(message='Unauthorized'), 403
+    
+    van_plate = get_van_by_driver(get_jwt_identity()).license_plate
+    return jsonify({"plate":van_plate}), 200
 
 @driver_views.route('/api/driver/routes', methods=['GET'])
 @jwt_required()
@@ -156,53 +165,6 @@ def unassign_route(route_id):
     if not success:
         return jsonify(message='Assignment not found'), 404
     return jsonify(message='Unassigned successfully')
-
-
-@driver_views.route('/api/driver/requests/<int:request_id>/cancel', methods=['POST'])
-@jwt_required()
-def cancel_request(request_id):
-    if current_user.role != 'driver':
-        return jsonify(message='Unauthorized'), 403
-
-    cancelled = db.session.execute(
-        db.select(Status).filter_by(status_name='cancelled')
-    ).scalar_one_or_none()
-    if not cancelled:
-        return jsonify(message='Status not found'), 500
-
-    req = db.session.get(CustomerRequest, request_id)
-    if not req:
-        return jsonify(message='Request not found'), 404
-
-    req.status_id = cancelled.status_id
-    db.session.commit()
-    return jsonify(message='Request cancelled')
-
-
-@driver_views.route('/api/driver/requests/<int:request_id>/complete', methods=['POST'])
-@jwt_required()
-def complete_request(request_id):
-    if current_user.role != 'driver':
-        return jsonify(message='Unauthorized'), 403
-
-    from datetime import datetime, timedelta, timezone
-    UTC_MINUS_4 = timezone(timedelta(hours=-4))
-
-    fulfilled = db.session.execute(
-        db.select(Status).filter_by(status_name='fulfilled')
-    ).scalar_one_or_none()
-    if not fulfilled:
-        return jsonify(message='Status not found'), 500
-
-    req = db.session.get(CustomerRequest, request_id)
-    if not req:
-        return jsonify(message='Request not found'), 404
-
-    req.status_id      = fulfilled.status_id
-    req.fulfilled_time = datetime.now(UTC_MINUS_4)
-    db.session.commit()
-    return jsonify(message='Request completed')
-
 
 @driver_views.route('/api/driver/active-stops', methods=['GET'])
 @jwt_required()

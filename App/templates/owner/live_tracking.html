@@ -1,35 +1,59 @@
-{% extends "owner/layout.html" %}
-
-{% block title %}Live Tracking{% endblock %}
-
+{% extends "owner/layout.html" %} {% block title %}Live Tracking{% endblock %}
 {% block head %}
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles/owner/homepage.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles/owner/live_tracking.css') }}">
-  {{ super() }}
-{% endblock %}
-
-{% block content %}
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='styles/owner/homepage.css') }}"
+/>
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='styles/owner/live_tracking.css') }}"
+/>
+{{ super() }} {% endblock %} {% block content %}
 <div class="page-wrapper">
   <div class="sidebar">
     <div class="sidebar-logo">LOGO</div>
-    <a class="sidebar-btn" href="{{ url_for('index_views.owner_homepage') }}">Dashboard</a>
-    <a class="sidebar-btn" href="{{ url_for('index_views.owner_report') }}">Reports</a>
-    <a class="sidebar-btn" href="{{ url_for('index_views.owner_inventory') }}">Set Inventory</a>
-    <a class="sidebar-btn" href="{{ url_for('index_views.owner_routes') }}">Routes</a>
-    <a class="sidebar-btn active" href="{{ url_for('index_views.owner_tracking') }}">Driver Tracking</a>
-    <a class="sidebar-btn" href="{{ url_for('index_views.owner_fleet') }}"> Management</a>
-    <a class="sidebar-btn sidebar-logout" href="{{ url_for('auth_views.logout') }}">Logout</a>
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_homepage') }}"
+      >Dashboard</a
+    >
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_report') }}"
+      >Reports</a
+    >
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_inventory') }}"
+      >Set Inventory</a
+    >
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_routes') }}"
+      >Routes</a
+    >
+    <a
+      class="sidebar-btn active"
+      href="{{ url_for('index_views.owner_tracking') }}"
+      >Driver Tracking</a
+    >
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_fleet') }}">
+      Management</a
+    >
+    <a
+      class="sidebar-btn sidebar-logout"
+      href="{{ url_for('auth_views.logout') }}"
+      >Logout</a
+    >
   </div>
 
   <div class="content-wrapper">
     <div class="main-content">
-      
       <div class="tracking-header">
         <h1>📍 Live Tracking</h1>
         <div class="header-controls">
-          <button class="refresh-btn" id="refresh-btn" onclick="refreshTracking()">
+          <button
+            class="refresh-btn"
+            id="refresh-btn"
+            onclick="refreshTracking()"
+          >
             <span class="icon">🔄</span> Refresh
           </button>
           <div class="auto-refresh-toggle">
@@ -75,7 +99,6 @@
 
       <!-- Main Tracking Layout -->
       <div class="tracking-layout">
-        
         <!-- Map Panel -->
         <div class="map-panel">
           <div class="map-header">
@@ -94,7 +117,6 @@
 
         <!-- Side Panel -->
         <div class="info-panel">
-          
           <!-- Van Details -->
           <div class="info-card">
             <h3>🚐 Van Status</h3>
@@ -118,17 +140,14 @@
               <div class="empty-state">All stock levels OK</div>
             </div>
           </div>
-
         </div>
-
       </div>
-
     </div>
   </div>
 </div>
 
-{% endblock %}
-
-{% block scripts %}
+{% endblock %} {% block scripts %}
+<!---Web Socket Code Below-->
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script src="{{ url_for('static', filename='js/owner/live_tracking.js') }}"></script>
 {% endblock %}

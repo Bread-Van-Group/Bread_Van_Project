@@ -76,13 +76,16 @@ navigator.geolocation.watchPosition(success, error, {
   timeout: 10000,
 });
 
-function success(position) {
+async function success(position) {
   const lat = position.coords.latitude;
   const lon = position.coords.longitude;
+
+  plate = await getDriverPlate();
 
   socket.emit("driver_location", {
     lat: position.coords.latitude,
     lng: position.coords.longitude,
+    plate: plate,
   });
 
   if (!driverLocation) {
@@ -112,6 +115,13 @@ function error(err) {
   } else {
     alert("Error: Position is unavailable!");
   }
+}
+
+async function getDriverPlate() {
+  const res = await fetch("/api/driver/plate");
+  const json = await res.json();
+
+  return json.plate;
 }
 
 async function getActiveMarkers() {

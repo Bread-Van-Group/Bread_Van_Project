@@ -6,6 +6,12 @@ from datetime import date
 def get_van_by_id(van_id):
     return db.session.get(Van, van_id)
 
+def get_van_by_driver(driver_id):
+    return db.session.execute(
+        db.select(Van)
+        .filter_by(current_driver_id=driver_id)
+    ).scalar_one_or_none()
+
 def get_active_van():
     from App.models import Van
     return db.session.execute(
