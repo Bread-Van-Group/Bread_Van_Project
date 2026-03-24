@@ -197,7 +197,12 @@
           </button>
         </div>
         {% endif %}
-        <p class="order-total"><span>Total: </span>${{"%.2f" % order_total}}</p>
+        <div class="order-bottom-content">
+          <p class="order-eta">eta: <span id="order-eta">Unavailable</span></p>
+          <p class="order-total">
+            <span>Total: </span>${{"%.2f" % order_total}}
+          </p>
+        </div>
       </div>
     </div>
     <button class="stop-request-btn" onclick="openStopModal()">
@@ -237,6 +242,8 @@
           className: "marker-icon",
         }).addTo(map);
 
+        markers.addLayer(orderMarker);
+        map.flyTo([customerStop.lat, customerStop.lng], 14);
         clearInterval(checkOrderIntervalId);
       }
     }, 1000);

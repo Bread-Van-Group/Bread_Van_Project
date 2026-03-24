@@ -4,6 +4,9 @@ const checkoutCustomerMarkerIcon = L.divIcon({
   className: "marker-icon ",
 });
 
+//CHANGE THIS DEPENDING ON DESIRED VAN SPEED
+const VAN_SPEED = 48.2803; //km an hour
+
 //----------------------------TESTING CODE---------------------------
 // //Dummy Driver Location
 // breadVanMarker = L.marker([10.642156853165652, -61.39825880527497], {
@@ -100,10 +103,28 @@ detectDriverInterval = setInterval(() => {
 
 //Set Distance of Van and reset Route Periodically
 setInterval(() => {
+  if (breadVanMarker == null) return;
+
+  //ETA Code
   const vanDistanceMetres = breadVanMarker
     .getLatLng()
     .distanceTo(customerMarker.getLatLng());
-  const vanDistanceKm = (vanDistanceMetres / 1000).toFixed(2);
+  const vanDistanceKm = vanDistanceMetres / 1000;
+
+  const eta = document.querySelector("#order-eta");
+
+  const seconds = Math.floor((vanDistanceKm / VAN_SPEED) * 3600);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+
+  const arrivalTime =
+    String(hours).padStart(2, "0") +
+    ":" +
+    String(minutes).padStart(2, "0") +
+    ":" +
+    String(seconds).padStart(2, "0");
+
+  eta.innerHTML = arrivalTime;
 
   //Build the route between customer and driver
   const waypoints = [breadVanMarker.getLatLng(), customerMarker.getLatLng()];
