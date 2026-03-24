@@ -18,7 +18,7 @@ class InventoryItem(db.Model):
     # Relationships
     daily_inventories  = db.relationship("DailyInventory",  backref="item", lazy=True)
     transaction_items  = db.relationship("TransactionItem", backref="item", lazy=True)
-    customer_requests  = db.relationship("CustomerRequest", backref="item", lazy=True)
+    customer_requests  = db.relationship("RequestItem", backref="item", lazy=True)
 
     def __init__(self, name, price, description=None, category=None):
         self.name        = name

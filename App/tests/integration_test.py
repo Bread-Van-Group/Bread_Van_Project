@@ -185,7 +185,7 @@ class TestCustomerOrderFlow:
         When a customer places a request for 3 units,
         the available inventory on the van should decrease by 3.
         """
-        from App.controllers.customer_request import create_customer_request
+        from App.controllers.request_item import create_customer_request
         from App.models import DailyInventory
 
         owner, customer, van, item, route, stop, inventory = self._setup_order_environment(db)
@@ -210,7 +210,7 @@ class TestCustomerOrderFlow:
         A customer request record should exist in the database
         after an order is successfully placed.
         """
-        from App.controllers.customer_request import create_customer_request
+        from App.controllers.request_item import create_customer_request
 
         owner, customer, van, item, route, stop, inventory = self._setup_order_environment(db)
 
@@ -232,7 +232,7 @@ class TestCustomerOrderFlow:
         Attempting to order more than the available stock should fail
         and return None rather than crashing or corrupting inventory.
         """
-        from App.controllers.customer_request import create_customer_request
+        from App.controllers.request_item import create_customer_request
         from App.models import DailyInventory
 
         owner, customer, van, item, route, stop, inventory = self._setup_order_environment(db)
@@ -264,7 +264,7 @@ class TestCustomerOrderFlow:
         from App.controllers.inventory_item import create_item
         from App.controllers.route import create_route, add_customer_stop_to_route
         from App.controllers.status import create_status
-        from App.controllers.customer_request import create_customer_request
+        from App.controllers.request_item import create_customer_request
         from App.models import DailyInventory
 
         # Step 1 — Register and login

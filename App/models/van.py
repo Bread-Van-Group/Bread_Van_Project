@@ -24,7 +24,6 @@ class Van(db.Model):
 
     # Relationships
     daily_inventories = db.relationship("DailyInventory", backref="van", lazy=True)
-    customer_requests = db.relationship("CustomerRequest", backref="van", lazy=True)
     transactions = db.relationship("Transaction", backref="van", lazy=True)
     current_driver = db.relationship("Driver", foreign_keys=[current_driver_id], backref="assigned_van", lazy=True)
 

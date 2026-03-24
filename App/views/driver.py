@@ -14,8 +14,6 @@ from App.controllers import (
     get_todays_route,
 )
 from App.controllers.route import get_route_stops
-from App.models import CustomerRequest, RouteStop, Customer, InventoryItem, Status
-from App.database import db
 
 from datetime import date
 

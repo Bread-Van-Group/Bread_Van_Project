@@ -1,9 +1,10 @@
 from App.database import db
 from .user import create_driver, create_customer, create_owner
-from .customer_request import create_customer_request
+from .request_item import create_customer_request
 from .status import create_status
 from .inventory_item import create_item
-from .route import create_route, add_customer_stop_to_route
+from .route import create_route
+from .stop_request import add_customer_stop_to_route
 from .van import create_van, assign_van_to_route, set_van_inventory
 from .driver import assign_driver_to_route
 from .transaction import create_transaction
@@ -213,16 +214,12 @@ def initialize():
 
     # ── Customer Requests ─────────────────────────────────────────────────────
     request1 = create_customer_request(
-        customer_id=customer.customer_id,
-        van_id=van1.van_id,
         stop_id=stop1['stop_id'],
         item_id=hops.item_id,
         quantity=1,
     )
 
     request2 = create_customer_request(
-        customer_id=customer.customer_id,
-        van_id=van1.van_id,
         stop_id=stop1['stop_id'],
         item_id=bara.item_id,
         quantity=1,
