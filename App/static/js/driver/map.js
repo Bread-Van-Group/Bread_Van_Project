@@ -49,6 +49,23 @@ L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
 }).addTo(map);
 
+//Handles Marker Clustering
+let markerClusterLayer = L.markerClusterGroup({
+  iconCreateFunction: function (cluster) {
+    const count = cluster.getChildCount();
+    return L.divIcon({
+      html: `
+        <div class="marker-cluster">
+         ${markerSVG.repeat(count)}
+        </div>
+      `,
+      className: "",
+      iconSize: [40, 40],
+    });
+  },
+});
+map.addLayer(markerClusterLayer);
+
 //Dummy Driver Location
 // var breadVanDummyMarker = L.marker([10.642156853165652, -61.39825880527497], {
 //   icon: L.divIcon({

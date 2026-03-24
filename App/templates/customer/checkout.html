@@ -12,6 +12,16 @@ block head %}
     <div class="order-modal-content">
       <div class="order-modal-close-button" onclick="closeModal()">X</div>
       <p class="order-modal-text">You already have an existing order!</p>
+      <p
+        class="descriptor-info"
+        style="
+          margin-bottom: 2vh;
+          background-color: var(--orange-light);
+          font-size: 0.8rem;
+        "
+      >
+        New Orders must be reapproved by drivers!
+      </p>
       <div class="order-modal-btns">
         <div class="order-modal-btn" onclick="createNewOrder()">
           Create New Order
@@ -32,8 +42,15 @@ block head %}
       <div id="map" class="map"></div>
     </div>
     <div class="order-section">
-      <p class="order-header">My Order <span> ({{order | length}})</span></p>
+      <div class="order-header">
+        <p class="order-title">My Order <span> ({{order | length}})</span></p>
+        <p class="order-eta">eta: <span id="order-eta">Unavailable</span></p>
+      </div>
       <div class="order-items">
+        <p class="descriptor-info">
+          ETA is calculated from you're location, you may change location on the
+          order section of the homepage
+        </p>
         {% for item in order %}
         <div class="order-item">
           <p class="item-name">{{item.name}}</p>

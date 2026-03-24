@@ -166,7 +166,7 @@ def customer_make_request():
             status_id=1
         )
     else:
-        edit_customer_stop(stop['stop_id'], lat, lng)
+        edit_customer_stop(stop['stop_id'], lat, lng, stop['status_id'])
         
     
     for item in order:
