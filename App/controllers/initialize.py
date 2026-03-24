@@ -33,7 +33,18 @@ def initialize():
     region_pos = create_region("Port of Spain", "Capital city and surrounding area")
     region_chag = create_region("Chaguanas", "Central Trinidad commercial hub")
     region_sf = create_region("San Fernando", "South Trinidad industrial city")
-
+    region_diego = create_region("Diego Martin", "Northwest residential borough")
+    region_san_juan = create_region("San Juan-Laventille", "East Port of Spain urban corridor")
+    region_tunapuna = create_region("Tunapuna-Piarco", "East-West Corridor and airport region")
+    region_arima = create_region("Arima", "Northeast borough and market town")
+    region_sangre = create_region("Sangre Grande", "Large rural northeast county")
+    region_couva = create_region("Couva-Tabaquite-Talparo", "Central Trinidad industrial and rural belt")
+    region_rio = create_region("Rio Claro-Mayaro", "Southeast coast and fishing villages")
+    region_penal = create_region("Penal-Debe", "South-central agricultural region")
+    region_prince = create_region("Prince Town", "South-central sugarcane and farming area")
+    region_fortin = create_region("Point Fortin", "Southwest oil and gas borough")
+    region_siparia = create_region("Siparia", "Southwest rural and petroleum region")
+        
     print("✓ Regions created")
 
     # ── Users ─────────────────────────────────────────────────────────────────
