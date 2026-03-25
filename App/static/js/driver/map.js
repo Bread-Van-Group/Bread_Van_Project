@@ -34,33 +34,9 @@ const selectedMarkerIcon = L.divIcon({
 });
 
 //Map initialization
-
-//Production Map Config
-// var map = L.map("map", {
-//   center: [10.234144, -61.43942],
-//   zoom: 16,
-//   maxBoundsViscosity: 1.0,
-//   minZoom: 16,
-//   maxZoom: 18,
-//   zoomControl: false,
-//   scrollWheelZoom: true,
-//   wheelPxPerZoomLevel: 200,
-//   maxBounds: [
-//     [10.24166, -61.45022],
-//     [10.2274, -61.42478],
-//   ],
-// });
-
-//Testing Map config
 var map = L.map("map", {
   center: [10.64179, -61.400861],
-  //   maxBounds: [
-  //     [10.63555, -61.38032],
-  //     [10.64829, -61.41387],
-  //   ],
-  maxBoundsViscosity: 1.0,
   zoom: 17,
-  //   minZoom: 17,
   maxZoom: 18,
   scrollWheelZoom: true,
   wheelPxPerZoomLevel: 200,
@@ -73,22 +49,39 @@ L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
 }).addTo(map);
 
+//Handles Marker Clustering
+let markerClusterLayer = L.markerClusterGroup({
+  iconCreateFunction: function (cluster) {
+    const count = cluster.getChildCount();
+    return L.divIcon({
+      html: `
+        <div class="marker-cluster">
+         ${markerSVG.repeat(count)}
+        </div>
+      `,
+      className: "",
+      iconSize: [40, 40],
+    });
+  },
+});
+map.addLayer(markerClusterLayer);
+
 //Dummy Driver Location
-var breadVanDummyMarker = L.marker([10.642156853165652, -61.39825880527497], {
-  icon: L.divIcon({
-    html: vanSVG,
-    iconSize: [40, 40],
-    className: "van-icon",
-  }),
-}).addTo(map);
+// var breadVanDummyMarker = L.marker([10.642156853165652, -61.39825880527497], {
+//   icon: L.divIcon({
+//     html: vanSVG,
+//     iconSize: [40, 40],
+//     className: "van-icon",
+//   }),
+// }).addTo(map);
 
 //Dummy websocket code with preset driver location
-setInterval(() => {
-  socket.emit("driver_location", {
-    lat: 10.642156853165652,
-    lng: -61.39825880527497,
-  });
-}, 3000);
+// setInterval(() => {
+//   socket.emit("driver_location", {
+//     lat: 10.642156853165652,
+//     lng: -61.39825880527497,
+//   });
+// }, 3000);
 
 // **NOTE** The code below will be used to get the driver's live location
 
@@ -100,20 +93,37 @@ navigator.geolocation.watchPosition(success, error, {
   timeout: 10000,
 });
 
-function success(position) {
+async function success(position) {
   const lat = position.coords.latitude;
   const lon = position.coords.longitude;
 
-  //   socket.emit("driver_location", {
-  //     lat: position.coords.latitude,
-  //     lng: position.coords.longitude,
-  //   });
+  plate = await getDriverPlate();
+
+  socket.emit("driver_location", {
+    lat: position.coords.latitude,
+    lng: position.coords.longitude,
+    plate: plate,
+  });
 
   if (!driverLocation) {
-    driverLocation = L.marker([lat, lon]).addTo(map);
+    driverLocation = L.marker([lat, lon], {
+      icon: L.divIcon({
+        html: vanSVG,
+        iconSize: [40, 40],
+        className: "van-icon",
+      }),
+    }).addTo(map);
   } else {
     driverLocation.setLatLng([lat, lon]);
   }
+
+  //Recalculate the route
+  const waypoints = [
+    driverLocation.getLatLng(),
+    ...markers.map((marker) => L.latLng(marker.lat, marker.lng)),
+  ];
+
+  buildRoute(waypoints);
 }
 
 function error(err) {
@@ -122,6 +132,13 @@ function error(err) {
   } else {
     alert("Error: Position is unavailable!");
   }
+}
+
+async function getDriverPlate() {
+  const res = await fetch("/api/driver/plate");
+  const json = await res.json();
+
+  return json.plate;
 }
 
 async function getActiveMarkers() {
@@ -158,7 +175,7 @@ async function initMap() {
 
           //Rebuild the route without the previously selected new marker
           const waypoints = [
-            breadVanDummyMarker.getLatLng(),
+            driverLocation.getLatLng(),
             ...markers.map((m) => L.latLng(m.lat, m.lng)),
           ];
           buildRoute(waypoints);

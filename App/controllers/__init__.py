@@ -3,10 +3,14 @@ from .auth import *
 from .owner import *
 from .driver import *
 from .customer import *
-from .customer_request import *
+from .request_item import *
+from .stop_request import *
 from .van import *
 from .route import *
 from .inventory_item import *
 from .transaction import *
 from .status import *
+from .region import *
+from .route_area import *
+from .route_history import *
 from .initialize import *

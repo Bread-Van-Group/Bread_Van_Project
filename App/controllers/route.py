@@ -1,9 +1,7 @@
 from App.database import db
-from App.models import Route, RouteStop, CustomerRequest, Status
+from App.models import Route, RouteStop
 from sqlalchemy import func
 from datetime import datetime
-
-
 def get_route_by_id(route_id):
     return db.session.get(Route, route_id)
 
@@ -20,30 +18,6 @@ def get_stop_by_id(stop_id):
 
 def get_all_routes():
     return db.session.scalars(db.select(Route)).all()
-
-def get_pending_stops():
-    pending_stops = db.session.execute(
-        db.select(RouteStop)
-        .join(RouteStop.customer_requests)
-        .join(CustomerRequest.status)
-        .filter(Status.status_name == "pending")
-        .distinct()
-    ).scalars().all()
-
-    return [pending_stop.get_json() for pending_stop in pending_stops]
-
-def get_active_stops():
-    active_stops = db.session.execute(
-        db.select(RouteStop)
-        .join(RouteStop.customer_requests)
-        .join(CustomerRequest.status)
-        .filter(Status.status_name == "confirmed")
-        .distinct()
-    ).scalars().all()
-
-    return [active_stop.get_json() for active_stop in active_stops]
-
-
 
 def create_route(name, start_time, end_time, day_of_week, owner_id, description=None):
     route = Route(
@@ -68,14 +42,14 @@ def get_route_stops(route_id):
     ).all()
 
 
-def add_stop_to_route(route_id, address, lat, lng, stop_order, estimated_arrival_time=None):
+def add_stop_to_route(route_id, owner_id, address, lat, lng, stop_order):
     stop = RouteStop(
         route_id=route_id,
+        owner_id=owner_id,
         address=address,
         lat=lat,
         lng=lng,
         stop_order=stop_order,
-        estimated_arrival_time=estimated_arrival_time,
     )
     db.session.add(stop)
     db.session.commit()
@@ -106,6 +80,7 @@ def remove_stop_from_route(stop_id):
     stop = db.session.get(RouteStop, stop_id)
     if not stop:
         return False
+    
     db.session.delete(stop)
     db.session.commit()
     return True

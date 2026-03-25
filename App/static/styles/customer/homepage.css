@@ -1,5 +1,6 @@
 /* ─── Page Content ───────────────────────────────────────────────── */
 .page-content {
+  position: relative;
   display: flex;
   flex-direction: column;
   padding: 12px;
@@ -16,12 +17,13 @@
 .main-content {
   position: relative;
   width: 100%;
-  height: 80vh;
+  height: 72vh;
   border-radius: 25px;
   background-color: white;
   box-shadow:
     rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
     rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+  z-index: 2;
 }
 
 .content-navbar {
@@ -145,49 +147,6 @@
   z-index: 2;
 }
 
-/* Map Info Footer (ETA and Distance) */
-.map-info {
-  z-index: 2;
-  position: absolute;
-  bottom: 16px;
-  left: 16px;
-  right: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  padding: 16px 32px;
-  border-radius: 15px;
-  box-shadow:
-    rgba(60, 64, 67, 0.3) 0px 2px 4px 0px,
-    rgba(60, 64, 67, 0.15) 0px 4px 8px 2px;
-  font-family: "Shadows Into Light Two", cursive;
-  font-size: 1.4rem;
-  font-weight: 600;
-  color: #333;
-}
-
-.map-info-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.map-info-label {
-  font-family: "Caveat Brush", cursive;
-  font-size: 1.6rem;
-  color: #e07b39;
-  font-weight: 400;
-}
-
-.map-info-value {
-  font-family: "Shadows Into Light Two", cursive;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #333;
-}
-
 /* ─── Orders Section ───────────────────────────────────────────────── */
 .orders-section {
   position: absolute;
@@ -204,6 +163,16 @@
   transition: all 0.5s ease-in-out;
 }
 
+.order-info {
+  text-align: center;
+  font-family: "Shadows Into Light Two", cursive;
+  font-weight: 400;
+  font-style: italic;
+  font-size: 1.8rem;
+  color: var(--orange-deep);
+  background-color: var(--orange-light);
+}
+
 .order-items {
   display: flex;
   flex-direction: column;
@@ -211,7 +180,7 @@
   align-items: center;
   padding: 4px 2px;
   direction: rtl;
-  height: 75%;
+  height: 74%;
   overflow-y: scroll;
 }
 
@@ -323,11 +292,98 @@
   text-transform: uppercase;
 }
 
+.order-mng-panel {
+  display: flex;
+  flex-direction: row;
+  margin-top: 1vh;
+  justify-content: space-around;
+}
+
+.order-mng-btn {
+  border-radius: 15px;
+  border: none;
+
+  padding: 8px 12px;
+
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 400;
+  font-style: italic;
+  font-family: "Caveat Brush", cursive;
+  color: var(--orange-deep);
+
+  box-shadow:
+    rgba(9, 30, 66, 0.25) 0px 1px 1px,
+    rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;
+  color: white;
+  background: linear-gradient(145deg, #e07b39, #c66a2e);
+  transition: all 0.3s ease-in-out;
+}
+
+.order-mng-btn:nth-child(3) {
+  background: linear-gradient(145deg, var(--red-main), var(--red-deep));
+}
+
+.order-bottom-content {
+  display: flex;
+  flex-direction: row;
+  gap: 1vw;
+
+  height: auto;
+  padding: 12px;
+  margin-top: 1.6vh;
+  height: 14%;
+  border-radius: 15px;
+
+  justify-content: space-between;
+  align-items: center;
+
+  box-shadow:
+    rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
+    rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+}
+
+.order-eta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  text-align: center;
+
+  font-size: 1.25rem;
+  font-weight: 400;
+  font-style: italic;
+  font-family: "Caveat Brush", cursive;
+
+  padding: 8px 14px;
+  border-radius: 16px;
+
+  text-transform: uppercase;
+  letter-spacing: 1.12px;
+
+  color: var(--orange-deep);
+  background: var(--orange-light);
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+    rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+}
+
+.order-eta span {
+  margin-left: 0.4rem;
+  font-size: 1rem;
+  font-family: "Shadows Into Light Two", cursive;
+  color: var(--orange-deep);
+  font-style: italic;
+  font-weight: 600;
+  letter-spacing: -0.42px;
+  text-transform: lowercase;
+}
+
 .order-total {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 1.45rem;
+  font-size: 1.25rem;
   font-family: "Shadows Into Light Two", cursive;
   color: var(--orange-deep);
   font-style: italic;
@@ -335,8 +391,7 @@
 
   background: white;
   border-radius: 16px;
-  padding: 12px 18px;
-  margin-top: 5vh;
+  padding: 8px 14px;
 
   box-shadow:
     rgba(224, 123, 57, 0.18) 0px 0px 0px 1.5px,
@@ -351,26 +406,167 @@
   font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  margin-right: 0.4rem;
 }
 
 /* ─── Map Icons ───────────────────────────────────────────────── */
-.established-footer {
-  background: white;
-  border-radius: 25px;
-  padding: 20px;
+
+/* ─── Stop Request Button ───────────────────────────────────────────────── */
+.stop-request-btn {
+  margin-top: 1vh;
+  border-radius: 15px;
+
+  width: max-content;
+  margin-left: 20vw;
+
+  font-family: "Caveat Brush", cursive;
+  text-transform: uppercase;
+  font-size: 1.8rem;
+  font-weight: 400;
+  font-style: italic;
+
+  text-decoration: none;
   text-align: center;
+  letter-spacing: 0.7px;
+  border: none;
+  padding: 8px 12px;
   box-shadow:
-    rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
-    rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+    rgba(9, 30, 66, 0.25) 0px 1px 1px,
+    rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;
+  color: white;
+  background: linear-gradient(145deg, #e07b39, #c66a2e);
+  transition: all 0.3s ease-in-out;
 }
 
-.established-footer h3 {
+/* ───  Modals ───────────────────────────────────────────────── */
+.modal-dimmer {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: -99;
+}
+
+.descriptor-info {
+  margin-top: 0px;
+  margin-bottom: 1px;
+  font-size: 0.7rem;
+  font-family: "Shadows Into Light Two", cursive;
+  color: var(--orange-deep);
+  font-style: italic;
+  font-weight: 600;
+  text-align: center;
+}
+
+.map-instructions {
+  position: absolute;
+  opacity: 0;
+  z-index: -100;
+
+  top: 1vh;
+  left: 0vw;
+
+  padding: 8px;
+  border-radius: 15px;
+
+  background-color: white;
+  color: var(--orange-deep);
+
+  text-align: center;
+  font-family: "Shadows Into Light Two", cursive;
+  font-size: 1rem;
+  font-style: italic;
+
+  box-shadow:
+    rgba(0, 0, 0, 0.07) 0px 1px 2px,
+    rgba(0, 0, 0, 0.07) 0px 2px 4px,
+    rgba(0, 0, 0, 0.07) 0px 4px 8px,
+    rgba(0, 0, 0, 0.07) 0px 8px 16px,
+    rgba(0, 0, 0, 0.07) 0px 16px 32px,
+    rgba(0, 0, 0, 0.07) 0px 32px 64px;
+}
+
+.modal {
+  display: flex;
+  opacity: 0;
+
+  position: absolute;
+  padding: 15px;
+  top: 30vh;
+  left: 10vw;
+  width: 80vw;
+  height: auto;
+  background: var(--white);
+  border-radius: 15px;
+
+  box-shadow:
+    rgba(0, 0, 0, 0.07) 0px 1px 2px,
+    rgba(0, 0, 0, 0.07) 0px 2px 4px,
+    rgba(0, 0, 0, 0.07) 0px 4px 8px,
+    rgba(0, 0, 0, 0.07) 0px 8px 16px,
+    rgba(0, 0, 0, 0.07) 0px 16px 32px,
+    rgba(0, 0, 0, 0.07) 0px 32px 64px;
+
+  z-index: -100;
+  transition: all ease-in-out 0.3s;
+}
+
+.stop-request-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-close-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  border-radius: 50%;
+  background-color: var(--red-deep);
+  color: white;
+
+  font-family: "Shadows Into Light Two", cursive;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 2px 6px;
+}
+
+.modal-text {
+  margin-top: 1.1rem;
+  text-align: center;
   font-family: "Caveat Brush", cursive;
-  font-size: 2rem;
-  font-weight: 400;
-  color: #333;
-  margin: 0;
-  letter-spacing: 0.5px;
+  font-size: 1.3rem;
+  font-style: italic;
+  color: var(--orange-deep);
+}
+
+.modal-btns {
+  display: flex;
+  flex-direction: row;
+  gap: 1vw;
+  justify-content: space-evenly;
+}
+
+.modal-btn {
+  text-align: center;
+  border-radius: 15px;
+  padding: 8px;
+
+  font-family: "Caveat Brush", cursive;
+  font-size: 1.12rem;
+  font-style: italic;
+  color: white;
+
+  box-shadow:
+    rgba(0, 0, 0, 0.12) 0px 1px 3px,
+    rgba(0, 0, 0, 0.24) 0px 1px 2px;
+}
+
+.modal-btn:first-child {
+  background-color: var(--orange-deep);
+}
+
+.modal-btn:last-child {
+  background-color: var(--ink-muted);
 }
 
 /* Mobile Responsive */

@@ -5,7 +5,7 @@ from flask_jwt_extended import (
 )
 from App.database import db
 from App.models import User
-from App.controllers import login
+from App.controllers import login, get_region_by_name
 from App.controllers.user import create_customer
 import os
 from werkzeug.utils import secure_filename
@@ -71,11 +71,9 @@ def signup_page():
 
 @auth_views.route('/signup', methods=['POST'])
 def signup_action():
-    """Handle signup form submission"""
     data = request.form
 
-    # Validate required fields
-    for field in ['first_name', 'last_name', 'email', 'password', 'verify_password']:
+    for field in ['name', 'email','area', 'password', 'verify_password']:
         if not data.get(field):
             flash(f'{field.replace("_", " ").title()} is required', 'error')
             return redirect(url_for('auth_views.signup_page'))
@@ -85,17 +83,16 @@ def signup_action():
         flash('Passwords do not match', 'error')
         return redirect(url_for('auth_views.signup_page'))
 
-    # Combine first + last name into the single 'name' field Customer expects
-    full_name = f"{data['first_name'].strip()} {data['last_name'].strip()}"
+    region = get_region_by_name(data['area'])
 
     # create_customer returns None if the email already exists
     new_user = create_customer(
         email=data['email'],
         password=data['password'],
-        name=full_name,
+        name=data['name'],
         address=data.get('address') or None,
         phone=data.get('phone') or None,
-        area=data.get('area') or None,  # NEW
+        region_id= region.region_id
     )
 
     if not new_user:
@@ -104,8 +101,7 @@ def signup_action():
 
     # Log the new user in immediately after signup
     token = login(data['email'], data['password'])
-    flash('Account created successfully! Welcome aboard.', 'success')
-    response = redirect(url_for('customer_views.customer_homepage'))
+    response = redirect(url_for('customer_views.customer_homepage', message='Account created successfully! Welcome aboard.'))
     set_access_cookies(response, token)
     return response
 

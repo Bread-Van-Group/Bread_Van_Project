@@ -1,0 +1,428 @@
+/* ─── Variables ─────────────────────────────────────────────── */
+:root {
+  --orange-deep: #c45e1e;
+  --orange-main: #e07b39;
+  --orange-warm: #f09455;
+  --orange-light: #fad4b4;
+  --orange-blush: #fff3ea;
+  --cream: #fffaf5;
+  --ink: #2a1a0e;
+  --ink-muted: #7a5a3e;
+  --ink-faint: #c8a98a;
+  --white: #ffffff;
+  --green-deep: #229954;
+  --green-main: #27ae60;
+  --red-deep: #c0392b;
+  --red-main: #e74c3c;
+  --shadow-warm: rgba(180, 80, 10, 0.12);
+}
+
+/* ─── Reset & Base ───────────────────────────────────────────── */
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #fcfbf5;
+  font-family: "Shadows Into Light Two", cursive;
+}
+
+/* ─── Page wrapper ───────────────────────────────────────────── */
+.page-wrapper {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* ─── Sidebar ────────────────────────────────────────────────── */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  background: linear-gradient(180deg, #2e1204 0%, #4a1e08 50%, #6b3012 100%);
+  padding: 100px 16px 20px 16px;
+  gap: 8px;
+  min-width: 220px;
+  max-width: 220px;
+  height: 100vh;
+  flex-shrink: 0;
+  z-index: 10;
+  position: relative;
+  box-shadow:
+    4px 0 24px rgba(80, 30, 5, 0.4),
+    inset -1px 0 0 rgba(240, 148, 85, 0.12);
+}
+
+.sidebar-logout {
+  margin-top: auto;
+  color: #f1948a !important;
+  border-color: rgba(231, 76, 60, 0.35) !important;
+  background-color: rgba(231, 76, 60, 0.08) !important;
+}
+.sidebar-logout:hover {
+  background: linear-gradient(145deg, var(--red-main), var(--red-deep)) !important;
+  color: var(--white) !important;
+  border-color: transparent !important;
+}
+
+/* ─── Sidebar logo ───────────────────────────────────────────── */
+.sidebar-logo {
+  position: fixed;
+  top: 0; left: 0;
+  width: 220px;
+  height: 80px;
+  background: linear-gradient(135deg, var(--orange-deep) 0%, var(--orange-main) 100%);
+  color: var(--white);
+  border: none;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 400;
+  font-family: "Caveat Brush", cursive;
+  font-style: italic;
+  letter-spacing: 2px;
+  box-shadow: 0 4px 16px rgba(100, 40, 5, 0.45), inset 0 1px 0 rgba(255,255,255,0.2);
+  z-index: 1000;
+}
+
+/* ─── Sidebar buttons ────────────────────────────────────────── */
+.sidebar-btn {
+  padding: 12px 16px;
+  background-color: rgba(255, 255, 255, 0.06);
+  color: var(--orange-light);
+  border: 1px solid rgba(240, 148, 85, 0.18);
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-family: "Caveat Brush", cursive;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+  text-decoration: none;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.sidebar-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+  transition: left 0.5s ease;
+}
+.sidebar-btn:hover::before { left: 100%; }
+.sidebar-btn:hover {
+  background-color: rgba(240, 148, 85, 0.16);
+  border-color: rgba(240, 148, 85, 0.4);
+  color: var(--white);
+  transform: translateX(4px);
+  box-shadow: 0 3px 12px rgba(180, 80, 10, 0.28);
+}
+.sidebar-btn:active { transform: translateX(2px); }
+.sidebar-btn.active {
+  background: linear-gradient(135deg, var(--orange-deep), var(--orange-main));
+  color: var(--white);
+  border-color: transparent;
+  box-shadow: 0 4px 16px rgba(180, 80, 10, 0.45), inset 0 1px 0 rgba(255,255,255,0.2);
+  transform: translateX(4px);
+}
+.sidebar-btn.active:hover {
+  background: linear-gradient(135deg, var(--orange-main), var(--orange-warm));
+  box-shadow: 0 6px 20px rgba(180, 80, 10, 0.55);
+}
+
+/* ─── Content wrapper ────────────────────────────────────────── */
+.content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: #fcfbf5;
+  min-width: 0;
+}
+
+/* ─── Main content ───────────────────────────────────────────── */
+.main-content {
+  flex: 1;
+  overflow: hidden;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 0;
+}
+
+/* ─── Tracking header ────────────────────────────────────────── */
+.tracking-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+.tracking-header h1 {
+  font-family: "Caveat Brush", cursive;
+  font-style: italic;
+  font-size: 2.5rem;
+  font-weight: 400;
+  color: var(--orange-main);
+  margin: 0;
+}
+.header-controls {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.refresh-btn {
+  padding: 8px 16px;
+  background: linear-gradient(145deg, var(--orange-main), var(--orange-deep));
+  color: var(--white);
+  border: none;
+  border-radius: 12px;
+  font-family: "Caveat Brush", cursive;
+  font-style: italic;
+  font-size: 1.1rem;
+  font-weight: 400;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  box-shadow: rgba(50,50,93,0.25) 0px 2px 5px -1px, rgba(0,0,0,0.3) 0px 1px 3px -1px;
+}
+.refresh-btn:hover {
+  background: linear-gradient(145deg, var(--orange-warm), var(--orange-main));
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--shadow-warm);
+}
+.auto-refresh-toggle {
+  font-family: "Shadows Into Light Two", cursive;
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--ink);
+}
+
+/* ─── Stats grid ─────────────────────────────────────────────── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  flex-shrink: 0;
+}
+.stat-card {
+  background: var(--white);
+  border-radius: 18px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow:
+    0 0 0 1px rgba(224, 123, 57, 0.08),
+    rgba(180, 80, 10, 0.08) 0px 1px 2px 0px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--shadow-warm);
+}
+.stat-icon { font-size: 2rem; }
+.stat-value {
+  font-family: "Caveat Brush", cursive;
+  font-style: italic;
+  font-size: 1.9rem;
+  font-weight: 400;
+  color: var(--orange-main);
+  line-height: 1;
+}
+.stat-label {
+  font-family: "Shadows Into Light Two", cursive;
+  font-style: italic;
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+  margin-top: 2px;
+}
+
+/* ─── Tracking layout — fills remaining height ───────────────── */
+.tracking-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 14px;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ─── Map panel ──────────────────────────────────────────────── */
+.map-panel {
+  background: var(--white);
+  border-radius: 25px;
+  box-shadow:
+    0 0 0 1px rgba(224, 123, 57, 0.08),
+    rgba(180, 80, 10, 0.08) 0px 1px 2px 0px,
+    rgba(180, 80, 10, 0.05) 0px 2px 6px 2px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+.map-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1.5px solid var(--orange-light);
+  flex-shrink: 0;
+}
+.map-header h2 {
+  font-family: "Caveat Brush", cursive;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.8rem;
+  margin: 0;
+  color: var(--ink);
+}
+.map-legend { display: flex; gap: 16px; }
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: "Shadows Into Light Two", cursive;
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--ink-muted);
+}
+.legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+.legend-dot.active   { background: rgb(251, 159, 102); }
+.legend-dot.inactive { background: rgb(150, 150, 150); }
+
+/* The map itself fills the rest of map-panel */
+.tracking-map {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  border-radius: 0 0 25px 25px;
+  z-index: 1;
+}
+
+/* ─── Info panel ─────────────────────────────────────────────── */
+.info-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+  min-height: 0;
+}
+.info-panel::-webkit-scrollbar { width: 4px; }
+.info-panel::-webkit-scrollbar-track { background: transparent; }
+.info-panel::-webkit-scrollbar-thumb { background: var(--orange-light); border-radius: 20px; }
+
+/* ─── Info cards ─────────────────────────────────────────────── */
+.info-card {
+  background: var(--white);
+  border-radius: 18px;
+  padding: 16px 18px;
+  box-shadow:
+    0 0 0 1px rgba(224, 123, 57, 0.08),
+    rgba(180, 80, 10, 0.08) 0px 1px 2px 0px;
+  flex-shrink: 0;
+}
+.info-card h3 {
+  font-family: "Caveat Brush", cursive;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.4rem;
+  margin: 0 0 12px 0;
+  color: var(--orange-main);
+  padding-bottom: 10px;
+  border-bottom: 1.5px solid var(--orange-light);
+}
+.alert-card { border: 2px solid var(--red-main); }
+.alert-card h3 { color: var(--red-main); }
+
+/* ─── Lists ──────────────────────────────────────────────────── */
+.van-list, .routes-list, .alerts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.van-status-item {
+  background: var(--cream);
+  border: 1px solid var(--orange-light);
+  border-radius: 12px;
+  padding: 10px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+.van-status-item:hover {
+  border-color: var(--orange-warm);
+  box-shadow: 0 2px 6px var(--shadow-warm);
+}
+.van-status-item.active {
+  border-color: var(--green-main);
+  background: #e8f8f0;
+}
+.van-plate {
+  font-family: "Shadows Into Light Two", cursive;
+  font-style: italic;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.van-driver {
+  font-family: "Shadows Into Light Two", cursive;
+  font-style: italic;
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+}
+.van-status-badge {
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-family: "Shadows Into Light Two", cursive;
+  font-style: italic;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--white);
+}
+.van-status-badge.active   { background: var(--green-main); }
+.van-status-badge.inactive { background: #95a5a6; }
+
+/* ─── Empty state ────────────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 14px;
+  color: var(--ink-muted);
+  font-family: "Shadows Into Light Two", cursive;
+  font-style: italic;
+  font-size: 1rem;
+}
+
+/* ─── Van icon on map ────────────────────────────────────────── */
+.van-icon {
+  background-color: rgb(251, 159, 102);
+  border-radius: 50%;
+  padding: 4px;
+  box-shadow:
+    rgba(0,0,0,0.4) 0px 2px 4px,
+    rgba(0,0,0,0.3) 0px 7px 13px -3px,
+    rgba(0,0,0,0.2) 0px -3px 0px inset;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .tracking-layout { grid-template-columns: 1fr; }
+}
+
+/* ─── Inactive van marker ────────────────────────────────────── */
+.van-icon-inactive {
+  background-color: rgb(150, 150, 150) !important;
+}

@@ -12,6 +12,16 @@ block head %}
     <div class="order-modal-content">
       <div class="order-modal-close-button" onclick="closeModal()">X</div>
       <p class="order-modal-text">You already have an existing order!</p>
+      <p
+        class="descriptor-info"
+        style="
+          margin-bottom: 2vh;
+          background-color: var(--orange-light);
+          font-size: 0.8rem;
+        "
+      >
+        New Orders must be reapproved by drivers!
+      </p>
       <div class="order-modal-btns">
         <div class="order-modal-btn" onclick="createNewOrder()">
           Create New Order
@@ -32,8 +42,15 @@ block head %}
       <div id="map" class="map"></div>
     </div>
     <div class="order-section">
-      <p class="order-header">My Order <span> ({{order | length}})</span></p>
+      <div class="order-header">
+        <p class="order-title">My Order <span> ({{order | length}})</span></p>
+        <p class="order-eta">eta: <span id="order-eta">Unavailable</span></p>
+      </div>
       <div class="order-items">
+        <p class="descriptor-info">
+          ETA is calculated from you're location, you may change location on the
+          order section of the homepage
+        </p>
         {% for item in order %}
         <div class="order-item">
           <p class="item-name">{{item.name}}</p>
@@ -90,42 +107,27 @@ block head %}
     return json;
   }
 
-  function createOrder(hasExistingOrder) {
-    //Product Code
-    // if (customerMarker) {
-    //   lat = customerMarker.getLatLng().lat;
-    //   lng = customerMarker.getLatLng().lng;
+  async function createOrder() {
+    // Production Code
 
-    //   fetch("/api/customer/make-order", {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify({ lat: lat, lng: lng, isExisting: hasExistingOrder, }),
-    //   }).then((response) => {
-    //     if (response.ok) {
-    //       window.location.href =
-    //         "{{ url_for('customer_views.customer_homepage') }}";
-    //     }
-    //   });
-    // }
+    addressData = await reverseGeocode(lat, lng);
+    address = addressData.display_name.replace(", Trinidad and Tobago", "");
 
-    //Test Code
-    lat = 10.6405359397094;
-    lng = -61.39297485351563;
+    if (customerMarker) {
+      lat = customerMarker.getLatLng().lat;
+      lng = customerMarker.getLatLng().lng;
 
-    fetch("/api/customer/make-order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        lat: lat,
-        lng: lng,
-        hasExistingOrder: hasExistingOrder,
-      }),
-    }).then((response) => {
-      if (response.ok) {
-        window.location.href =
-          "{{ url_for('customer_views.customer_homepage', message='Order Created!') }}";
-      }
-    });
+      fetch("/api/customer/make-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lat: lat, lng: lng, address: address }),
+      }).then((response) => {
+        if (response.ok) {
+          window.location.href =
+            "{{ url_for('customer_views.customer_homepage', message='Order Created!') }}";
+        }
+      });
+    }
   }
 
   function createNewOrder() {
@@ -134,7 +136,7 @@ block head %}
       headers: { "Content-Type": "application/json" },
     }).then((response) => {
       if (response.ok) {
-        createOrder(false);
+        createOrder();
       }
     });
   }
@@ -142,12 +144,12 @@ block head %}
   async function makeOrder() {
     activeOrder = await getActiveOrder();
 
-    if (activeOrder.length != 0) {
+    if (activeOrder.response) {
       displayOrderDecisionModal();
       return;
     }
 
-    createOrder(false);
+    createOrder();
   }
 </script>
 {% endblock %}

@@ -6,17 +6,23 @@ from datetime import date
 def get_van_by_id(van_id):
     return db.session.get(Van, van_id)
 
-def get_active_van():
+def get_van_by_driver(driver_id):
     return db.session.execute(
         db.select(Van)
-        .filter_by(status="active")
+        .filter_by(current_driver_id=driver_id)
     ).scalar_one_or_none()
+
+def get_active_van():
+    from App.models import Van
+    return db.session.execute(
+        db.select(Van).filter_by(status='active')
+    ).scalars().first()  # ✅ Returns first active van
 
 def get_active_van_plate():
     van = db.session.execute(
         db.select(Van)
         .filter_by(status="active")
-    ).scalar_one_or_none()
+    ).scalars().first()
 
     return van.license_plate
 

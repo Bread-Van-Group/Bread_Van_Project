@@ -1,23 +1,29 @@
 from App.database import db
-from .map_stop import MapStop
 from datetime import datetime, timedelta, timezone
 
 UTC_MINUS_4 = timezone(timedelta(hours=-4))
 
-class RouteStop(MapStop):
-    __tablename__ = "route_stops"
+class MapStop(db.Model):
+    __tablename__ = "map_stops"
 
-    stop_id                = db.Column(db.Integer, db.ForeignKey("map_stops.stop_id"),  primary_key=True)
-    route_id               = db.Column(db.Integer, db.ForeignKey("routes.route_id"),    nullable=False)
-    owner_id               = db.Column(db.Integer, db.ForeignKey("owners.owner_id"),    nullable=False)
-
+    stop_id                = db.Column(db.Integer, primary_key=True)
+    address                = db.Column(db.String(255), nullable=False)
+    lat                    = db.Column(db.Float,       nullable=False)
+    lng                    = db.Column(db.Float,       nullable=False)
+    stop_type              = db.Column(db.String(20),  nullable=False)
+    stop_order             = db.Column(db.Integer,     nullable=False)
+    created_at             = db.Column(db.DateTime(timezone=True), nullable=True,
+                                       default=lambda: datetime.now(UTC_MINUS_4))
+   
     __mapper_args__ = {
-        "polymorphic_identity": "route_stop",
+        "polymorphic_on": stop_type,
+        "polymorphic_identity": "map_stop",
     }
-    
+   
+    # Relationships
+    transactions      = db.relationship("Transaction",     backref="map_stop", lazy=True)
+
     def __init__(self, route_id, owner_id, address, lat, lng, stop_order):
-        self.route_id               = route_id
-        self.owner_id               = owner_id
         self.address                = address
         self.lat                    = lat
         self.lng                    = lng

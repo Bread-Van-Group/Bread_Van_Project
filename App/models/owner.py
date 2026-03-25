@@ -7,8 +7,9 @@ class Owner(User):
     owner_id = db.Column(db.Integer, db.ForeignKey("users.user_id"), primary_key=True)
 
     # Relationships
-    vans   = db.relationship("Van",   backref="owner",  lazy=True)
-    routes = db.relationship("Route", backref="owner",  lazy=True)
+    vans    = db.relationship("Van",    backref="owner", lazy=True)
+    routes  = db.relationship("Route",  backref="owner", lazy=True)
+    drivers = db.relationship("Driver", backref="owner", lazy=True, foreign_keys= "Driver.owner_id")  # NEW
 
     __mapper_args__ = {
         "polymorphic_identity": "owner",
@@ -20,7 +21,10 @@ class Owner(User):
     def get_json(self):
         base = super().get_json()
         base.update({
-            "owner_id": self.owner_id,
+            "owner_id":      self.owner_id,
+            "vans_count":    len(self.vans) if self.vans else 0,
+            "routes_count":  len(self.routes) if self.routes else 0,
+            "drivers_count": len(self.drivers) if self.drivers else 0,
         })
         return base
 

@@ -7,12 +7,102 @@ let stopMarkers = []; // Array of marker objects
 let activeRoutingControl = null;
 let isSelectingLocation = false;
 let isEditing = false;
+let allDrivers = []; // All drivers for this owner
+
+// Load drivers for the dropdown
+async function loadDrivers() {
+  try {
+    const res = await fetch('/api/owner/drivers');
+    allDrivers = await res.json();
+    populateDriverSelect();
+  } catch (err) {
+    console.error('Failed to load drivers:', err);
+  }
+}
+
+function populateDriverSelect(selectedDriverId = null) {
+  const menu = document.getElementById('driver-select-menu');
+  const label = document.getElementById('driver-select-label');
+  const hidden = document.getElementById('route-driver');
+  if (!menu) return;
+
+  // Build menu items
+  const noDriverItem = `<li data-value="">-- No driver assigned --</li>`;
+  const driverItems = allDrivers.map(d =>
+    `<li data-value="${d.driver_id}">${d.name}${d.assigned_van_plate ? ' (' + d.assigned_van_plate + ')' : ''}</li>`
+  ).join('');
+  menu.innerHTML = noDriverItem + driverItems;
+
+  // Set selected value
+  const selectedDriver = selectedDriverId
+    ? allDrivers.find(d => d.driver_id == selectedDriverId)
+    : null;
+
+  label.textContent = selectedDriver
+    ? selectedDriver.name + (selectedDriver.assigned_van_plate ? ' (' + selectedDriver.assigned_van_plate + ')' : '')
+    : '-- No driver assigned --';
+  hidden.value = selectedDriverId || '';
+
+  // Mark selected item
+  menu.querySelectorAll('li').forEach(li => {
+    li.classList.toggle('selected', li.dataset.value == (selectedDriverId || ''));
+  });
+
+  // Re-bind click handlers
+  menu.querySelectorAll('li').forEach(li => {
+    li.addEventListener('click', () => {
+      menu.querySelectorAll('li').forEach(x => x.classList.remove('selected'));
+      li.classList.add('selected');
+      label.textContent = li.textContent;
+      hidden.value = li.dataset.value;
+      document.getElementById('driver-select').classList.remove('open');
+      document.getElementById('driver-select-trigger').setAttribute('aria-expanded', false);
+    });
+  });
+}
+
+function initDriverDropdown() {
+  const wrapper = document.getElementById('driver-select');
+  const trigger = document.getElementById('driver-select-trigger');
+
+  trigger.addEventListener('click', e => {
+    e.stopPropagation();
+    const open = wrapper.classList.toggle('open');
+    trigger.setAttribute('aria-expanded', open);
+  });
+
+  document.addEventListener('click', e => {
+    if (!wrapper.contains(e.target)) {
+      wrapper.classList.remove('open');
+      trigger.setAttribute('aria-expanded', false);
+    }
+  });
+}
+
+function setDriverDropdownValue(driverId) {
+  const driver = allDrivers.find(d => d.driver_id == driverId);
+  const label = document.getElementById('driver-select-label');
+  const hidden = document.getElementById('route-driver');
+  const menu = document.getElementById('driver-select-menu');
+  if (!label || !hidden) return;
+
+  label.textContent = driver
+    ? driver.name + (driver.assigned_van_plate ? ' (' + driver.assigned_van_plate + ')' : '')
+    : '-- No driver assigned --';
+  hidden.value = driverId || '';
+
+  if (menu) {
+    menu.querySelectorAll('li').forEach(li => {
+      li.classList.toggle('selected', li.dataset.value == (driverId || ''));
+    });
+  }
+}
 
 // Icons
-let numberIcons = {}; // Cache for numbered markers
+let numberIcons = {};
 function createNumberedIcon(number) {
   if (!numberIcons[number]) {
-    // Create custom icon with number
+
 
     const html = `<div class="numbered-marker-inner">${number}</div>`;
     numberIcons[number] = L.divIcon({
@@ -38,7 +128,7 @@ function buildRoutingPath() {
     addWaypoints: false,
     draggableWaypoints: false,
     fitSelectedRoutes: true,
-    createMarker: () => null, // We create our own markers
+    createMarker: () => null,
     lineOptions: {
       styles: [{ className: 'route-path-line' }]
     }
@@ -159,10 +249,10 @@ function renderStops() {
     stopMarkers.push(marker);
   });
 
-  // Update routing
+
   buildRoutingPath();
 
-  // Update stops list display
+
   updateStopsList();
 }
 
@@ -190,24 +280,18 @@ function updateStopsList() {
 function handleMapClick(e) {
   if (!isSelectingLocation) return;
   const { lat, lng } = e.latlng;
-
-  // Add stop to array
   stops.push({ lat, lng, order: stops.length });
 
-  // Render all stops
   renderStops();
   updateMapHint();
 }
 
 function removeStop(index) {
   stops.splice(index, 1);
-  // Reorder remaining stops
   stops.forEach((stop, idx) => {
     stop.order = idx;
   });
   renderStops();
-
-  // Close any open popups
   map.closePopup();
 }
 
@@ -260,6 +344,7 @@ function renderRoutesList() {
       </div>
       <div class="route-card-detail">⏰ ${route.start_time} - ${route.end_time}</div>
       <div class="route-card-detail">📍 ${route.stops_count || 0} stops</div>
+      <div class="route-card-detail">👤 ${route.assigned_driver_name || 'No driver assigned'}</div>
       <span class="route-card-day">${route.day_of_week}</span>
     </div>
   `).join('');
@@ -326,6 +411,9 @@ function showRouteEditor(editing = false) {
   isEditing = editing;
   clearAllStops();
 
+  // Always refresh driver list
+  populateDriverSelect();
+
   if (editing && selectedRoute) {
     document.getElementById('editor-title').textContent = 'Edit Route';
     document.getElementById('route-name').value = selectedRoute.name;
@@ -333,6 +421,10 @@ function showRouteEditor(editing = false) {
     document.getElementById('route-start-time').value = selectedRoute.start_time;
     document.getElementById('route-end-time').value = selectedRoute.end_time;
     document.getElementById('route-description').value = selectedRoute.description || '';
+
+    // Pre-select assigned driver if any
+    populateDriverSelect(selectedRoute.assigned_driver_id || null);
+    setDriverDropdownValue(selectedRoute.assigned_driver_id || null);
 
     // Load existing stops
     loadRouteStopsForEdit(selectedRoute.route_id);
@@ -343,6 +435,8 @@ function showRouteEditor(editing = false) {
     document.getElementById('route-start-time').value = '06:00';
     document.getElementById('route-end-time').value = '10:00';
     document.getElementById('route-description').value = '';
+    populateDriverSelect(null);
+    setDriverDropdownValue(null);
   }
 
   startSelecting();
@@ -402,6 +496,7 @@ async function saveRoute() {
   const startTime = document.getElementById('route-start-time').value;
   const endTime = document.getElementById('route-end-time').value;
   const description = document.getElementById('route-description').value.trim();
+  const driverId = document.getElementById('route-driver').value;
 
   if (!name) {
     alert('Please enter a route name');
@@ -423,7 +518,7 @@ async function saveRoute() {
       lat: stop.lat,
       lng: stop.lng,
       order: index,
-      address: '' // You can add address lookup here if needed
+      address: ''
     }))
   };
 
@@ -438,13 +533,23 @@ async function saveRoute() {
       body: JSON.stringify(routeData)
     });
 
-    if (res.ok) {
-      alert('✅ Route saved successfully!');
-      hideRouteEditor();
-      await loadRoutes();
-    } else {
-      throw new Error('Save failed');
+    if (!res.ok) throw new Error('Save failed');
+
+    const result = await res.json();
+    const savedRouteId = result.route_id || (selectedRoute && selectedRoute.route_id);
+
+    // Assign driver to route if one was selected
+    if (driverId && savedRouteId) {
+      await fetch(`/api/owner/routes/${savedRouteId}/assign-driver`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ driver_id: parseInt(driverId) })
+      });
     }
+
+    alert('✅ Route saved successfully!');
+    hideRouteEditor();
+    await loadRoutes();
   } catch (err) {
     console.error('Failed to save route:', err);
     alert('❌ Failed to save route');
@@ -455,7 +560,9 @@ async function saveRoute() {
 document.addEventListener('DOMContentLoaded', async () => {
   initMap();
   initDayDropdown();
+  initDriverDropdown();
   await loadRoutes();
+  await loadDrivers();
 
   document.getElementById('add-route-btn').addEventListener('click', () => {
     selectedRoute = null;
