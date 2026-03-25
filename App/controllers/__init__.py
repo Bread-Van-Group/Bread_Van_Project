@@ -5,6 +5,7 @@ from .driver import *
 from .customer import *
 from .request_item import *
 from .stop_request import *
+from .map__stop import *
 from .van import *
 from .route import *
 from .inventory_item import *

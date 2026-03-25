@@ -107,15 +107,15 @@
               <!-- Items will be dynamically inserted here -->
                {% if transaction_items %}
                {% for item in transaction_items %}
-                <tr>
-                    <td class="item-name"><i onclick="removeItem({{item.inventory_id}})"  class="minus-btn fa-solid fa-minus" style="color: white;"></i><i class="fa-solid fa-cube"></i> {{item.item.name}}</td>
+                <tr class="transaction-item" id="transaction-item_{{item['transaction_item'].inventory_id}}" data-total="{{item['transaction_item'].item.price}}">
+                    <td class="item-name"><i onclick="removeItem({{item['transaction_item'].inventory_id}})"  class="minus-btn fa-solid fa-minus" style="color: white;"></i><i class="fa-solid fa-cube"></i> {{item['transaction_item'].item.name}}</td>
                     <td >
-                      <i onclick="removeQuantity({{item.inventory_id}})"  class="qty-btn fa-solid fa-minus" style="color: white;"></i>
-                      <span class="item-quantity" id="item-quantity_{{item.inventory_id}}">1</span> 
-                      <i onclick="addQuantity({{item.inventory_id}}, {{item.quantity_available}})"  class="qty-btn fa-solid fa-add" style="color: white;"></i>
+                      <i onclick="removeQuantity({{item['transaction_item'].inventory_id}}, {{item['transaction_item'].item.price}})"  class="qty-btn fa-solid fa-minus" style="color: white;"></i>
+                      <span class="item-quantity" id="item-quantity_{{item['transaction_item'].inventory_id}}">{{item['quantity']}}</span> 
+                      <i onclick="addQuantity({{item['transaction_item'].inventory_id}}, {{item['transaction_item'].quantity_available}}, {{item['transaction_item'].item.price}})"  class="qty-btn fa-solid fa-add" style="color: white;"></i>
                     </td>
-                    <td class="item-price">${{"%.2f" %   item.item.price}}</td>
-                    <td class="item-total">${{"%.2f" %   item.item.price}}</td>
+                    <td class="item-price">${{"%.2f" %   item['transaction_item'].item.price}}</td>
+                    <td class="item-total" id="item-total_{{item['transaction_item'].inventory_id}}">${{"%.2f" %   item['transaction_item'].item.price}}</td>
                 </tr>
                 {% endfor %}
               {% else %}
@@ -139,7 +139,7 @@
         <span class="total-label"
           ><i class="fa-solid fa-coins"></i> Total Amount:</span
         >
-        <span class="total-amount" id="totalAmount">$0.00</span>
+        <span class="total-amount" id="total-amount">$0.00</span>
       </div>
 
       <!-- Action Buttons Section -->
@@ -174,16 +174,31 @@
         if (message) showToast(message);
       });
     </script>
+    <script src="{{url_for('static', filename='js/customer/reverse_geocoder.js')}}"></script>
     <script src="{{url_for('static', filename='js/driver/transaction.js')}}"></script>
   
     <!--This script handles all major functionality and communication
-        with the backend-->
+        with the backend flask functions-->
     <script>
+      //Set all totals on load
+      updateTransactionTotal()
+
       async function addToTransaction(inventory_id) {
+        daily_inventory = {{daily_inventory |tojson}}
+
+        daily_inventory.forEach(item => {
+            if(item['inventory_id'] == inventory_id){
+              if(item['quantity_available'] ==0)
+              console.log(item)
+               window.location.href =
+                "{{ url_for('driver_views.driver_transaction_page',message='Item no longer in stock') }}";
+            }          
+        });
+      
         await fetch("/api/driver/update-session", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ inventory_id: inventory_id }),
+          body: JSON.stringify({ inventory_id: inventory_id, quantity:1 }),
         }).then((response) => {
           if (response.ok) {
             window.location.href =
@@ -208,6 +223,63 @@
               "{{ url_for('driver_views.driver_transaction_page',message='Could not clear items, please try again later') }}";
           }
         });
+      }
+
+      async function removeItem(inventory_id) {
+        await fetch("/api/driver/delete-session-item", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ inventory_id: inventory_id }),
+        }).then((response) => {
+          if (response.ok) {
+            window.location.href =
+              "{{ url_for('driver_views.driver_transaction_page',message='Item removed from transaction') }}";
+          } else {
+            window.location.href =
+              "{{ url_for('driver_views.driver_transaction_page',message='Item could not be removed from transaction') }}";
+          }
+        });
+      }
+      
+      async function completeTransaction(){
+        items = {{transaction_items |tojson}}
+
+        if(!items){
+          window.location.href =
+                  "{{ url_for('driver_views.driver_transaction_page',message='Please add an item to the Transaction first') }}";
+        }
+
+
+        navigator.geolocation.watchPosition(
+          async (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+
+            addressData = await reverseGeocode(lat, lng);
+            address = addressData.display_name.replace(", Trinidad and Tobago", "");
+            
+            await fetch("/api/driver/make-transaction", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ address: address, lat:lat, lng:lng }),
+            }).then((response) => {
+              if (response.ok) {
+                window.location.href =
+                  "{{ url_for('driver_views.driver_transaction_page',message='Transaction Made!') }}";
+              } else {
+                window.location.href =
+                  "{{ url_for('driver_views.driver_transaction_page',message='Could not make Transaction, please try again') }}";
+              }
+            });
+            
+          },
+          (error) => {
+            console.error("Error getting location:", error);
+            window.location.href =
+                  "{{ url_for('driver_views.driver_transaction_page',message='Could not get current location') }}";
+            
+          }
+        );
       }
     </script>
   </body>

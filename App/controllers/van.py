@@ -126,7 +126,34 @@ def reserve_inventory(van_id, item_id, quantity, target_date=None):
     if not record or record.quantity_available < quantity:
         return None
 
-    record.quantity_reserved  += quantity
-    record.quantity_available -= quantity
+    try:
+        record.quantity_reserved  += quantity
+        record.quantity_available -= quantity
+    except:
+        db.session.rollback()
+        return None
+    
+    db.session.commit()
+    return record
+
+def update_stock(van_id, item_id, quantity,target_date =None):
+    target_date = target_date or date.today()
+    
+    record = db.session.execute(
+        db.select(DailyInventory).filter_by(
+            van_id=van_id, item_id=item_id, date=target_date
+        )
+    ).scalar_one_or_none()
+
+    if not record:
+        return None
+    
+    try:
+        record.quantity_in_stock -= quantity
+        record.quantity_available -= quantity
+    except:
+        db.session.rollback()
+        return None
+    
     db.session.commit()
     return record

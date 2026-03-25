@@ -13,7 +13,10 @@ from App.controllers import (
     update_request_status,
     add_stop_to_end_of_route,
     get_todays_route,
-    get_van_by_driver
+    get_van_by_driver,
+    create_transaction,
+    create_map_stop,
+    update_stock
 )
 from App.controllers.route import get_route_stops
 
@@ -189,6 +192,56 @@ def get_pending_requests():
 
     return stops
 
+@driver_views.route('/api/driver/make-transaction', methods=['POST'])
+@jwt_required()
+def make_transaction():
+    if current_user.role != 'driver':
+        return jsonify(message='Unauthorized'), 403
+    
+    transaction_list = []
+    total = 0.0
+
+    address = request.get_json().get('address')
+    lat = request.get_json().get('lat')
+    lng = request.get_json().get('lng')
+
+    for item in session['transaction_items']:
+        transaction_list.append(
+            {'item_id': item['transaction_item']['item_id'], 
+             'quantity': item['quantity']
+            })
+        total += float(item['total'])
+    
+    try:
+        current_stop = create_map_stop(
+            address= address,
+            lat=lat,
+            lng=lng,
+            stop_order=0
+        )
+
+        transaction = create_transaction(
+            customer_id=None,
+            van_id=get_van_by_driver(get_jwt_identity()).van_id,
+            total_amount= round(total,2),
+            items=transaction_list,
+            stop_id= current_stop.stop_id,
+            payment_method='cash',
+        )
+
+        for item in transaction_list:
+            update_stock(
+                van_id=get_van_by_driver(get_jwt_identity()).van_id,
+                item_id = item['item_id'],
+                quantity= item['quantity']
+            )
+
+        session.pop('transaction_items', None)
+        return '', 200
+    except Exception as e:
+        print(e)
+        return '', 500
+
 @driver_views.route('/api/driver/update-session', methods=['POST'])
 @jwt_required()
 def update_driver_session():
@@ -197,17 +250,58 @@ def update_driver_session():
     
     inventory_id = request.get_json().get('inventory_id')
     transaction_item = get_daily_inventory_item_by_id(inventory_id).get_json()
-    
+    quantity = request.get_json().get('quantity')
+
+    transaction_item = {'transaction_item' : transaction_item, 'quantity':quantity, 'total':transaction_item['item']['price']}
     #Initialize session items if not already initialized
     session.setdefault('transaction_items', [])
 
-    if transaction_item not in session['transaction_items']:
-        session['transaction_items'] += [transaction_item]
-        session.modified = True
-        return '', 200
-    else:
-        return '', 400
+    for item in session['transaction_items']:   
+        if item['transaction_item']['inventory_id'] == inventory_id:
+            return '', 400
     
+    session['transaction_items'] += [transaction_item]
+    session.modified = True
+    return '', 200
+    
+@driver_views.route('/api/driver/update-session-item', methods=['POST'])
+@jwt_required()
+def update_driver_session_item():
+    if current_user.role != 'driver':
+        return jsonify(message='Unauthorized'), 403
+    
+    inventory_id = request.get_json().get('inventory_id')
+    quantity = request.get_json().get('quantity')
+    total = request.get_json().get('total')
+
+    for item in session['transaction_items']:
+        if item['transaction_item']['inventory_id'] == inventory_id:
+            item['quantity'] = quantity
+            item['total'] = total
+
+            session.modified = True
+            return '', 200
+    
+    return '', 400   
+
+@driver_views.route('/api/driver/delete-session-item', methods=['POST'])
+@jwt_required()
+def delete_driver_session_item():
+    if current_user.role != 'driver':
+        return jsonify(message='Unauthorized'), 403
+    
+    inventory_id = request.get_json().get('inventory_id')
+    transaction_item = get_daily_inventory_item_by_id(inventory_id).get_json()
+    
+    for item in session['transaction_items']:   
+        if item['transaction_item']['inventory_id'] == inventory_id:
+            session['transaction_items'].remove(item)
+            session.modified = True
+
+            return '', 200
+    
+    return '', 400
+
 @driver_views.route('/api/driver/clear-session', methods=['POST'])
 @jwt_required()
 def clear_driver_session():
@@ -216,3 +310,4 @@ def clear_driver_session():
     
     session.pop('transaction_items', None)
     return '', 200
+
