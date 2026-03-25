@@ -23,7 +23,7 @@ class MapStop(db.Model):
     # Relationships
     transactions      = db.relationship("Transaction",     backref="map_stop", lazy=True)
 
-    def __init__(self, route_id, owner_id, address, lat, lng, stop_order):
+    def __init__(self, address, lat, lng, stop_order):
         self.address                = address
         self.lat                    = lat
         self.lng                    = lng

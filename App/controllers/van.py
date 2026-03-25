@@ -58,6 +58,9 @@ def assign_van_to_route(van_id, route_id):
 
 # Daily Inventory
 
+def get_daily_inventory_item_by_id(inventory_id):
+    return db.session.get(DailyInventory, inventory_id)
+
 def get_van_daily_inventory(van_id, target_date=None):
     """Return today's inventory records for a van (or a specified date)."""
     target_date = target_date or date.today()
@@ -123,7 +126,34 @@ def reserve_inventory(van_id, item_id, quantity, target_date=None):
     if not record or record.quantity_available < quantity:
         return None
 
-    record.quantity_reserved  += quantity
-    record.quantity_available -= quantity
+    try:
+        record.quantity_reserved  += quantity
+        record.quantity_available -= quantity
+    except:
+        db.session.rollback()
+        return None
+    
+    db.session.commit()
+    return record
+
+def update_stock(van_id, item_id, quantity,target_date =None):
+    target_date = target_date or date.today()
+    
+    record = db.session.execute(
+        db.select(DailyInventory).filter_by(
+            van_id=van_id, item_id=item_id, date=target_date
+        )
+    ).scalar_one_or_none()
+
+    if not record:
+        return None
+    
+    try:
+        record.quantity_in_stock -= quantity
+        record.quantity_available -= quantity
+    except:
+        db.session.rollback()
+        return None
+    
     db.session.commit()
     return record

@@ -8,7 +8,7 @@ class Transaction(db.Model):
     __tablename__ = "transactions"
 
     transaction_id   = db.Column(db.Integer, primary_key=True)
-    customer_id      = db.Column(db.Integer, db.ForeignKey("customers.customer_id"), nullable=False)
+    customer_id      = db.Column(db.Integer, db.ForeignKey("customers.customer_id"), nullable=True)
     van_id           = db.Column(db.Integer, db.ForeignKey("vans.van_id"),           nullable=False)
     stop_id          = db.Column(db.Integer, db.ForeignKey("map_stops.stop_id"),   nullable=True)
     transaction_time = db.Column(db.DateTime(timezone=True), nullable=True,
