@@ -1,149 +1,157 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sign Up - Bread Van Project</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Caveat+Brush&family=Shadows+Into+Light+Two&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/signup.css') }}">
-</head>
-<body>
+    <!-- Font Awesome Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
+    <!-- Material Icons -->
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Caveat+Brush&family=DM+Serif+Display:ital@0;1&family=Syne:wght@400;500;600;700;800&family=Quicksand:wght@300..700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles/signup.css') }}"
+    />
+  </head>
+  <body>
     <div class="signup-header">
-        <a class="back-btn" href="{{ url_for('index_views.index') }}">
-            <span>←</span>
-            <span>Back</span>
-        </a>
-        <h1 class="header-title">Sign up</h1>
-        <div style="width: 80px;"></div>
+      <a class="back-btn" href="{{ url_for('index_views.index') }}">
+        <i class="fa-solid fa-arrow-left"></i>
+      </a>
+      Sign up
     </div>
 
     <div class="signup-container">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div class="flash-messages">
-                    {% for category, message in messages %}
-                        <div class="flash {{ category }}">{{ message }}</div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %}
+      <div class="flash-messages">
+        {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %} {% endwith %}
 
-        <form method="POST" action="{{ url_for('auth_views.signup_action') }}">
-            <div class="form-fields">
+      <form method="POST" action="{{ url_for('auth_views.signup_action') }}">
+        <div class="form-fields">
+          <div class="form-group">
+            <label for="name">*Name:</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              placeholder="Name"
+              required
+            />
+          </div>
 
-                <div class="form-group">
-                    <label for="first_name">First name:</label>
-                    <input type="text" id="first_name" name="first_name" placeholder="(name)" required>
-                </div>
+          <div class="form-group">
+            <label for="area">*Area:</label>
+            <select id="area" name="area" required>
+              <option value="">-- Select your area --</option>
+              <option>Arima</option>
+              <option>Chaguanas</option>
+              <option>Couva-Tabaquite-Talparo</option>
+              <option>Diego Martin</option>
+              <option>Penal-Debe</option>
+              <option>Point Fortin</option>
+              <option>Port of Spain</option>
+              <option>Prince Town</option>
+              <option>Rio Claro-Mayaro</option>
+              <option>San Fernando</option>
+              <option>San Juan-Laventille</option>
+              <option>Sangre Grande</option>
+              <option>Siparia</option>
+              <option>Tunapuna-Piarco</option>
+            </select>
+          </div>
 
-                <div class="form-group">
-                    <label for="last_name">Last name:</label>
-                    <input type="text" id="last_name" name="last_name" placeholder="(name)" required>
-                </div>
+          <div class="form-group">
+            <label for="address">Address:</label>
+            <input
+              type="text"
+              id="address"
+              name="address"
+              placeholder="(street address)"
+            />
+          </div>
 
-                <div class="form-group">
-                    <label for="area">Area:</label>
-                    <select id="area" name="area">
-                        <option value="">-- Select your area --</option>
-                        <option>Arima</option>
-                        <option>Arouca</option>
-                        <option>Barataria</option>
-                        <option>Carenage</option>
-                        <option>Chaguanas</option>
-                        <option>Chaguaramas</option>
-                        <option>Claxton Bay</option>
-                        <option>Couva</option>
-                        <option>Curepe</option>
-                        <option>Debe</option>
-                        <option>Diego Martin</option>
-                        <option>El Socorro</option>
-                        <option>Erin</option>
-                        <option>Fyzabad</option>
-                        <option>Gasparillo</option>
-                        <option>Gran Couva</option>
-                        <option>Guayaguayare</option>
-                        <option>La Brea</option>
-                        <option>Laventille</option>
-                        <option>Marabella</option>
-                        <option>Maraval</option>
-                        <option>Mayaro</option>
-                        <option>Malabar</option>
-                        <option>Morvant</option>
-                        <option>Moruga</option>
-                        <option>Newtown</option>
-                        <option>Penal</option>
-                        <option>Petit Valley</option>
-                        <option>Piarco</option>
-                        <option>Point Fortin</option>
-                        <option>Point Lisas</option>
-                        <option>Pointe-a-Pierre</option>
-                        <option>Port of Spain</option>
-                        <option>Princes Town</option>
-                        <option>Rio Claro</option>
-                        <option>San Fernando</option>
-                        <option>San Juan</option>
-                        <option>Sangre Grande</option>
-                        <option>Siparia</option>
-                        <option>St. Augustine</option>
-                        <option>St. James</option>
-                        <option>St. Joseph</option>
-                        <option>Tableland</option>
-                        <option>Toco</option>
-                        <option>Trincity</option>
-                        <option>Tunapuna</option>
-                        <option>Valsayn</option>
-                        <option>Williamsville</option>
-                        <option>Woodbrook</option>
-                    </select>
-                </div>
+          <div class="form-group">
+            <label for="phone">Phone:</label>
+            <input
+              type="text"
+              id="phone"
+              name="phone"
+              placeholder="xxx-xxx-xxxx"
+            />
+          </div>
 
-                <div class="form-group">
-                    <label for="address">Address:</label>
-                    <input type="text" id="address" name="address" placeholder="(street address)">
-                </div>
+          <div class="form-group">
+            <label for="email">*Email Address:</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="name@email.com"
+              required
+            />
+          </div>
 
-                <div class="form-group">
-                    <label for="phone">Phone:</label>
-                    <input type="text" id="phone" name="phone" placeholder="(phone number)">
-                </div>
+          <div class="form-group">
+            <label for="password">*Password:</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Password"
+              required
+            />
+          </div>
 
-                <div class="form-group">
-                    <label for="email">Email Address:</label>
-                    <input type="email" id="email" name="email" placeholder="(email address)" required>
-                </div>
+          <div class="form-group">
+            <label for="verify_password">*Verify Password:</label>
+            <input
+              type="password"
+              id="verify_password"
+              name="verify_password"
+              placeholder="Password"
+              required
+            />
+          </div>
 
-                <div class="form-group">
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" name="password" placeholder="(Password)" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="verify_password">Verify Password:</label>
-                    <input type="password" id="verify_password" name="verify_password" placeholder="(password)" required>
-                </div>
-
-                <div class="confirm-btn-container">
-                    <button type="submit" class="confirm-btn">Confirm</button>
-                </div>
-            </div>
-        </form>
-    </div>
-
-    <div class="established-footer">
-        <h3>LOGO</h3>
+          <div class="confirm-btn-container">
+            <button type="submit" class="confirm-btn">Confirm</button>
+          </div>
+        </div>
+      </form>
     </div>
 
     <script>
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const password = document.getElementById('password').value;
-            const verify = document.getElementById('verify_password').value;
-            if (password !== verify) {
-                e.preventDefault();
-                alert('Passwords do not match!');
-            }
-        });
+      document.querySelector("form").addEventListener("submit", function (e) {
+        const password = document.getElementById("password").value;
+        const verify = document.getElementById("verify_password").value;
+        if (password !== verify) {
+          e.preventDefault();
+          alert("Passwords do not match!");
+        }
+      });
     </script>
-</body>
+  </body>
 </html>

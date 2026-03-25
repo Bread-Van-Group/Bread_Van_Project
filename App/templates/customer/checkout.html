@@ -107,41 +107,27 @@ block head %}
     return json;
   }
 
-  function createOrder() {
-    //Production Code
-    // if (customerMarker) {
-    //   lat = customerMarker.getLatLng().lat;
-    //   lng = customerMarker.getLatLng().lng;
+  async function createOrder() {
+    // Production Code
 
-    //   fetch("/api/customer/make-order", {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify({ lat: lat, lng: lng }),
-    //   }).then((response) => {
-    //     if (response.ok) {
-    //       window.location.href =
-    //         "{{ url_for('customer_views.customer_homepage', message='Order Created!') }}";
-    //     }
-    //   });
-    // }
+    addressData = await reverseGeocode(lat, lng);
+    address = addressData.display_name.replace(", Trinidad and Tobago", "");
 
-    //Test Code
-    lat = 10.6405359397094;
-    lng = -61.39297485351563;
+    if (customerMarker) {
+      lat = customerMarker.getLatLng().lat;
+      lng = customerMarker.getLatLng().lng;
 
-    fetch("/api/customer/make-order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        lat: lat,
-        lng: lng,
-      }),
-    }).then((response) => {
-      if (response.ok) {
-        window.location.href =
-          "{{ url_for('customer_views.customer_homepage', message='Order Created!') }}";
-      }
-    });
+      fetch("/api/customer/make-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lat: lat, lng: lng, address: address }),
+      }).then((response) => {
+        if (response.ok) {
+          window.location.href =
+            "{{ url_for('customer_views.customer_homepage', message='Order Created!') }}";
+        }
+      });
+    }
   }
 
   function createNewOrder() {

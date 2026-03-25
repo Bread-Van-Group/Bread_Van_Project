@@ -42,9 +42,10 @@ def get_route_stops(route_id):
     ).all()
 
 
-def add_stop_to_route(route_id, address, lat, lng, stop_order):
+def add_stop_to_route(route_id, owner_id, address, lat, lng, stop_order):
     stop = RouteStop(
         route_id=route_id,
+        owner_id=owner_id,
         address=address,
         lat=lat,
         lng=lng,
