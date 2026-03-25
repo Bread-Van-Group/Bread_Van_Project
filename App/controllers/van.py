@@ -58,6 +58,9 @@ def assign_van_to_route(van_id, route_id):
 
 # Daily Inventory
 
+def get_daily_inventory_item_by_id(inventory_id):
+    return db.session.get(DailyInventory, inventory_id)
+
 def get_van_daily_inventory(van_id, target_date=None):
     """Return today's inventory records for a van (or a specified date)."""
     target_date = target_date or date.today()

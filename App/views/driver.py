@@ -5,6 +5,7 @@ from App.controllers import (
     get_driver_routes,
     assign_driver_to_route,
     unassign_driver_from_route,
+    get_daily_inventory_item_by_id,
     get_pending_stops,
     get_active_stops,
     get_daily_inventory,
@@ -187,3 +188,31 @@ def get_pending_requests():
     stops = get_pending_stops()
 
     return stops
+
+@driver_views.route('/api/driver/update-session', methods=['POST'])
+@jwt_required()
+def update_driver_session():
+    if current_user.role != 'driver':
+        return jsonify(message='Unauthorized'), 403
+    
+    inventory_id = request.get_json().get('inventory_id')
+    transaction_item = get_daily_inventory_item_by_id(inventory_id).get_json()
+    
+    #Initialize session items if not already initialized
+    session.setdefault('transaction_items', [])
+
+    if transaction_item not in session['transaction_items']:
+        session['transaction_items'] += [transaction_item]
+        session.modified = True
+        return '', 200
+    else:
+        return '', 400
+    
+@driver_views.route('/api/driver/clear-session', methods=['POST'])
+@jwt_required()
+def clear_driver_session():
+    if current_user.role != 'driver':
+        return jsonify(message='Unauthorized'), 403
+    
+    session.pop('transaction_items', None)
+    return '', 200

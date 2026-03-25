@@ -54,10 +54,12 @@
                     />
                 </div>
             </div>
+
+            <!--Catalogue List Which Appears on Add Item Click-->
             <div class="catalogue-list">
                 <div class="catalogue-scrollable">
                     {% for item in daily_inventory %}
-                    <div class="catalogue-item" onclick="addToTransaction()">
+                    <div class="catalogue-item" data-category="{{item.item.category}}" onclick="addToTransaction({{item.inventory_id}})">
                         {%if item.item.category == 'bread' %}
                         <img class="catalogue-item-image" src="\static\assets\images\bread.png" />
                         {%elif item.item.category == 'filling' %}
@@ -106,10 +108,14 @@
                {% if transaction_items %}
                {% for item in transaction_items %}
                 <tr>
-                    <td class="item-name"><i class="fa-solid fa-cube"></i> Basmati Rice</td>
-                    <td>3</td>
-                    <td class="item-price">$12.50</td>
-                    <td class="item-total">$37.50</td>
+                    <td class="item-name"><i onclick="removeItem({{item.inventory_id}})"  class="minus-btn fa-solid fa-minus" style="color: white;"></i><i class="fa-solid fa-cube"></i> {{item.item.name}}</td>
+                    <td >
+                      <i onclick="removeQuantity({{item.inventory_id}})"  class="qty-btn fa-solid fa-minus" style="color: white;"></i>
+                      <span class="item-quantity" id="item-quantity_{{item.inventory_id}}">1</span> 
+                      <i onclick="addQuantity({{item.inventory_id}}, {{item.quantity_available}})"  class="qty-btn fa-solid fa-add" style="color: white;"></i>
+                    </td>
+                    <td class="item-price">${{"%.2f" %   item.item.price}}</td>
+                    <td class="item-total">${{"%.2f" %   item.item.price}}</td>
                 </tr>
                 {% endfor %}
               {% else %}
@@ -148,7 +154,61 @@
         </button>
       </div>
 
+    <script>
+      function showToast(message) {
+            const toast = document.createElement("div");
+            toast.className = "toast";
+            toast.innerText = message;
+            document.body.appendChild(toast);
 
+            setTimeout(() => toast.classList.add("show"), 10);
+            setTimeout(() => {
+              toast.classList.remove("show");
+              setTimeout(() => toast.remove(), 300);
+            }, 2500);
+          }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const params = new URLSearchParams(window.location.search);
+        const message = params.get("message");
+        if (message) showToast(message);
+      });
+    </script>
     <script src="{{url_for('static', filename='js/driver/transaction.js')}}"></script>
+  
+    <!--This script handles all major functionality and communication
+        with the backend-->
+    <script>
+      async function addToTransaction(inventory_id) {
+        await fetch("/api/driver/update-session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ inventory_id: inventory_id }),
+        }).then((response) => {
+          if (response.ok) {
+            window.location.href =
+              "{{ url_for('driver_views.driver_transaction_page',message='Item added to transaction') }}";
+          } else {
+            window.location.href =
+              "{{ url_for('driver_views.driver_transaction_page',message='Item already added to transaction') }}";
+          }
+        });
+      }
+      
+      async function clearItems(){
+        await fetch("/api/driver/clear-session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        }).then((response) => {
+          if (response.ok) {
+            window.location.href =
+              "{{ url_for('driver_views.driver_transaction_page',message='Items Cleared') }}";
+          } else {
+            window.location.href =
+              "{{ url_for('driver_views.driver_transaction_page',message='Could not clear items, please try again later') }}";
+          }
+        });
+      }
+    </script>
   </body>
 </html>

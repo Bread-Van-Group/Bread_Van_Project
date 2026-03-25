@@ -183,7 +183,7 @@ td {
 
 tbody {
   display: block;
-  max-height: 30vh;
+  height: 30vh;
   width: 100%;
   overflow-y: auto;
 }
@@ -209,6 +209,35 @@ tbody tr:hover {
   color: var(--orange-warm);
 }
 
+.minus-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  background-color: var(--red-main);
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.item-quantity {
+  margin: 0px 0.5rem;
+}
+
+.qty-btn {
+  display: inline;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 4px;
+  border-radius: 50%;
+  background-color: var(--orange-warm);
+  cursor: pointer;
+  font-size: 1rem;
+}
+
 .item-price {
   font-family: "Shadows Into Light Two", cursive;
   font-weight: 400;
@@ -218,8 +247,9 @@ tbody tr:hover {
 
 .item-total {
   font-family: "Shadows Into Light Two", cursive;
-  font-weight: 400;
+  font-weight: 600;
   font-style: italic;
+
   color: var(--orange-deep);
 }
 
@@ -585,6 +615,10 @@ td:nth-child(4) {
   box-sizing: border-box;
 }
 
+.catalogue-item:hover {
+  cursor: pointer;
+}
+
 .catalogue-item-image {
   width: 100%;
   aspect-ratio: 1 / 1;
@@ -640,4 +674,34 @@ td:nth-child(4) {
   color: var(--orange-deep);
   margin: 0;
   letter-spacing: 0.2px;
+}
+
+/* ─── Flash Messages ───────────────────────────────────────────────── */
+
+.toast {
+  position: fixed;
+  top: 9vh;
+  left: 50%;
+  width: 80%;
+  transform: translateX(-50%);
+
+  text-align: center;
+
+  background: var(--orange-light);
+  color: var(--ink-muted);
+  font-family: "Shadows Into Light Two", cursive;
+  font-style: italic;
+  font-size: 1rem;
+  padding: 10px 20px;
+  border-radius: 20px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1000;
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
+    rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+}
+
+.toast.show {
+  opacity: 1;
 }
