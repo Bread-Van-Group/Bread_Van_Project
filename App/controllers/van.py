@@ -2,7 +2,6 @@ from App.database import db
 from App.models import Van, DailyInventory
 from datetime import date
 
-
 def get_van_by_id(van_id):
     return db.session.get(Van, van_id)
 
@@ -68,8 +67,6 @@ def get_van_daily_inventory(van_id, target_date=None):
         db.select(DailyInventory).filter_by(van_id=van_id, date=target_date)
     ).all()
 
-
-# Replace the set_van_inventory function in App/controllers/van.py with this:
 
 def set_van_inventory(van_id, item_id, quantity, date):
     """Set or delete daily inventory for a van"""
@@ -157,3 +154,59 @@ def update_stock(van_id, item_id, quantity,target_date =None):
     
     db.session.commit()
     return record
+
+#New - Set inven
+
+def get_route_daily_inventory(route_id: int, target_date: date) -> list[dict]:
+    """
+    Return today's inventory for all vans assigned to a given route.
+
+    """
+    records = (
+        db.session.query(DailyInventory)
+        .join(Van, Van.van_id == DailyInventory.van_id)
+        .filter(
+            Van.current_route_id == route_id,
+            DailyInventory.date  == target_date,
+        )
+        .all()
+    )
+    return [r.get_json() for r in records]
+
+
+def set_route_inventory(route_id: int, items: list[dict], target_date: date) -> None:
+    """
+    Items with quantity == 0 are deleted from the inventory for that date.
+    """
+    # Find all vans on this route
+    vans = Van.query.filter_by(current_route_id=route_id).all()
+
+    for van in vans:
+        for entry in items:
+            item_id  = int(entry['item_id'])
+            quantity = int(entry['quantity'])
+
+            existing = (
+                db.session.query(DailyInventory)
+                .filter_by(van_id=van.van_id, date=target_date, item_id=item_id)
+                .first()
+            )
+
+            if quantity == 0:
+                # Remove the record entirely so zero-stock items don't clutter the view
+                if existing:
+                    db.session.delete(existing)
+            elif existing:
+                existing.quantity_in_stock  = quantity
+                existing.quantity_available = quantity
+            else:
+                record = DailyInventory(
+                    van_id=van.van_id,
+                    date=target_date,
+                    item_id=item_id,
+                    quantity_in_stock=quantity,
+                    quantity_available=quantity,
+                )
+                db.session.add(record)
+
+    db.session.commit()

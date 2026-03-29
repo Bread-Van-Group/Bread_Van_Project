@@ -44,7 +44,7 @@ def initialize():
     region_prince = create_region("Prince Town", "South-central sugarcane and farming area")
     region_fortin = create_region("Point Fortin", "Southwest oil and gas borough")
     region_siparia = create_region("Siparia", "Southwest rural and petroleum region")
-        
+
     print("✓ Regions created")
 
     # ── Users ─────────────────────────────────────────────────────────────────
@@ -133,9 +133,9 @@ def initialize():
     )
 
     owner_stop1 = add_stop_to_route(
-        route_id=  route.route_id,
-        owner_id= owner.owner_id,
-        address= "Somewhere in St Augustine",
+        route_id=route.route_id,
+        owner_id=owner.owner_id,
+        address="Somewhere in St Augustine",
         lat=10.640908716845667,
         lng=-61.39593945274354,
         stop_order=1
@@ -302,7 +302,6 @@ def initialize():
 
     db.session.commit()
     print(f"✓ Dummy transactions: {tx_count} transactions seeded over last 30 days")
-
 
     print("✓ Database initialised successfully!")
 
