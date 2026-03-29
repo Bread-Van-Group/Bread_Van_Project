@@ -445,26 +445,20 @@ def create_route():
         description=data.get('description', '')
     )
     db.session.add(route)
-    db.session.flush()
+    db.session.flush()  # get route_id before adding stops
 
     for stop_data in data.get('stops', []):
         stop = RouteStop(
             route_id=route.route_id,
             owner_id=current_user.owner_id,
-            customer_id=None,
             address=stop_data.get('address', ''),
             lat=stop_data['lat'],
             lng=stop_data['lng'],
             stop_order=stop_data['order'],
-            status_id=None,
-            fulfilled_time=None,
-            estimated_arrival_time=None,
         )
-
         db.session.add(stop)
 
     db.session.commit()
-
     return jsonify(message='Route created', route_id=route.route_id)
 
 
@@ -490,6 +484,7 @@ def update_route(route_id):
     route.day_of_week = data['day_of_week']
     route.description = data.get('description', '')
 
+    # Replace all owner-placed stops; customer stops are managed separately
     RouteStop.query.filter_by(route_id=route_id).delete()
 
     for stop_data in data.get('stops', []):
@@ -504,9 +499,7 @@ def update_route(route_id):
         db.session.add(stop)
 
     db.session.commit()
-
     return jsonify(message='Route updated')
-
 
 @index_views.route('/api/owner/routes/<int:route_id>', methods=['DELETE'])
 @jwt_required()
@@ -738,6 +731,38 @@ def update_van_location(van_id):
 
     return jsonify(van.get_json())
 
+#set inventory
+@index_views.route('/api/owner/routes/<int:route_id>/inventory', methods=['GET'])
+@jwt_required()
+def get_route_inventory(route_id):
+    """Return today's inventory for a specific route (all vans on that route)."""
+    if current_user.role != 'owner':
+        return jsonify(message='Unauthorized'), 403
+
+    from App.controllers.van import get_route_daily_inventory
+    from datetime import date
+
+    today = date.today()
+    inventory = get_route_daily_inventory(route_id, today)
+    return jsonify(inventory)
+
+
+@index_views.route('/api/owner/routes/<int:route_id>/inventory', methods=['POST'])
+@jwt_required()
+def set_route_inventory(route_id):
+    """Set today's inventory for every van currently assigned to a route."""
+    if current_user.role != 'owner':
+        return jsonify(message='Unauthorized'), 403
+
+    from App.controllers.van import set_route_inventory as set_inv
+    from datetime import date
+
+    data = request.json
+    today = date.today()
+    items = data.get('items', [])
+
+    set_inv(route_id, items, today)
+    return jsonify(message='Route inventory updated successfully')
 
 # region management
 @index_views.route('/api/owner/regions', methods=['GET'])

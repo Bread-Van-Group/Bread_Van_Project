@@ -1,231 +1,262 @@
-let allItems = [];
-let vanId = null;
-let viewMode = 'today';
-let customViewDate = null;
-let editingDate = null;
-let selectedItems = new Map();
-let editingProduct = null;
-let deletedItems = new Set();
-// Helper: Get unique categories from items
+let allItems    = [];     // All catalogue products
+let allRoutes   = [];     // Owner's routes
+let selectedRouteId = null;  // Currently viewed route
+let selectedItems   = new Map();  // itemId -> quantity (edit mode)
+let deletedItems    = new Set();  // itemIds removed during this edit session
+let editingProduct  = null;
+
+// ── Helpers ──────────────────────────────────────────────────────
+
 function getUniqueCategories() {
-  const categories = [...new Set(allItems.map(item => item.category || 'Uncategorized'))];
-  return categories.sort();
+  return [...new Set(allItems.map(i => i.category || 'Uncategorized'))].sort();
 }
 
-// Helper: Group items by category
 function groupByCategory(items) {
-  const grouped = {};
-  items.forEach(item => {
-    const category = item.category || 'Uncategorized';
-    if (!grouped[category]) {
-      grouped[category] = [];
-    }
-    grouped[category].push(item);
-  });
-  return grouped;
+  return items.reduce((acc, item) => {
+    const cat = item.category || 'Uncategorized';
+    (acc[cat] = acc[cat] || []).push(item);
+    return acc;
+  }, {});
 }
 
-// Tab switching
+// ── Tab switching ────────────────────────────────────────────────
+
 function switchTab(tab) {
-  const inventoryTab = document.getElementById('inventory-tab');
-  const productsTab = document.getElementById('products-tab');
-  const inventoryContent = document.getElementById('inventory-content');
-  const productsContent = document.getElementById('products-content');
-
-  if (tab === 'inventory') {
-    inventoryTab.classList.add('active');
-    productsTab.classList.remove('active');
-    inventoryContent.style.display = 'block';
-    productsContent.style.display = 'none';
-  } else {
-    inventoryTab.classList.remove('active');
-    productsTab.classList.add('active');
-    inventoryContent.style.display = 'none';
-    productsContent.style.display = 'block';
-    loadProducts();
-  }
+  const isInventory = tab === 'inventory';
+  document.getElementById('inventory-tab').classList.toggle('active', isInventory);
+  document.getElementById('products-tab').classList.toggle('active', !isInventory);
+  document.getElementById('inventory-content').style.display = isInventory ? 'block' : 'none';
+  document.getElementById('products-content').style.display  = isInventory ? 'none'  : 'block';
+  if (!isInventory) loadProducts();
 }
 
-async function loadVan() {
+// ── Data loading ─────────────────────────────────────────────────
+
+async function loadRoutes() {
   try {
-    const res = await fetch('/api/owner/vans');
-    const vans = await res.json();
-    if (vans.length > 0) {
-      vanId = vans[0].van_id;
-    }
+    const res = await fetch('/api/owner/routes');
+    if (!res.ok) throw new Error('Failed to fetch routes');
+    allRoutes = await res.json();
+    buildRouteDropdown();
   } catch (err) {
-    console.error('Failed to load van:', err);
+    console.error('Failed to load routes:', err);
+    document.getElementById('selected-route-text').textContent = 'Error loading routes';
   }
 }
 
 async function loadAllItems() {
   try {
     const res = await fetch('/api/inventory/items');
+    if (!res.ok) throw new Error('Failed to fetch items');
     allItems = await res.json();
-    updateCategoryDatalist(); // Update datalist when items load
+    updateCategoryDatalist();
   } catch (err) {
     console.error('Failed to load items:', err);
   }
 }
 
-// Update category datalist for autocomplete
-function updateCategoryDatalist() {
-  const datalist = document.getElementById('category-options');
-  if (!datalist) return;
+// ── Route dropdown ────────────────────────────────────────────────
 
-  const categories = getUniqueCategories();
-  datalist.innerHTML = categories.map(cat => `<option value="${cat}">`).join('');
-}
+function buildRouteDropdown() {
+  const optionsList = document.getElementById('route-options-list');
+  const triggerText = document.getElementById('selected-route-text');
+  const noRoutes    = document.getElementById('no-routes-state');
+  const display     = document.getElementById('inventory-display');
 
-function getTargetDate() {
-  if (viewMode === 'today') {
-    return new Date().toISOString().split('T')[0];
-  } else if (viewMode === 'tomorrow') {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().split('T')[0];
-  } else {
-    return customViewDate;
+  if (allRoutes.length === 0) {
+    triggerText.textContent = 'No routes available';
+    noRoutes.style.display  = 'block';
+    display.style.display   = 'none';
+    document.getElementById('edit-btn').style.display        = 'none';
+    document.getElementById('import-csv-btn').style.display  = 'none';
+    return;
   }
+
+  noRoutes.style.display = 'none';
+  display.style.display  = 'block';
+
+  optionsList.innerHTML = allRoutes.map(r => `
+    <span class="custom-option" data-value="${r.route_id}">
+      ${r.name}
+      <small style="display:block; font-size:0.8rem; color:#7a5a3e; font-style:italic;">
+        ${r.day_of_week} · ${r.start_time} – ${r.end_time}
+      </small>
+    </span>
+  `).join('');
+
+  // Bind option clicks
+  optionsList.querySelectorAll('.custom-option').forEach(opt => {
+    opt.addEventListener('click', e => {
+      e.stopPropagation();
+      optionsList.querySelectorAll('.custom-option').forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+      triggerText.textContent = opt.firstChild.textContent.trim();
+      selectRoute(parseInt(opt.dataset.value));
+      document.getElementById('route-select-dropdown').classList.remove('custom-select--open');
+    });
+  });
+
+  // Auto-select first route
+  const first = allRoutes[0];
+  optionsList.querySelector('.custom-option')?.classList.add('selected');
+  triggerText.textContent = first.name;
+  selectRoute(first.route_id);
 }
+
+function selectRoute(routeId) {
+  selectedRouteId = routeId;
+  const route = allRoutes.find(r => r.route_id === routeId);
+
+  // Show route metadata badges
+  const meta = document.getElementById('route-meta');
+  if (route) {
+    document.getElementById('route-day-badge').textContent  = route.day_of_week;
+    document.getElementById('route-time-badge').textContent = `${route.start_time} – ${route.end_time}`;
+    meta.style.display = 'flex';
+  } else {
+    meta.style.display = 'none';
+  }
+
+  document.getElementById('edit-btn').style.display       = 'block';
+  document.getElementById('import-csv-btn').style.display = 'block';
+
+  loadInventoryView();
+}
+
+// ── View mode ────────────────────────────────────────────────────
 
 async function loadInventoryView() {
-  if (!vanId) return;
-  const targetDate = getTargetDate();
-  if (!targetDate) return;
+  if (!selectedRouteId) return;
+  const display = document.getElementById('inventory-display');
+  display.innerHTML = '<div style="text-align:center; padding:40px; color:#94a3b8;">Loading inventory…</div>';
 
   try {
-    const res = await fetch(`/api/owner/vans/${vanId}/inventory?date=${targetDate}`);
+    const res = await fetch(`/api/owner/routes/${selectedRouteId}/inventory`);
+    if (!res.ok) throw new Error('Fetch failed');
     const inventory = await res.json();
-    const display = document.getElementById('inventory-display');
 
     if (inventory.length === 0) {
-      display.innerHTML = '<div style="text-align:center; padding:40px; color:#94a3b8;">No inventory set for this date</div>';
+      display.innerHTML = `
+        <div style="text-align:center; padding:60px;">
+          <div style="font-size:2.5rem; margin-bottom:12px;">📦</div>
+          <div style="font-family:'Caveat Brush',cursive; font-size:1.3rem; color:#c8a98a;">
+            No inventory set for this route yet.
+          </div>
+          <div style="margin-top:8px; font-family:'Shadows Into Light Two',cursive; font-size:0.95rem; color:#94a3b8;">
+            Click "Edit Inventory" to load items onto this van.
+          </div>
+        </div>`;
       return;
     }
 
-    // Group inventory by category
-    const inventoryWithItems = inventory.map(inv => {
-      const item = allItems.find(i => i.item_id === inv.item_id);
-      return { ...inv, item };
-    }).filter(inv => inv.item);
-
+    // Group by category
     const grouped = {};
-    inventoryWithItems.forEach(inv => {
-      const category = inv.item.category || 'Uncategorized';
-      if (!grouped[category]) {
-        grouped[category] = [];
-      }
-      grouped[category].push(inv);
+    inventory.forEach(inv => {
+      const cat = inv.item?.category || 'Uncategorized';
+      (grouped[cat] = grouped[cat] || []).push(inv);
     });
 
-    // Render collapsible categories
     let html = '';
-    Object.keys(grouped).sort().forEach((category, idx) => {
-      const items = grouped[category];
-      const categoryId = `category-${category.replace(/\s+/g, '-').toLowerCase()}`;
+    Object.keys(grouped).sort().forEach(category => {
+      const items   = grouped[category];
+      const catId   = `cat-${category.replace(/\s+/g, '-').toLowerCase()}`;
+      const total   = items.reduce((s, i) => s + i.quantity_in_stock, 0);
+
       html += `
         <div class="category-accordion">
-          <div class="category-accordion-header" onclick="toggleCategory('${categoryId}')">
+          <div class="category-accordion-header" onclick="toggleCategory('${catId}')">
             <div class="category-title">
               <span class="category-icon">▼</span>
               <span>${category}</span>
             </div>
-            <span class="category-count">${items.length} items</span>
-          </div>
-          <div class="category-accordion-content" id="${categoryId}">
-            <div class="inventory-grid">
-              ${items.map(inv => {
-                const displayPrice = inv.price || inv.item.price;
-                return `
-                  <div class="inventory-card">
-                    <div class="inventory-card-name">${inv.item.name}</div>
-                    <div class="inventory-card-quantity-row">
-                      <div class="inventory-card-quantity">${inv.quantity_in_stock}</div>
-                      <div class="inventory-card-label">units</div>
-                    </div>
-                    <div class="inventory-card-price">$${parseFloat(displayPrice).toFixed(2)} each</div>
-                  </div>
-                `;
-              }).join('')}
+            <div style="display:flex; gap:12px; align-items:center;">
+              <span style="font-family:'Shadows Into Light Two',cursive; font-size:0.9rem; color:#7a5a3e;">
+                ${total} units total
+              </span>
+              <span class="category-count">${items.length} items</span>
             </div>
           </div>
-        </div>
-      `;
+          <div class="category-accordion-content" id="${catId}">
+            <div class="inventory-grid">
+              ${items.map(inv => `
+                <div class="inventory-card">
+                  <div class="inventory-card-name">${inv.item.name}</div>
+                  <div class="inventory-card-quantity-row">
+                    <div class="inventory-card-quantity">${inv.quantity_in_stock}</div>
+                    <div class="inventory-card-label">units</div>
+                  </div>
+                  <div class="inventory-card-price">$${parseFloat(inv.item.price).toFixed(2)} each</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>`;
     });
 
     display.innerHTML = html;
 
     // Open first category by default
-    if (Object.keys(grouped).length > 0) {
-      const firstCategory = Object.keys(grouped).sort()[0];
-      const firstId = `category-${firstCategory.replace(/\s+/g, '-').toLowerCase()}`;
-      toggleCategory(firstId);
-    }
+    const firstCat = Object.keys(grouped).sort()[0];
+    toggleCategory(`cat-${firstCat.replace(/\s+/g, '-').toLowerCase()}`);
+
   } catch (err) {
     console.error('Failed to load inventory:', err);
-    document.getElementById('inventory-display').innerHTML =
-      '<div style="text-align:center; padding:40px; color:#94a3b8;">No inventory set for this date</div>';
+    display.innerHTML = '<div style="text-align:center; padding:40px; color:#e74c3c;">Failed to load inventory.</div>';
   }
 }
 
-// Toggle category accordion
-function toggleCategory(categoryId) {
-  const content = document.getElementById(categoryId);
-  const header = content.previousElementSibling;
-  const icon = header.querySelector('.category-icon');
-
-  if (content.classList.contains('open')) {
-    content.classList.remove('open');
-    icon.textContent = '▶';
-  } else {
-    content.classList.add('open');
-    icon.textContent = '▼';
-  }
+function toggleCategory(catId) {
+  const content = document.getElementById(catId);
+  if (!content) return;
+  const icon = content.previousElementSibling?.querySelector('.category-icon');
+  const isOpen = content.classList.toggle('open');
+  if (icon) icon.textContent = isOpen ? '▼' : '▶';
 }
 
-// Edit Mode Functions
+// ── Edit mode ────────────────────────────────────────────────────
+
 function enterEditMode() {
-  if (viewMode === 'tomorrow') {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    editingDate = tomorrow.toISOString().split('T')[0];
-    document.getElementById('editing-date-label').textContent = "Tomorrow's";
-    document.getElementById('selected-date-label').textContent = "Tomorrow";
-  } else if (viewMode === 'custom') {
-    editingDate = customViewDate;
-    const dateObj = new Date(editingDate + 'T00:00:00');
-    document.getElementById('editing-date-label').textContent = dateObj.toLocaleDateString();
-    document.getElementById('selected-date-label').textContent = dateObj.toLocaleDateString();
-  } else {
-    alert("Cannot edit today's inventory. Please select Tomorrow or a Custom date.");
-    return;
-  }
+  if (!selectedRouteId) return;
+  const route = allRoutes.find(r => r.route_id === selectedRouteId);
+
+  document.getElementById('editing-route-label').textContent = route ? route.name : 'Route';
+  document.getElementById('editing-route-meta').textContent  =
+    route ? `${route.day_of_week} · ${route.start_time} – ${route.end_time}` : '';
+
   document.getElementById('view-mode').style.display = 'none';
-  document.getElementById('edit-mode').style.display = 'block';
+  document.getElementById('edit-mode').style.display  = 'block';
+
   renderCatalogByCategory();
   loadExistingInventoryForEdit();
 }
 
+function exitEditMode() {
+  document.getElementById('view-mode').style.display = 'block';
+  document.getElementById('edit-mode').style.display  = 'none';
+  selectedItems.clear();
+  deletedItems.clear();
+}
+
 function renderCatalogByCategory() {
   const container = document.getElementById('catalog-by-category');
-  const grouped = groupByCategory(allItems);
+  const grouped   = groupByCategory(allItems);
 
   let html = '<div class="item-selection-area"><h3>Add Items from Catalog</h3>';
 
-  Object.keys(grouped).sort().forEach((category, idx) => {
-    const items = grouped[category];
-    const categoryId = `edit-category-${category.replace(/\s+/g, '-').toLowerCase()}`;
+  Object.keys(grouped).sort().forEach(category => {
+    const items  = grouped[category];
+    const catId  = `edit-cat-${category.replace(/\s+/g, '-').toLowerCase()}`;
+
     html += `
       <div class="catalog-accordion">
-        <div class="catalog-accordion-header" onclick="toggleCatalogCategory('${categoryId}')">
+        <div class="catalog-accordion-header" onclick="toggleCatalogCategory('${catId}')">
           <div class="category-title">
             <span class="category-icon">▼</span>
             <span>${category}</span>
           </div>
           <span class="category-count">${items.length} items</span>
         </div>
-        <div class="catalog-accordion-content" id="${categoryId}">
+        <div class="catalog-accordion-content" id="${catId}">
           <div class="catalog-grid">
             ${items.map(item => `
               <div class="catalog-item" data-item-id="${item.item_id}" onclick="toggleItem(${item.item_id})">
@@ -235,73 +266,59 @@ function renderCatalogByCategory() {
             `).join('')}
           </div>
         </div>
-      </div>
-    `;
+      </div>`;
   });
 
   html += '</div>';
   container.innerHTML = html;
 
-  // Open first category by default
-  if (Object.keys(grouped).length > 0) {
-    const firstCategory = Object.keys(grouped).sort()[0];
-    const firstId = `edit-category-${firstCategory.replace(/\s+/g, '-').toLowerCase()}`;
-    toggleCatalogCategory(firstId);
-  }
+  // Open first category
+  const firstCat = Object.keys(grouped).sort()[0];
+  if (firstCat) toggleCatalogCategory(`edit-cat-${firstCat.replace(/\s+/g, '-').toLowerCase()}`);
 }
 
-function toggleCatalogCategory(categoryId) {
-  const content = document.getElementById(categoryId);
-  const header = content.previousElementSibling;
-  const icon = header.querySelector('.category-icon');
-
-  if (content.classList.contains('open')) {
-    content.classList.remove('open');
-    icon.textContent = '▶';
-  } else {
-    content.classList.add('open');
-    icon.textContent = '▼';
-  }
+function toggleCatalogCategory(catId) {
+  const content = document.getElementById(catId);
+  if (!content) return;
+  const icon = content.previousElementSibling?.querySelector('.category-icon');
+  const isOpen = content.classList.toggle('open');
+  if (icon) icon.textContent = isOpen ? '▼' : '▶';
 }
 
 async function loadExistingInventoryForEdit() {
-  if (!vanId || !editingDate) return;
+  if (!selectedRouteId) return;
   try {
-    const res = await fetch(`/api/owner/vans/${vanId}/inventory?date=${editingDate}`);
+    const res = await fetch(`/api/owner/routes/${selectedRouteId}/inventory`);
+    if (!res.ok) throw new Error('Fetch failed');
     const inventory = await res.json();
+
     selectedItems.clear();
-    inventory.forEach(inv => {
-      selectedItems.set(inv.item_id, inv.quantity_in_stock);
-    });
+    inventory.forEach(inv => selectedItems.set(inv.item_id, inv.quantity_in_stock));
     renderSelectedItems();
   } catch (err) {
-    console.error('No existing inventory:', err);
+    console.error('Could not load existing inventory for edit:', err);
     selectedItems.clear();
     renderSelectedItems();
   }
 }
-
-
 
 function toggleItem(itemId) {
   if (selectedItems.has(itemId)) {
-
     selectedItems.delete(itemId);
     deletedItems.add(itemId);
   } else {
-
     selectedItems.set(itemId, 10);
     deletedItems.delete(itemId);
   }
-
-  // Update the catalog item's visual state
-  const catalogCard = document.querySelector(`[data-item-id="${itemId}"]`);
-  if (catalogCard) {
-    catalogCard.classList.toggle('selected');
-  }
+  const card = document.querySelector(`[data-item-id="${itemId}"]`);
+  if (card) card.classList.toggle('selected', selectedItems.has(itemId));
   renderSelectedItems();
 }
 
+function updateQuantity(itemId, value) {
+  const qty = parseInt(value);
+  if (!isNaN(qty) && qty >= 0) selectedItems.set(itemId, qty);
+}
 
 function removeItem(itemId) {
   selectedItems.delete(itemId);
@@ -309,30 +326,32 @@ function removeItem(itemId) {
   renderSelectedItems();
 }
 
-
 function renderSelectedItems() {
   const list = document.getElementById('selected-items-list');
+
   if (selectedItems.size === 0) {
     list.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8;">No items selected yet</div>';
-    return;
+  } else {
+    list.innerHTML = Array.from(selectedItems.entries()).map(([itemId, qty]) => {
+      const item = allItems.find(i => i.item_id === itemId);
+      if (!item) return '';
+      return `
+        <div class="selected-item">
+          <div class="selected-item-info">
+            <div class="selected-item-name">${item.name}</div>
+            <div style="font-size:0.9rem; color:#64748b; margin-top:4px;">$${parseFloat(item.price).toFixed(2)} each</div>
+          </div>
+          <div class="selected-item-controls">
+            <label>Quantity:</label>
+            <input type="number" min="0" value="${qty}"
+                   onchange="updateQuantity(${itemId}, this.value)" />
+            <button class="remove-btn" onclick="removeItem(${itemId})">Remove</button>
+          </div>
+        </div>`;
+    }).join('');
   }
 
-  list.innerHTML = Array.from(selectedItems.entries()).map(([itemId, quantity]) => {
-    const item = allItems.find(i => i.item_id === itemId);
-    return `<div class="selected-item">
-      <div class="selected-item-info">
-        <div class="selected-item-name">${item.name}</div>
-        <div style="font-size:0.9rem; color:#64748b; margin-top:4px;">$${parseFloat(item.price).toFixed(2)} each</div>
-      </div>
-      <div class="selected-item-controls">
-        <label>Quantity:</label>
-        <input type="number" min="0" value="${quantity}"
-               onchange="updateQuantity(${itemId}, this.value)" />
-        <button class="remove-btn" onclick="removeItem(${itemId})">Remove</button>
-      </div>
-    </div>`;
-  }).join('');
-
+  // Sync catalog highlights
   document.querySelectorAll('.catalog-item').forEach(el => {
     const id = parseInt(el.dataset.itemId);
     el.classList.toggle('selected', selectedItems.has(id));
@@ -340,111 +359,81 @@ function renderSelectedItems() {
 }
 
 async function saveInventory() {
-  if (!vanId || !editingDate) return;
+  if (!selectedRouteId) return;
 
-  // Include both selected items AND deleted items (with quantity 0)
   const items = [];
 
-  // Add selected items
   selectedItems.forEach((quantity, item_id) => {
-    items.push({
-      item_id: parseInt(item_id),
-      quantity: parseInt(quantity)
-    });
+    items.push({ item_id: parseInt(item_id), quantity: parseInt(quantity) });
   });
 
-  // Add deleted items with quantity 0 to remove them
+  // Send removed items with quantity 0
   deletedItems.forEach(item_id => {
-    if (!selectedItems.has(item_id)) { // Only if not re-added
-      items.push({
-        item_id: parseInt(item_id),
-        quantity: 0
-      });
+    if (!selectedItems.has(item_id)) {
+      items.push({ item_id: parseInt(item_id), quantity: 0 });
     }
   });
 
   try {
-    const res = await fetch(`/api/owner/vans/${vanId}/inventory`, {
-      method: 'POST',
+    const res = await fetch(`/api/owner/routes/${selectedRouteId}/inventory`, {
+      method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ date: editingDate, items })
+      body:    JSON.stringify({ items }),
     });
+
     if (res.ok) {
       alert('✅ Inventory saved successfully!');
-      deletedItems.clear(); // Clear after successful save
+      deletedItems.clear();
       exitEditMode();
       await loadInventoryView();
     } else {
-      throw new Error('Save failed');
+      const err = await res.json().catch(() => ({}));
+      alert(`❌ Failed to save inventory: ${err.message || res.status}`);
     }
   } catch (err) {
-    console.error('Failed to save:', err);
-    alert('❌ Failed to save inventory');
+    console.error('Failed to save inventory:', err);
+    alert('❌ Network error — could not reach server');
   }
 }
 
-function exitEditMode() {
-  document.getElementById('view-mode').style.display = 'block';
-  document.getElementById('edit-mode').style.display = 'none';
-  selectedItems.clear();
-  deletedItems.clear(); // Also clear deleted items
-  editingDate = null;
-}
-// CSV Import
+// ── CSV Import ────────────────────────────────────────────────────
+
 async function handleCSVUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
+
+  if (!selectedRouteId) {
+    alert('Please select a route before importing a CSV.');
+    return;
+  }
+
   const reader = new FileReader();
-  reader.onload = async (e) => {
+  reader.onload = async e => {
     try {
-      const text = e.target.result;
-      const lines = text.split('\n').map(line => line.trim()).filter(line => line);
-      if (lines.length < 2) {
-        alert('CSV file is empty or invalid');
-        return;
-      }
-      const header = lines[0].toLowerCase();
-      if (!header.includes('name') || !header.includes('quantity')) {
+      const lines = e.target.result.split('\n').map(l => l.trim()).filter(Boolean);
+      if (lines.length < 2) { alert('CSV file is empty or invalid'); return; }
+
+      const headers = lines[0].toLowerCase().split(',');
+      const nameIdx = headers.findIndex(h => h.includes('name'));
+      const qtyIdx  = headers.findIndex(h => h.includes('quantity') || h.includes('qty'));
+
+      if (nameIdx < 0 || qtyIdx < 0) {
         alert('CSV must have "name" and "quantity" columns');
         return;
       }
-      const nameIdx = header.split(',').findIndex(h => h.includes('name'));
-      const qtyIdx = header.split(',').findIndex(h => h.includes('quantity'));
+
       selectedItems.clear();
       for (let i = 1; i < lines.length; i++) {
-        const cols = lines[i].split(',').map(c => c.trim());
-        const name = cols[nameIdx];
+        const cols     = lines[i].split(',').map(c => c.trim());
+        const name     = cols[nameIdx];
         const quantity = parseInt(cols[qtyIdx]) || 0;
-        const item = allItems.find(it => it.name.toLowerCase() === name.toLowerCase());
-        if (item) {
-          selectedItems.set(item.item_id, quantity);
-        }
+        const item     = allItems.find(it => it.name.toLowerCase() === name.toLowerCase());
+        if (item) selectedItems.set(item.item_id, quantity);
       }
-      if (viewMode === 'today') {
-        alert('Please select Tomorrow or Custom date to import CSV');
-        return;
-      }
-      if (viewMode === 'tomorrow') {
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        editingDate = tomorrow.toISOString().split('T')[0];
-        document.getElementById('editing-date-label').textContent = "Tomorrow's";
-        document.getElementById('selected-date-label').textContent = "Tomorrow";
-      } else if (viewMode === 'custom') {
-        if (!customViewDate) {
-          alert('Please select a custom date first');
-          return;
-        }
-        editingDate = customViewDate;
-        const dateObj = new Date(editingDate + 'T00:00:00');
-        document.getElementById('editing-date-label').textContent = dateObj.toLocaleDateString();
-        document.getElementById('selected-date-label').textContent = dateObj.toLocaleDateString();
-      }
-      document.getElementById('view-mode').style.display = 'none';
-      document.getElementById('edit-mode').style.display = 'block';
-      renderCatalogByCategory();
+
+      enterEditMode();
       renderSelectedItems();
-      alert('✅ Imported ${selectedItems.size} items from CSV');
+      alert(`✅ Imported ${selectedItems.size} item(s) from CSV`);
     } catch (err) {
       console.error('CSV parse error:', err);
       alert('❌ Failed to parse CSV file');
@@ -454,10 +443,17 @@ async function handleCSVUpload(event) {
   event.target.value = '';
 }
 
-// Product Management
+// ── Product management ────────────────────────────────────────────
+
+function updateCategoryDatalist() {
+  const datalist = document.getElementById('category-options');
+  if (!datalist) return;
+  datalist.innerHTML = getUniqueCategories().map(c => `<option value="${c}">`).join('');
+}
+
 async function loadProducts() {
   try {
-    const res = await fetch('/api/inventory/items');
+    const res      = await fetch('/api/inventory/items');
     const products = await res.json();
     renderProducts(products);
   } catch (err) {
@@ -468,20 +464,20 @@ async function loadProducts() {
 function renderProducts(products) {
   const grid = document.getElementById('products-grid');
   if (products.length === 0) {
-    grid.innerHTML = '<div style="text-align:center; padding:40px; color:#94a3b8; grid-column: 1/-1;">No products yet. Click "+ Add Product".</div>';
+    grid.innerHTML = '<div style="text-align:center; padding:40px; color:#94a3b8; grid-column:1/-1;">No products yet. Click "+ Add Product".</div>';
     return;
   }
-  grid.innerHTML = products.map(product => `
+  grid.innerHTML = products.map(p => `
     <div class="product-item">
       <div class="product-item-header">
-        <div class="product-item-name">${product.name}</div>
-        <div class="product-item-price">$${parseFloat(product.price).toFixed(2)}</div>
+        <div class="product-item-name">${p.name}</div>
+        <div class="product-item-price">$${parseFloat(p.price).toFixed(2)}</div>
       </div>
-      ${product.category ? `<div class="product-item-category">${product.category}</div>` : ''}
-      <div class="product-item-description">${product.description || 'No description'}</div>
+      ${p.category ? `<div class="product-item-category">${p.category}</div>` : ''}
+      <div class="product-item-description">${p.description || 'No description'}</div>
       <div class="product-actions">
-        <button class="product-action-btn edit-product-btn" onclick="editProduct(${product.item_id})">Edit</button>
-        <button class="product-action-btn delete-product-btn" onclick="deleteProduct(${product.item_id}, '${product.name}')">Delete</button>
+        <button class="product-action-btn edit-product-btn" onclick="editProduct(${p.item_id})">Edit</button>
+        <button class="product-action-btn delete-product-btn" onclick="deleteProduct(${p.item_id}, '${p.name.replace(/'/g, "\\'")}')">Delete</button>
       </div>
     </div>
   `).join('');
@@ -489,19 +485,15 @@ function renderProducts(products) {
 
 function showProductModal(editing = false) {
   const modal = document.getElementById('product-modal');
-  const title = document.getElementById('product-modal-title');
+  document.getElementById('product-modal-title').textContent = editing ? 'Edit Product' : 'Add Product';
   if (editing && editingProduct) {
-    title.textContent = 'Edit Product';
-    document.getElementById('product-name').value = editingProduct.name;
-    document.getElementById('product-price').value = parseFloat(editingProduct.price);
-    document.getElementById('product-category').value = editingProduct.category || '';
+    document.getElementById('product-name').value        = editingProduct.name;
+    document.getElementById('product-price').value       = parseFloat(editingProduct.price);
+    document.getElementById('product-category').value    = editingProduct.category || '';
     document.getElementById('product-description').value = editingProduct.description || '';
   } else {
-    title.textContent = 'Add Product';
-    document.getElementById('product-name').value = '';
-    document.getElementById('product-price').value = '';
-    document.getElementById('product-category').value = '';
-    document.getElementById('product-description').value = '';
+    ['product-name','product-price','product-category','product-description']
+      .forEach(id => { document.getElementById(id).value = ''; });
     editingProduct = null;
   }
   modal.style.display = 'flex';
@@ -512,154 +504,92 @@ function hideProductModal() {
   editingProduct = null;
 }
 
-async function editProduct(itemId) {
-  editingProduct = allItems.find(item => item.item_id === itemId);
+function editProduct(itemId) {
+  editingProduct = allItems.find(i => i.item_id === itemId);
   showProductModal(true);
 }
 
 async function deleteProduct(itemId, name) {
-  if (!confirm(`Are you sure you want to delete "${name}"? This cannot be undone.`)) {
-    return;
-  }
+  if (!confirm(`Are you sure you want to delete "${name}"? This cannot be undone.`)) return;
   try {
     const res = await fetch(`/api/inventory/items/${itemId}`, { method: 'DELETE' });
     if (res.ok) {
       alert('✅ Product deleted successfully!');
       await loadAllItems();
       await loadProducts();
-      if (document.getElementById('edit-mode').style.display !== 'none') {
-        renderCatalogByCategory();
-      }
+      if (document.getElementById('edit-mode').style.display !== 'none') renderCatalogByCategory();
     } else {
-      throw new Error('Delete failed');
+      alert('❌ Failed to delete product');
     }
   } catch (err) {
     console.error('Failed to delete product:', err);
-    alert('❌ Failed to delete product');
+    alert('❌ Network error');
   }
 }
 
 async function saveProduct() {
-  const name = document.getElementById('product-name').value.trim();
-  const price = parseFloat(document.getElementById('product-price').value);
-  const category = document.getElementById('product-category').value.trim();
+  const name        = document.getElementById('product-name').value.trim();
+  const price       = parseFloat(document.getElementById('product-price').value);
+  const category    = document.getElementById('product-category').value.trim();
   const description = document.getElementById('product-description').value.trim();
 
-  if (!name || !price || price < 0) {
+  if (!name || isNaN(price) || price < 0) {
     alert('Please enter a valid name and price');
     return;
   }
 
-  const productData = { name, price, category, description };
+  const payload = { name, price, category, description };
+  const url     = editingProduct ? `/api/inventory/items/${editingProduct.item_id}` : '/api/inventory/items';
+  const method  = editingProduct ? 'PUT' : 'POST';
 
   try {
-    const url = editingProduct ? `/api/inventory/items/${editingProduct.item_id}` : '/api/inventory/items';
     const res = await fetch(url, {
-      method: editingProduct ? 'PUT' : 'POST',
+      method,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(productData)
+      body:    JSON.stringify(payload),
     });
+
     if (res.ok) {
-      alert('✓ Product saved successfully!');
+      alert('✅ Product saved successfully!');
       hideProductModal();
       await loadAllItems();
       await loadProducts();
-      if (document.getElementById('edit-mode').style.display !== 'none') {
-        renderCatalogByCategory();
-      }
+      if (document.getElementById('edit-mode').style.display !== 'none') renderCatalogByCategory();
     } else {
-      throw new Error('Save failed');
+      alert('❌ Failed to save product');
     }
   } catch (err) {
     console.error('Failed to save product:', err);
-    alert('❌ Failed to save product');
+    alert('❌ Network error');
   }
 }
 
-// Custom Dropdown
-function updateViewMode(newValue) {
-  viewMode = newValue;
-  const customGroup = document.getElementById('custom-date-group');
-  const editBtn = document.getElementById('edit-btn');
-  const importBtn = document.getElementById('import-csv-btn');
-  if (viewMode === 'custom') {
-    customGroup.style.display = 'flex';
-    customViewDate = document.getElementById('custom-date').value;
-  } else {
-    customGroup.style.display = 'none';
-  }
-  if (viewMode === 'today') {
-    document.getElementById('edit-target').textContent = "Tomorrow's";
-    editBtn.style.display = 'none';
-    importBtn.style.display = 'none';
-  } else if (viewMode === 'tomorrow') {
-    document.getElementById('edit-target').textContent = "Tomorrow's";
-    editBtn.style.display = 'block';
-    importBtn.style.display = 'block';
-  } else {
-    document.getElementById('edit-target').textContent = "This Date's";
-    editBtn.style.display = customViewDate ? 'block' : 'none';
-    importBtn.style.display = customViewDate ? 'block' : 'none';
-  }
-  if (viewMode !== 'custom' || customViewDate) {
-    loadInventoryView();
-  }
+// ── Custom dropdown (route selector) ─────────────────────────────
+
+function initRouteDropdown() {
+  const dropdown = document.getElementById('route-select-dropdown');
+  const trigger  = document.getElementById('route-select-trigger');
+
+  trigger.addEventListener('click', e => {
+    e.stopPropagation();
+    dropdown.classList.toggle('custom-select--open');
+  });
+
+  document.addEventListener('click', e => {
+    if (!dropdown.contains(e.target)) dropdown.classList.remove('custom-select--open');
+  });
 }
 
-// Event Handlers
+// ── Init ──────────────────────────────────────────────────────────
+
 document.addEventListener('DOMContentLoaded', async () => {
-  await loadVan();
-  await loadAllItems();
-  await loadInventoryView();
-
-  const customSelectTrigger = document.querySelector('.custom-select__trigger');
-  const customSelect = document.querySelector('.custom-select');
-  const customOptions = document.querySelectorAll('.custom-option');
-
-  if (customSelectTrigger) {
-    customSelectTrigger.addEventListener('click', (e) => {
-      e.stopPropagation();
-      customSelect.classList.toggle('custom-select--open');
-    });
-  }
-
-  customOptions.forEach(option => {
-    option.addEventListener('click', function(e) {
-      e.stopPropagation();
-      customOptions.forEach(opt => opt.classList.remove('selected'));
-      this.classList.add('selected');
-      const selectedText = document.getElementById('selected-view-text');
-      if (selectedText) {
-        selectedText.textContent = this.textContent;
-      }
-      const value = this.getAttribute('data-value');
-      updateViewMode(value);
-      customSelect.classList.remove('custom-select--open');
-    });
-  });
-
-  document.addEventListener('click', (e) => {
-    if (customSelect && !customSelect.contains(e.target)) {
-      customSelect.classList.remove('custom-select--open');
-    }
-  });
-
-  document.getElementById('custom-date').addEventListener('change', async (e) => {
-    customViewDate = e.target.value;
-    const editBtn = document.getElementById('edit-btn');
-    const importBtn = document.getElementById('import-csv-btn');
-    editBtn.style.display = customViewDate ? 'block' : 'none';
-    importBtn.style.display = customViewDate ? 'block' : 'none';
-    await loadInventoryView();
-  });
+  initRouteDropdown();
+  await Promise.all([loadRoutes(), loadAllItems()]);
 
   document.getElementById('csv-upload').addEventListener('change', handleCSVUpload);
   document.getElementById('edit-btn').addEventListener('click', enterEditMode);
   document.getElementById('cancel-btn').addEventListener('click', exitEditMode);
   document.getElementById('save-btn').addEventListener('click', saveInventory);
-  document.getElementById('edit-btn').style.display = 'none';
-  document.getElementById('import-csv-btn').style.display = 'none';
-
   document.getElementById('add-product-btn').addEventListener('click', () => showProductModal(false));
   document.getElementById('save-product-btn').addEventListener('click', saveProduct);
 });

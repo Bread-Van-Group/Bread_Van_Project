@@ -26,14 +26,12 @@ function populateDriverSelect(selectedDriverId = null) {
   const hidden = document.getElementById('route-driver');
   if (!menu) return;
 
-  // Build menu items
   const noDriverItem = `<li data-value="">-- No driver assigned --</li>`;
   const driverItems = allDrivers.map(d =>
     `<li data-value="${d.driver_id}">${d.name}${d.assigned_van_plate ? ' (' + d.assigned_van_plate + ')' : ''}</li>`
   ).join('');
   menu.innerHTML = noDriverItem + driverItems;
 
-  // Set selected value
   const selectedDriver = selectedDriverId
     ? allDrivers.find(d => d.driver_id == selectedDriverId)
     : null;
@@ -43,12 +41,10 @@ function populateDriverSelect(selectedDriverId = null) {
     : '-- No driver assigned --';
   hidden.value = selectedDriverId || '';
 
-  // Mark selected item
   menu.querySelectorAll('li').forEach(li => {
     li.classList.toggle('selected', li.dataset.value == (selectedDriverId || ''));
   });
 
-  // Re-bind click handlers
   menu.querySelectorAll('li').forEach(li => {
     li.addEventListener('click', () => {
       menu.querySelectorAll('li').forEach(x => x.classList.remove('selected'));
@@ -102,8 +98,6 @@ function setDriverDropdownValue(driverId) {
 let numberIcons = {};
 function createNumberedIcon(number) {
   if (!numberIcons[number]) {
-
-
     const html = `<div class="numbered-marker-inner">${number}</div>`;
     numberIcons[number] = L.divIcon({
       html: html,
@@ -223,11 +217,9 @@ function updateMapHint() {
 
 // Render stop markers
 function renderStops() {
-  // Clear existing markers
   stopMarkers.forEach(m => map.removeLayer(m));
   stopMarkers = [];
 
-  // Create numbered markers for each stop
   stops.forEach((stop, index) => {
     const marker = L.marker([stop.lat, stop.lng], {
       icon: createNumberedIcon(index + 1)
@@ -249,10 +241,7 @@ function renderStops() {
     stopMarkers.push(marker);
   });
 
-
   buildRoutingPath();
-
-
   updateStopsList();
 }
 
@@ -263,17 +252,13 @@ function updateStopsList() {
     return;
   }
 
-  let html = '';
-  stops.forEach((stop, index) => {
-    html += `
-      <div class="location-row">
-        <span class="loc-dot" style="background: #0077be;">${index + 1}</span>
-        <div class="loc-text set">Stop #${index + 1}: (${stop.lat.toFixed(4)}, ${stop.lng.toFixed(4)})</div>
-        <button class="loc-reset-btn" onclick="removeStop(${index})">Remove</button>
-      </div>
-    `;
-  });
-  container.innerHTML = html;
+  container.innerHTML = stops.map((stop, index) => `
+    <div class="location-row">
+      <span class="loc-dot" style="background: #0077be;">${index + 1}</span>
+      <div class="loc-text set">Stop #${index + 1}: (${stop.lat.toFixed(4)}, ${stop.lng.toFixed(4)})</div>
+      <button class="loc-reset-btn" onclick="removeStop(${index})">Remove</button>
+    </div>
+  `).join('');
 }
 
 // Map click - add stop
@@ -281,16 +266,13 @@ function handleMapClick(e) {
   if (!isSelectingLocation) return;
   const { lat, lng } = e.latlng;
   stops.push({ lat, lng, order: stops.length });
-
   renderStops();
   updateMapHint();
 }
 
 function removeStop(index) {
   stops.splice(index, 1);
-  stops.forEach((stop, idx) => {
-    stop.order = idx;
-  });
+  stops.forEach((stop, idx) => { stop.order = idx; });
   renderStops();
   map.closePopup();
 }
@@ -332,22 +314,28 @@ function renderRoutesList() {
     return;
   }
 
-  list.innerHTML = routes.map(route => `
-    <div class="route-card ${selectedRoute && selectedRoute.route_id === route.route_id ? 'active' : ''}"
-         onclick="selectRoute(${route.route_id})">
-      <div class="route-card-header">
-        <div class="route-card-name">${route.name}</div>
-        <div class="route-card-actions">
-          <button class="route-edit-btn" onclick="event.stopPropagation(); editRoute(${route.route_id})">✎</button>
-          <button class="route-delete-btn" onclick="event.stopPropagation(); deleteRoute(${route.route_id})">🗙</button>
+  list.innerHTML = routes.map(route => {
+    const driverNames = route.assigned_drivers && route.assigned_drivers.length > 0
+      ? route.assigned_drivers.map(d => d.name).join(', ')
+      : 'No driver assigned';
+
+    return `
+      <div class="route-card ${selectedRoute && selectedRoute.route_id === route.route_id ? 'active' : ''}"
+           onclick="selectRoute(${route.route_id})">
+        <div class="route-card-header">
+          <div class="route-card-name">${route.name}</div>
+          <div class="route-card-actions">
+            <button class="route-edit-btn" onclick="event.stopPropagation(); editRoute(${route.route_id})">✎</button>
+            <button class="route-delete-btn" onclick="event.stopPropagation(); deleteRoute(${route.route_id})">🗙</button>
+          </div>
         </div>
+        <div class="route-card-detail">⏰ ${route.start_time} - ${route.end_time}</div>
+        <div class="route-card-detail">📍 ${route.stops_count || 0} stops</div>
+        <div class="route-card-detail">👤 ${driverNames}</div>
+        <span class="route-card-day">${route.day_of_week}</span>
       </div>
-      <div class="route-card-detail">⏰ ${route.start_time} - ${route.end_time}</div>
-      <div class="route-card-detail">📍 ${route.stops_count || 0} stops</div>
-      <div class="route-card-detail">👤 ${route.assigned_driver_name || 'No driver assigned'}</div>
-      <span class="route-card-day">${route.day_of_week}</span>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 // Select route - display on map
@@ -365,7 +353,6 @@ async function selectRoute(routeId) {
       return;
     }
 
-    // Display stops
     stopsData.forEach((stop, idx) => {
       const marker = L.marker([stop.lat, stop.lng], {
         icon: createNumberedIcon(idx + 1)
@@ -374,7 +361,6 @@ async function selectRoute(routeId) {
       stopMarkers.push(marker);
     });
 
-    // Build route
     const waypoints = stopsData.map(s => L.latLng(s.lat, s.lng));
     if (waypoints.length > 1) {
       activeRoutingControl = L.Routing.control({
@@ -410,8 +396,6 @@ function showRouteEditor(editing = false) {
 
   isEditing = editing;
   clearAllStops();
-
-  // Always refresh driver list
   populateDriverSelect();
 
   if (editing && selectedRoute) {
@@ -422,11 +406,13 @@ function showRouteEditor(editing = false) {
     document.getElementById('route-end-time').value = selectedRoute.end_time;
     document.getElementById('route-description').value = selectedRoute.description || '';
 
-    // Pre-select assigned driver if any
-    populateDriverSelect(selectedRoute.assigned_driver_id || null);
-    setDriverDropdownValue(selectedRoute.assigned_driver_id || null);
+    // Pre-select the first assigned driver if any
+    const firstDriver = selectedRoute.assigned_drivers && selectedRoute.assigned_drivers.length > 0
+      ? selectedRoute.assigned_drivers[0]
+      : null;
+    populateDriverSelect(firstDriver ? firstDriver.driver_id : null);
+    setDriverDropdownValue(firstDriver ? firstDriver.driver_id : null);
 
-    // Load existing stops
     loadRouteStopsForEdit(selectedRoute.route_id);
   } else {
     document.getElementById('editor-title').textContent = 'New Route';
@@ -489,14 +475,37 @@ async function deleteRoute(routeId) {
   }
 }
 
+// ── Helper: sync driver assignment for a route ───────────────────
+async function syncDriverAssignment(routeId, newDriverId) {
+  const route = routes.find(r => r.route_id === routeId);
+  const currentDrivers = route && route.assigned_drivers ? route.assigned_drivers : [];
+
+  await Promise.all(currentDrivers.map(d =>
+    fetch(`/api/owner/routes/${routeId}/assign-driver`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ driver_id: d.driver_id })
+    })
+  ));
+
+  // Assign the new driver
+  if (newDriverId) {
+    await fetch(`/api/owner/routes/${routeId}/assign-driver`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ driver_id: parseInt(newDriverId) })
+    });
+  }
+}
+
 // Save route
 async function saveRoute() {
-  const name = document.getElementById('route-name').value.trim();
-  const day = document.getElementById('route-day').value;
-  const startTime = document.getElementById('route-start-time').value;
-  const endTime = document.getElementById('route-end-time').value;
+  const name        = document.getElementById('route-name').value.trim();
+  const day         = document.getElementById('route-day').value;
+  const startTime   = document.getElementById('route-start-time').value;
+  const endTime     = document.getElementById('route-end-time').value;
   const description = document.getElementById('route-description').value.trim();
-  const driverId = document.getElementById('route-driver').value;
+  const driverId    = document.getElementById('route-driver').value; // '' or numeric string
 
   if (!name) {
     alert('Please enter a route name');
@@ -511,41 +520,34 @@ async function saveRoute() {
   const routeData = {
     name,
     day_of_week: day,
-    start_time: startTime,
-    end_time: endTime,
+    start_time:  startTime,
+    end_time:    endTime,
     description,
     stops: stops.map((stop, index) => ({
-      lat: stop.lat,
-      lng: stop.lng,
-      order: index,
+      lat:     stop.lat,
+      lng:     stop.lng,
+      order:   index,
       address: ''
     }))
   };
 
   try {
-    const url = isEditing && selectedRoute
-      ? `/api/owner/routes/${selectedRoute.route_id}`
-      : '/api/owner/routes';
+    const url    = isEditing && selectedRoute ? `/api/owner/routes/${selectedRoute.route_id}` : '/api/owner/routes';
+    const method = isEditing && selectedRoute ? 'PUT' : 'POST';
 
     const res = await fetch(url, {
-      method: isEditing && selectedRoute ? 'PUT' : 'POST',
+      method,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(routeData)
+      body:    JSON.stringify(routeData)
     });
 
     if (!res.ok) throw new Error('Save failed');
 
-    const result = await res.json();
+    const result      = await res.json();
     const savedRouteId = result.route_id || (selectedRoute && selectedRoute.route_id);
 
-    // Assign driver to route if one was selected
-    if (driverId && savedRouteId) {
-      await fetch(`/api/owner/routes/${savedRouteId}/assign-driver`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ driver_id: parseInt(driverId) })
-      });
-    }
+    // Sync driver: unassign old, assign new
+    await syncDriverAssignment(savedRouteId, driverId || null);
 
     alert('✅ Route saved successfully!');
     hideRouteEditor();

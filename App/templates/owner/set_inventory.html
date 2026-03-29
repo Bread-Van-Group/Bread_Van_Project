@@ -17,49 +17,47 @@
     <a class="sidebar-btn" href="{{ url_for('index_views.owner_report') }}">Reports</a>
     <a class="sidebar-btn active" href="{{ url_for('index_views.owner_inventory') }}">Set Inventory</a>
     <a class="sidebar-btn" href="{{ url_for('index_views.owner_routes') }}">Routes</a>
-    <a class="sidebar-btn " href="{{ url_for('index_views.owner_tracking') }}">Driver Tracking</a>
-    <a class="sidebar-btn" href="{{ url_for('index_views.owner_fleet') }}"> Management</a>
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_tracking') }}">Driver Tracking</a>
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_fleet') }}">Management</a>
     <a class="sidebar-btn sidebar-logout" href="{{ url_for('auth_views.logout') }}">Logout</a>
   </div>
 
   <!-- Main Content Area -->
   <div class="content-wrapper">
-
     <div class="main-content">
       <div class="content-card">
 
         <!-- Tab Navigation -->
         <div class="tab-navigation">
-          <button class="tab-btn active" id="inventory-tab" onclick="switchTab('inventory')">Daily Inventory</button>
+          <button class="tab-btn active" id="inventory-tab" onclick="switchTab('inventory')">Route Inventory</button>
           <button class="tab-btn" id="products-tab" onclick="switchTab('products')">Manage Products</button>
         </div>
 
-        <!-- Daily Inventory Tab -->
+        <!-- Route Inventory Tab -->
         <div id="inventory-content" class="tab-content">
+
           <!-- View Mode -->
           <div id="view-mode">
             <div class="inventory-controls">
               <div class="filter-row">
                 <div class="filter-group">
-                  <label>View:</label>
+                  <label>Route:</label>
                   <div class="custom-select-wrapper">
-                    <div class="custom-select">
-                      <div class="custom-select__trigger">
-                        <span id="selected-view-text">Today's Inventory</span>
+                    <div class="custom-select" id="route-select-dropdown">
+                      <div class="custom-select__trigger" id="route-select-trigger">
+                        <span id="selected-route-text">Loading routes…</span>
                         <div class="custom-select__arrow">▼</div>
                       </div>
-                      <div class="custom-options">
-                        <span class="custom-option selected" data-value="today">Today's Inventory</span>
-                        <span class="custom-option" data-value="tomorrow">Tomorrow's Inventory</span>
-                        <span class="custom-option" data-value="custom">Custom Date</span>
+                      <div class="custom-options" id="route-options-list">
+                        <!-- Populated by JS -->
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div class="filter-group" id="custom-date-group" style="display:none;">
-                  <label>Date:</label>
-                  <input type="date" id="custom-date" />
+                <div class="filter-group route-meta" id="route-meta" style="display:none;">
+                  <span class="route-meta-badge" id="route-day-badge"></span>
+                  <span class="route-meta-badge" id="route-time-badge"></span>
                 </div>
               </div>
 
@@ -68,16 +66,25 @@
                 <button class="action-btn" id="import-csv-btn" onclick="document.getElementById('csv-upload').click()" style="display:none;">
                   Import CSV
                 </button>
-                <button class="action-btn edit-btn" id="edit-btn">
-                  Edit <span id="edit-target">Tomorrow's</span> Inventory
+                <button class="action-btn edit-btn" id="edit-btn" style="display:none;">
+                  Edit Inventory
                 </button>
               </div>
             </div>
 
-            <!-- Current Inventory Display (collapsible by category) -->
+            <!-- No routes state -->
+            <div id="no-routes-state" style="display:none; text-align:center; padding:60px; color:#94a3b8;">
+              <div style="font-size:3rem; margin-bottom:16px;">🛣️</div>
+              <div style="font-family:'Caveat Brush',cursive; font-size:1.4rem; color:#c8a98a;">No routes found.</div>
+              <div style="margin-top:8px; font-family:'Shadows Into Light Two',cursive; font-size:1rem;">
+                Create a route first from the <a href="{{ url_for('index_views.owner_routes') }}" style="color:#e07b39;">Routes</a> page.
+              </div>
+            </div>
+
+            <!-- Route Inventory Display -->
             <div class="inventory-display" id="inventory-display">
               <div style="text-align:center; padding:40px; color:#94a3b8;">
-                Loading inventory...
+                Select a route to view its inventory.
               </div>
             </div>
           </div>
@@ -85,21 +92,24 @@
           <!-- Edit Mode -->
           <div id="edit-mode" style="display:none;">
             <div class="edit-header">
-              <h2>Edit <span id="editing-date-label">Tomorrow's</span> Inventory</h2>
+              <div>
+                <h2>Edit Inventory for <span id="editing-route-label">Route</span></h2>
+                <p class="edit-subtitle" id="editing-route-meta"></p>
+              </div>
               <div class="edit-actions">
                 <button class="action-btn cancel-btn" id="cancel-btn">Cancel</button>
                 <button class="action-btn save-btn" id="save-btn">Save Inventory</button>
               </div>
             </div>
 
-            <!-- Item Selection by Category (collapsible) -->
+            <!-- Item Catalog by Category -->
             <div id="catalog-by-category">
-              <!-- Categories will be added here -->
+              <!-- Populated by JS -->
             </div>
 
             <!-- Selected Items List -->
             <div class="selected-items-area">
-              <h3>Selected Items for <span id="selected-date-label">Tomorrow</span></h3>
+              <h3>Items Loaded onto Van</h3>
               <div class="selected-items-list" id="selected-items-list">
                 <div style="text-align:center; padding:20px; color:#94a3b8;">
                   No items selected yet
@@ -118,7 +128,7 @@
 
           <div class="products-grid" id="products-grid">
             <div style="text-align:center; padding:40px; color:#94a3b8;">
-              Loading products...
+              Loading products…
             </div>
           </div>
         </div>
@@ -149,9 +159,7 @@
       <div class="form-group">
         <label>Category:</label>
         <input type="text" id="product-category" list="category-options" placeholder="e.g., Bread, Pastry, Doubles" />
-        <datalist id="category-options">
-          <!-- Dynamically populated categories -->
-        </datalist>
+        <datalist id="category-options"></datalist>
       </div>
       <div class="form-group">
         <label>Description (optional):</label>
