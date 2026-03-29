@@ -1,0 +1,364 @@
+{% extends "driver/layout.html" %}
+{% block title %}Manage Route{% endblock %}
+
+{% block head %}
+
+<!-- Leaflet CSS for OpenStreet Maps -->
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+  crossorigin=""
+/>
+
+<!-- Leaflet JS for OpenStreet Maps -->
+<script
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlBo="
+  crossorigin=""
+></script>
+
+<!-- Custom CSS files -->
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='styles/driver/homepage.css') }}"
+/>
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='styles/driver/requests_page.css') }}"
+/>
+
+<!-- Leaflet Routing Machine for drawing routes between stops -->
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css"
+/>
+<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+
+<!-- SortableJS for drag and drop reordering of stops -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+
+<style>
+/* Drag handle for reordering stops */
+.drag-handle {
+  cursor: grab;
+  margin-right: 15px;
+  font-size: 1.2rem;
+  color: #9ca3af;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Blue badge showing stop order number */
+.route-order-badge {
+  display: inline-block;
+  background: #3b82f6;
+  color: white;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  text-align: center;
+  line-height: 28px;
+  font-weight: bold;
+  margin-right: 15px;
+  vertical-align: middle;
+}
+
+/* Button to focus map on a specific stop */
+.focus-map-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  color: #6b7280;
+  transition: color 0.2s;
+  padding: 8px 12px;
+  margin-left: 10px;
+  border-radius: 6px;
+}
+
+.focus-map-btn:hover {
+  color: #3b82f6;
+  background: #f3f4f6;
+}
+
+/* Save button for storing the new route order */
+.save-order-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  margin-left: auto;
+}
+
+.save-order-btn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+/* Success state after saving */
+.save-order-btn.saved {
+  background: #10b981;
+}
+
+/* Visual feedback during drag and drop */
+.sortable-drag {
+  opacity: 0.4;
+}
+
+.sortable-ghost {
+  opacity: 0.3;
+  background: #f3f4f6;
+}
+
+/* Make request-card support drag and drop layout */
+.request-card {
+  cursor: default;
+  display: block;
+}
+</style>
+
+{% endblock %}
+
+{% block content %}
+<div id="top-content" class="top-content-container">
+  <!-- Left panel - List of stops that can be reordered -->
+  <div id="requests-content" class="requests-content">
+    <div class="requests-content-header">
+      <a href="{{ url_for('driver_views.driver_homepage') }}">
+        <i class="fa-solid fa-arrow-left"></i>
+      </a>
+      <h2>Manage Route</h2>
+      <button id="save-order-btn" class="save-order-btn">
+        <i class="fa-solid fa-save"></i> Save Order
+      </button>
+    </div>
+    <div id="route-stops-container" class="requests-content-body">
+      {% if route_stops %}
+        {% for stop in route_stops %}
+        <div class="request-card" data-stop-id="{{ stop.stop_id }}" data-lat="{{ stop.latitude }}" data-lng="{{ stop.longitude }}">
+          <div style="display: flex; align-items: flex-start;">
+            <!-- Drag handle for reordering -->
+            <div class="drag-handle">
+              <i class="fa-solid fa-grip-vertical"></i>
+            </div>
+            
+            <!-- Route order number -->
+            <div class="route-order-badge">{{ loop.index }}</div>
+            
+            <!-- Stop address and order details -->
+            <div style="flex: 1;">
+              <h2 class="address-header">ADDRESS:</h2>
+              <h2 class="address-body">{{ stop.address }}</h2>
+              <div class="order-details">
+                <h2 class="order-details-header">Order Details</h2>
+                {% for customer_request in stop.customer_requests %}
+                <div class="order-item">
+                  <div class="order-item-name">{{ customer_request.item.name }}</div>
+                  <div class="order-item-quantity">{{ customer_request.quantity }}</div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+            
+            <!-- Button to center map on this stop -->
+            <button class="focus-map-btn" onclick="focusOnStop({{ stop.stop_id }})">
+              <i class="fa-solid fa-location-dot"></i>
+            </button>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <h2 class="address-header">NO STOPS ASSIGNED</h2>
+      {% endif %}
+    </div>
+  </div>
+  
+  <!-- Right panel - Map displaying all stops and route -->
+  <div id="map-container" class="map-container">
+    <div id="map" class="map"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let map;               // Leaflet map instance
+  let markers = [];      // Array to store marker objects
+  let routeStops = [];   // Array to store stop data in current order
+  let routingControl = null;  // Route drawing control
+  let sortable;          // SortableJS instance for drag and drop
+
+  // Initialize everything when page loads
+  document.addEventListener('DOMContentLoaded', function() {
+    initMap();
+    loadStopsData();
+    initDragAndDrop();
+    
+    const saveBtn = document.getElementById('save-order-btn');
+    if (saveBtn) {
+      saveBtn.addEventListener('click', saveRouteOrder);
+    }
+  });
+
+  // Initialize the Leaflet map
+  function initMap() {
+    // Default center (Trinidad)
+    map = L.map('map').setView([10.5, -61.3], 10);
+    
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+  }
+
+  // Load stop data from HTML cards and add markers to map
+  function loadStopsData() {
+    const cards = document.querySelectorAll('#route-stops-container .request-card');
+    
+    cards.forEach((card, index) => {
+      const stop = {
+        id: parseInt(card.dataset.stopId),
+        lat: parseFloat(card.dataset.lat),
+        lng: parseFloat(card.dataset.lng),
+        address: card.querySelector('.address-body')?.innerText || '',
+        order: index
+      };
+      routeStops.push(stop);
+      
+      // Add marker to map
+      const marker = L.marker([stop.lat, stop.lng]).addTo(map);
+      marker.bindPopup(`
+        <strong>Stop ${index + 1}</strong><br>
+        ${stop.address}<br>
+        <small>Drag to reorder in list</small>
+      `);
+      markers.push(marker);
+    });
+    
+    // Draw route if we have multiple stops
+    if (routeStops.length > 1) {
+      drawRoute();
+    } else if (routeStops.length === 1) {
+      map.setView([routeStops[0].lat, routeStops[0].lng], 15);
+    }
+  }
+
+  // Draw the route connecting all stops in current order
+  function drawRoute() {
+    // Clear existing route
+    if (routingControl) {
+      map.removeControl(routingControl);
+    }
+    
+    // Get waypoints in current order
+    const waypoints = routeStops.map(stop => L.latLng(stop.lat, stop.lng));
+    
+    if (waypoints.length >= 2) {
+      routingControl = L.Routing.control({
+        waypoints: waypoints,
+        routeWhileDragging: true,
+        showAlternatives: false,
+        lineOptions: {
+          styles: [{ color: '#3b82f6', weight: 4 }]
+        }
+      }).addTo(map);
+      
+      // Fit map to show all waypoints
+      const bounds = L.latLngBounds(waypoints);
+      map.fitBounds(bounds, { padding: [50, 50] });
+    }
+  }
+
+  // Initialize drag and drop functionality using SortableJS
+  function initDragAndDrop() {
+    const container = document.getElementById('route-stops-container');
+    if (!container) return;
+    
+    sortable = new Sortable(container, {
+      handle: '.drag-handle',  // Only drag using the grip handle
+      animation: 300,
+      onEnd: function() {
+        updateStopOrder();  // Update order when dragging ends
+      }
+    });
+  }
+
+  // Update stop order numbers and redraw route after reordering
+  function updateStopOrder() {
+    const cards = document.querySelectorAll('#route-stops-container .request-card');
+    const newRouteStops = [];
+    
+    cards.forEach((card, newIndex) => {
+      // Update the order badge number
+      const badge = card.querySelector('.route-order-badge');
+      if (badge) {
+        badge.textContent = newIndex + 1;
+      }
+      
+      // Update stop order in array
+      const stopId = parseInt(card.dataset.stopId);
+      const existingStop = routeStops.find(s => s.id === stopId);
+      if (existingStop) {
+        existingStop.order = newIndex;
+        newRouteStops.push(existingStop);
+      }
+    });
+    
+    routeStops = newRouteStops;
+    
+    // Redraw route with new order
+    if (routeStops.length > 1) {
+      drawRoute();
+    }
+  }
+
+  // Save the new route order (frontend only for now)
+  function saveRouteOrder() {
+    const stopOrder = routeStops.map(stop => stop.id);
+    console.log('New route order:', stopOrder);
+    
+    // Visual feedback
+    const saveBtn = document.getElementById('save-order-btn');
+    const originalHtml = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!';
+    saveBtn.classList.add('saved');
+    
+    setTimeout(() => {
+      saveBtn.innerHTML = originalHtml;
+      saveBtn.classList.remove('saved');
+    }, 2000);
+    
+    // TODO: When backend is ready, uncomment this to save to database
+    // fetch('/driver/route/save-order', {
+    //   method: 'POST',
+    //   headers: {'Content-Type': 'application/json'},
+    //   body: JSON.stringify({stop_order: stopOrder})
+    // });
+  }
+
+  // Center map on a specific stop and open its popup
+  function focusOnStop(stopId) {
+    const stop = routeStops.find(s => s.id === stopId);
+    if (stop) {
+      map.setView([stop.lat, stop.lng], 16);
+      const markerIndex = routeStops.findIndex(s => s.id === stopId);
+      if (markers[markerIndex]) {
+        markers[markerIndex].openPopup();
+      }
+    }
+  }
+
+  // Make function available globally for onclick
+  window.focusOnStop = focusOnStop;
+</script>
+<script src="{{ url_for('static', filename='js/driver/homepage.js') }}"></script>
+{% endblock %}
