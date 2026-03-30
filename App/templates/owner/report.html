@@ -5,32 +5,34 @@
 {% block head %}
   <link rel="stylesheet" href="{{ url_for('static', filename='styles/owner/report.css') }}">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- PDF export libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   {{ super() }}
 {% endblock %}
 
 {% block content %}
 <div class="page-wrapper">
-  <!-- Sidebar Navigation -->
+  <!-- Sidebar -->
   <div class="sidebar">
     <div class="sidebar-logo">LOGO</div>
-    <a class="sidebar-btn" href="{{ url_for('index_views.owner_homepage') }}">Dashboard</a>
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_tracking') }}">Dashboard</a>
     <a class="sidebar-btn active" href="{{ url_for('index_views.owner_report') }}">Reports</a>
     <a class="sidebar-btn" href="{{ url_for('index_views.owner_inventory') }}">Set Inventory</a>
     <a class="sidebar-btn" href="{{ url_for('index_views.owner_routes') }}">Routes</a>
-    <a class="sidebar-btn " href="{{ url_for('index_views.owner_tracking') }}">Driver Tracking</a>
-    <a class="sidebar-btn" href="{{ url_for('index_views.owner_fleet') }}"> Management</a>
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_fleet') }}">Management</a>
     <a class="sidebar-btn sidebar-logout" href="{{ url_for('auth_views.logout') }}">Logout</a>
   </div>
 
-  <!-- Main Content Area -->
   <div class="content-wrapper">
-
-
     <div class="page-container">
       <div class="report-container">
         <div class="main-content-scrollable">
-          <div class="content-card">
 
+          <!-- This wrapper is captured for PDF export -->
+          <div class="content-card" id="report-printable">
+
+            <!-- Header -->
             <div class="report-header">
               <h1>Report</h1>
               <div class="report-actions">
@@ -44,22 +46,27 @@
                     <li data-value="year">Last Year</li>
                   </ul>
                 </div>
+                <button class="export-btn" id="export-pdf-btn">
+                  Download PDF
+                </button>
               </div>
             </div>
-
-            <!-- Charts -->
+            <div class="section-divider">
+              <h2 class="section-title">Sales Performance</h2>
+            </div>
+            <!-- Sales Charts -->
             <div class="charts-grid">
               <div class="chart-card">
                 <h2>Average Order Value</h2>
-                <canvas id="orderValueChart" width="400" height="200"></canvas>
+                <canvas id="orderValueChart"></canvas>
               </div>
               <div class="chart-card">
                 <h2>Customer Traffic</h2>
-                <canvas id="trafficChart" width="400" height="200"></canvas>
+                <canvas id="trafficChart"></canvas>
               </div>
             </div>
 
-            <!-- Tables -->
+            <!-- Sales Tables -->
             <div class="tables-grid">
               <div class="table-card">
                 <h2>Top-Selling Items</h2>
@@ -68,7 +75,7 @@
                     <tr><th>Rank</th><th>Item</th><th>Units Sold</th></tr>
                   </thead>
                   <tbody id="top-selling-body">
-                    <tr><td colspan="3">Loading...</td></tr>
+                    <tr><td colspan="3">Loading…</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -79,36 +86,74 @@
                     <tr><th>Item 1</th><th>Item 2</th><th>Times Paired</th></tr>
                   </thead>
                   <tbody id="pairing-body">
-                    <tr><td colspan="3">Loading...</td></tr>
+                    <tr><td colspan="3">Loading…</td></tr>
                   </tbody>
                 </table>
               </div>
             </div>
 
-          </div>
+            <!-- Route Performance Section -->
+            <div class="section-divider">
+              <h2 class="section-title">Route Performance</h2>
+            </div>
+
+            <!-- Revenue per Route stat -->
+            <div class="route-summary-bar">
+              <div class="route-summary-item">
+                <div class="route-summary-value" id="stat-revenue-per-route">—</div>
+                <div class="route-summary-label">Avg Revenue per Route</div>
+              </div>
+            </div>
+
+            <!-- Route & Driver tables -->
+            <div class="tables-grid">
+              <div class="table-card">
+                <h2>Most Profitable Routes</h2>
+                <table>
+                  <thead>
+                    <tr><th>Rank</th><th>Route</th><th>Revenue ($)</th></tr>
+                  </thead>
+                  <tbody id="profitable-routes-body">
+                    <tr><td colspan="3">Loading…</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="table-card">
+                <h2>Most Active Routes</h2>
+                <table>
+                  <thead>
+                    <tr><th>Route</th><th>Runs</th></tr>
+                  </thead>
+                  <tbody id="active-routes-body">
+                    <tr><td colspan="2">Loading…</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Driver activity full-width -->
+            <div class="tables-grid">
+              <div class="table-card">
+                <h2>Driver Activity</h2>
+                <table>
+                  <thead>
+                    <tr><th>Driver</th><th>Sessions</th></tr>
+                  </thead>
+                  <tbody id="driver-activity-body">
+                    <tr><td colspan="2">Loading…</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div><!-- /#report-printable -->
         </div>
       </div>
     </div>
   </div>
 </div>
-
-<!--<style>
-  .sidebar {
-    display: flex;
-    flex-direction: column;
-  }
-  .sidebar-logout {
-    margin-top: auto;
-    color: #e74c3c !important;
-  }
-  .sidebar-logout:hover {
-    background-color: #e74c3c !important;
-    color: white !important;
-  }
-</style>-->
 {% endblock %}
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/owner/report.js') }}"></script>
-<script src="{{ url_for('static', filename='js/owner/set_inventory.js') }}"></script>
 {% endblock %}
