@@ -433,7 +433,64 @@ table tr:hover {
 .button-container {
   display: none;
 }
+/* ── Append these rules to the bottom of report.css ── */
 
+/* ─── Section divider ────────────────────────────────────────── */
+.section-divider {
+  margin: 36px 0 20px;
+  padding-bottom: 12px;
+  border-bottom: 1.5px solid var(--orange-light);
+}
+
+.section-title {
+  font-family: "Caveat Brush", cursive;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.8rem;
+  color: var(--orange-main);
+  margin: 0;
+  letter-spacing: 0.3px;
+}
+
+/* ─── Revenue per Route summary bar ──────────────────────────── */
+.route-summary-bar {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.route-summary-item {
+  background: var(--cream);
+  border: 1.5px solid var(--orange-light);
+  border-radius: 20px;
+  padding: 20px 32px;
+  text-align: center;
+  box-shadow: rgba(0, 0, 0, 0.06) 0px 1px 4px;
+  transition: all 0.3s ease;
+  min-width: 220px;
+}
+
+.route-summary-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px var(--shadow-warm);
+  background: var(--orange-blush);
+}
+
+.route-summary-value {
+  font-family: "Caveat Brush", cursive;
+  font-style: italic;
+  font-size: 2.4rem;
+  color: var(--orange-main);
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+
+.route-summary-label {
+  font-family: "Shadows Into Light Two", cursive;
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--ink-muted);
+}
 /* ─── Responsive ─────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .page-wrapper { flex-direction: column; }

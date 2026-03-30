@@ -9,7 +9,7 @@ from .van import create_van, assign_van_to_route, set_van_inventory
 from .driver import assign_driver_to_route
 from .transaction import create_transaction
 from .region import *
-from App.models import Transaction
+from App.models import Transaction,RouteHistory
 from datetime import time, date, datetime, timedelta, timezone
 import random
 
@@ -118,190 +118,284 @@ def initialize():
     whole = create_item("Whole Wheat", price=4.00, category="bread", description="Whole wheat loaf")
     bara = create_item("Bara", price=1.50, category="fried", description="Fried bara for doubles")
     channa = create_item("Channa", price=5.00, category="filling", description="Curried channa filling")
-
-    items = [hops, salt, whole, bara, channa]
+    cake = create_item("Cake Slice", 5.00 , category="sweets", description="Sweet, tender baked dessert")
+    cookie = create_item("Chocolate Chip Cookie", 2.50, category="sweets", description="Drop cookie that contains pieces of chocolate" )
+    items = [hops, salt, whole, bara, channa,cake,cookie]
     print("✓ Inventory items created")
 
-    # ── Route ─────────────────────────────────────────────────────────────────
-    route = create_route(
+    # ── Routes ────────────────────────────────────────────────────────────────
+    # Three routes covering different areas and days so the report shows
+    # meaningful variation across routes.
+
+    route_east = create_route(
         name="Morning East Route",
-        start_time=time(6, 0),
-        end_time=time(10, 0),
-        day_of_week=datetime.now().strftime("%A"),
+        start_time=time(6, 0), end_time=time(10, 0),
+        day_of_week="Monday",
         owner_id=owner.owner_id,
         description="East Trinidad morning bread delivery",
     )
-
-    owner_stop1 = add_stop_to_route(
-        route_id=route.route_id,
+    route_central = create_route(
+        name="Central Chaguanas Run",
+        start_time=time(6, 30), end_time=time(11, 0),
+        day_of_week="Wednesday",
         owner_id=owner.owner_id,
-        address="Somewhere in St Augustine",
-        lat=10.640908716845667,
-        lng=-61.39593945274354,
-        stop_order=1
+        description="Chaguanas and environs mid-morning run",
+    )
+    route_south = create_route(
+        name="South San Fernando Circuit",
+        start_time=time(5, 30), end_time=time(9, 30),
+        day_of_week="Friday",
+        owner_id=owner.owner_id,
+        description="San Fernando early morning delivery circuit",
     )
 
-    stop1 = add_customer_stop_to_route(
-        route_id=route.route_id,
-        customer_id=customer2.customer_id,
+    # ── Stops ─────────────────────────────────────────────────────────────────
+    # East route stops
+    add_stop_to_route(
+        route_id=route_east.route_id, owner_id=owner.owner_id,
+        address="Bakery depot, St. Augustine",
+        lat=10.640908716845667, lng=-61.39593945274354, stop_order=1,
+    )
+    stop_e1 = add_customer_stop_to_route(
+        route_id=route_east.route_id, customer_id=customer2.customer_id,
         address="123 Main Street, St. Augustine",
-        lat=10.640808716845667,
-        lng=-61.39583945274354,
-        stop_order=1,
-        status_id=2,
+        lat=10.640808716845667, lng=-61.39583945274354,
+        stop_order=2, status_id=confirmed.status_id,
     )
-
-    stop2 = add_customer_stop_to_route(
-        route_id=route.route_id,
-        customer_id=customer3.customer_id,
+    stop_e2 = add_customer_stop_to_route(
+        route_id=route_east.route_id, customer_id=customer3.customer_id,
         address="456 Oak Avenue, Toco",
-        lat=10.64294795513197,
-        lng=-61.395367383956916,
-        stop_order=2,
-        status_id=2,
+        lat=10.64294795513197, lng=-61.395367383956916,
+        stop_order=3, status_id=confirmed.status_id,
     )
 
-    print(f"✓ Route created   : {route.name} with 2 stops")
-
-    # ── Vans with GPS Locations ───────────────────────────────────────────────
-    # Van 1 - Active with driver, in Chaguanas Centre
-    van1 = create_van(
-        license_plate="PBK 1234",
-        owner_id=owner.owner_id,
-        status="active",
+    # Central route stops
+    add_stop_to_route(
+        route_id=route_central.route_id, owner_id=owner.owner_id,
+        address="Bakery depot, Chaguanas",
+        lat=10.5167, lng=-61.4114, stop_order=1,
     )
-    assign_van_to_route(van1.van_id, route.route_id)
+    stop_c1 = add_customer_stop_to_route(
+        route_id=route_central.route_id, customer_id=customer.customer_id,
+        address="Centre Pointe Mall area, Chaguanas",
+        lat=10.5190, lng=-61.4080,
+        stop_order=2, status_id=confirmed.status_id,
+    )
+    stop_c2 = add_customer_stop_to_route(
+        route_id=route_central.route_id, customer_id=customer2.customer_id,
+        address="Endeavour Road, Chaguanas",
+        lat=10.5145, lng=-61.4050,
+        stop_order=3, status_id=confirmed.status_id,
+    )
 
-    # Assign driver and set GPS location
+    # South route stops
+    add_stop_to_route(
+        route_id=route_south.route_id, owner_id=owner.owner_id,
+        address="Bakery depot, San Fernando",
+        lat=10.2796, lng=-61.4589, stop_order=1,
+    )
+    stop_s1 = add_customer_stop_to_route(
+        route_id=route_south.route_id, customer_id=customer3.customer_id,
+        address="Coffee Street, San Fernando",
+        lat=10.2810, lng=-61.4600,
+        stop_order=2, status_id=confirmed.status_id,
+    )
+    stop_s2 = add_customer_stop_to_route(
+        route_id=route_south.route_id, customer_id=customer.customer_id,
+        address="High Street, San Fernando",
+        lat=10.2775, lng=-61.4570,
+        stop_order=3, status_id=confirmed.status_id,
+    )
+
+    print(f"✓ Routes created  : {route_east.name}, {route_central.name}, {route_south.name}")
+
+    # ── Vans ─────────────────────────────────────────────────────────────────
+    # Each active van is assigned to a distinct route so the revenue-per-route
+    # calculation in get_report_data() has three separate buckets to work with.
     from App.controllers.van import get_van_by_id
+
+    van1 = create_van(license_plate="PBK 1234", owner_id=owner.owner_id, status="active")
+    assign_van_to_route(van1.van_id, route_east.route_id)
     van1_obj = get_van_by_id(van1.van_id)
     van1_obj.assign_driver(driver1.driver_id)
     van1_obj.update_location(10.6409, -61.3953)  # Chaguanas Centre
     db.session.commit()
 
-    # Van 2 - Active with driver, in Endeavour area
-    van2 = create_van(
-        license_plate="TCH 5678",
-        owner_id=owner.owner_id,
-        status="active",
-    )
+    van2 = create_van(license_plate="TCH 5678", owner_id=owner.owner_id, status="active")
+    assign_van_to_route(van2.van_id, route_central.route_id)
     van2_obj = get_van_by_id(van2.van_id)
     van2_obj.assign_driver(driver2.driver_id)
-    van2_obj.update_location(10.6455, -61.4021)  # Endeavour
+    van2_obj.update_location(10.5190, -61.4080)  # Chaguanas
     db.session.commit()
 
-    # Van 3 - Active with driver, in Edinburgh area
-    van3 = create_van(
-        license_plate="PDM 9012",
-        owner_id=owner.owner_id,
-        status="active",
-    )
+    van3 = create_van(license_plate="PDM 9012", owner_id=owner.owner_id, status="active")
+    assign_van_to_route(van3.van_id, route_south.route_id)
     van3_obj = get_van_by_id(van3.van_id)
     van3_obj.assign_driver(driver3.driver_id)
-    van3_obj.update_location(10.6378, -61.4105)  # Edinburgh
+    van3_obj.update_location(10.2796, -61.4589)  # San Fernando
     db.session.commit()
 
-    # Van 4 - Inactive, no driver, no GPS (for testing)
-    van4 = create_van(
-        license_plate="POS 3456",
-        owner_id=owner.owner_id,
-        status="inactive",
-    )
+    van4 = create_van(license_plate="POS 3456", owner_id=owner.owner_id, status="inactive")
 
     print(f"✓ Vans created    : {van1.license_plate}, {van2.license_plate}, {van3.license_plate}, {van4.license_plate}")
-    print(f"  • Van 1: Active @ Chaguanas Centre (Driver: {driver1.name})")
-    print(f"  • Van 2: Active @ Endeavour (Driver: {driver2.name})")
-    print(f"  • Van 3: Active @ Edinburgh (Driver: {driver3.name})")
-    print(f"  • Van 4: Inactive (No driver)")
+    print(f"  • Van 1 → {route_east.name}    (Driver: {driver1.name})")
+    print(f"  • Van 2 → {route_central.name} (Driver: {driver2.name})")
+    print(f"  • Van 3 → {route_south.name}   (Driver: {driver3.name})")
+    print(f"  • Van 4 → Inactive (no driver)")
 
-    # Set inventory for today and tomorrow (Van 1 only for simplicity)
+    # ── Route Inventory (today, per route van) ────────────────────────────────
     today = date.today()
     tomorrow = today + timedelta(days=1)
 
-    # Today's inventory
+    # Van 1 — East route
     set_van_inventory(van1.van_id, hops.item_id, quantity=50, date=today)
     set_van_inventory(van1.van_id, salt.item_id, quantity=40, date=today)
     set_van_inventory(van1.van_id, whole.item_id, quantity=20, date=today)
     set_van_inventory(van1.van_id, bara.item_id, quantity=80, date=today)
     set_van_inventory(van1.van_id, channa.item_id, quantity=30, date=today)
 
-    # Tomorrow's inventory
-    set_van_inventory(van1.van_id, hops.item_id, quantity=60, date=tomorrow)
-    set_van_inventory(van1.van_id, salt.item_id, quantity=45, date=tomorrow)
-    set_van_inventory(van1.van_id, whole.item_id, quantity=25, date=tomorrow)
-    set_van_inventory(van1.van_id, bara.item_id, quantity=90, date=tomorrow)
-    set_van_inventory(van1.van_id, channa.item_id, quantity=35, date=tomorrow)
+    # Van 2 — Central route
+    set_van_inventory(van2.van_id, hops.item_id, quantity=60, date=today)
+    set_van_inventory(van2.van_id, salt.item_id, quantity=50, date=today)
+    set_van_inventory(van2.van_id, cake.item_id, quantity=40, date=today)
+    set_van_inventory(van2.van_id, cookie.item_id, quantity=35, date=today)
+    set_van_inventory(van2.van_id, bara.item_id, quantity=70, date=today)
+
+    # Van 3 — South route
+    set_van_inventory(van3.van_id, hops.item_id, quantity=45, date=today)
+    set_van_inventory(van3.van_id, channa.item_id, quantity=40, date=today)
+    set_van_inventory(van3.van_id, whole.item_id, quantity=25, date=today)
+    set_van_inventory(van3.van_id, cake.item_id, quantity=30, date=today)
+    set_van_inventory(van3.van_id, cookie.item_id, quantity=25, date=today)
+
+    print("✓ Route inventory set for today (all three vans)")
 
     # ── Customer Requests ─────────────────────────────────────────────────────
-    request1 = create_customer_request(
-        stop_id=stop1['stop_id'],
-        item_id=hops.item_id,
-        quantity=1,
-    )
+    create_customer_request(stop_id=stop_e1['stop_id'], item_id=hops.item_id, quantity=2)
+    create_customer_request(stop_id=stop_e1['stop_id'], item_id=bara.item_id, quantity=1)
+    create_customer_request(stop_id=stop_c1['stop_id'], item_id=hops.item_id, quantity=1)
+    create_customer_request(stop_id=stop_c1['stop_id'], item_id=cake.item_id, quantity=2)
+    create_customer_request(stop_id=stop_s1['stop_id'], item_id=channa.item_id, quantity=1)
+    create_customer_request(stop_id=stop_s1['stop_id'], item_id=whole.item_id, quantity=1)
+    print("✓ Customer requests created")
 
-    request2 = create_customer_request(
-        stop_id=stop1['stop_id'],
-        item_id=bara.item_id,
-        quantity=1,
-    )
+    # ── Driver → Route assignments ────────────────────────────────────────────
+    assign_driver_to_route(driver1.driver_id, route_east.route_id)
+    assign_driver_to_route(driver2.driver_id, route_central.route_id)
+    assign_driver_to_route(driver3.driver_id, route_south.route_id)
+    print("✓ Drivers assigned to routes")
 
-    print(f"✓ Requests created for stop orders")
-
-    # ── Driver Assignment ─────────────────────────────────────────────────────
-    assign_driver_to_route(driver1.driver_id, route.route_id)
-    print(f"✓ Driver assigned to route")
-
+    # ── Dummy Transactions (last 30 days) ─────────────────────────────────────
     # ─ Dummy Transactions (last 30 days) AI-generated realistic sales patterns for report testing
-    # Realistic daily sales patterns — heavier on hops/bara, lighter on whole wheat
-    item_weights = [
-        (hops, 0.35),  # 35% chance of being in an order
-        (bara, 0.30),  # 30%
-        (salt, 0.20),  # 20%
-        (channa, 0.10),  # 10%
-        (whole, 0.05),  # 5%
+    # Each van/route gets its own item mix and volume so the Most Profitable
+    # Routes table shows clear differentiation.
+
+    # Route East  (van1) — high volume, bread-focused
+    # Route Central (van2) — medium volume, pastry mix
+    # Route South  (van3) — lower volume, filling-heavy
+
+    route_configs = [
+        {
+            'van_id': van1.van_id,
+            'stops': [stop_e1, stop_e2],
+            'items': [(hops, 0.35), (bara, 0.30), (salt, 0.20), (channa, 0.10), (whole, 0.05)],
+            'weekday_orders': (8, 15),
+            'weekend_orders': (3, 7),
+        },
+        {
+            'van_id': van2.van_id,
+            'stops': [stop_c1, stop_c2],
+            'items': [(hops, 0.25), (cake, 0.30), (cookie, 0.25), (bara, 0.15), (salt, 0.05)],
+            'weekday_orders': (5, 10),
+            'weekend_orders': (2, 5),
+        },
+        {
+            'van_id': van3.van_id,
+            'stops': [stop_s1, stop_s2],
+            'items': [(channa, 0.35), (whole, 0.25), (hops, 0.20), (cake, 0.15), (cookie, 0.05)],
+            'weekday_orders': (4, 8),
+            'weekend_orders': (1, 3),
+        },
     ]
 
-    stops = [stop1, stop2]
     tx_count = 0
 
     for days_ago in range(30, 0, -1):
-        # Vary sales volume — busier on weekdays, quieter on weekends
         tx_date = datetime.now(UTC_MINUS_4) - timedelta(days=days_ago)
         is_weekend = tx_date.weekday() >= 5
-        daily_orders = random.randint(2, 5) if is_weekend else random.randint(6, 14)
 
-        for _ in range(daily_orders):
-            # Pick 1–3 random items for this transaction
-            chosen = random.sample(item_weights, k=random.randint(1, 3))
-            order_items = []
-            total = 0.0
+        for cfg in route_configs:
+            lo, hi = cfg['weekend_orders'] if is_weekend else cfg['weekday_orders']
+            daily_orders = random.randint(lo, hi)
 
-            for item, _ in chosen:
-                qty = random.randint(1, 4)
-                order_items.append({'item_id': item.item_id, 'quantity': qty})
-                total += round(float(item.price) * qty, 2)
+            for _ in range(daily_orders):
+                chosen = random.sample(cfg['items'], k=random.randint(1, 3))
+                order_items = []
+                total = 0.0
 
-            stop = random.choice(stops)
-            tx = create_transaction(
-                customer_id=customer.customer_id,
-                van_id=van1.van_id,
-                total_amount=round(total, 2),
-                items=order_items,
-                stop_id=stop['stop_id'],
-                payment_method=random.choice(['cash', 'card']),
-            )
+                for item, _ in chosen:
+                    qty = random.randint(1, 4)
+                    order_items.append({'item_id': item.item_id, 'quantity': qty})
+                    total += round(float(item.price) * qty, 2)
 
-            # Backdate the transaction_time so the report charts show history
-            tx.transaction_time = tx_date.replace(
-                hour=random.randint(6, 10),
-                minute=random.randint(0, 59),
-                second=0,
-            )
-            db.session.add(tx)
-            tx_count += 1
+                stop = random.choice(cfg['stops'])
+                tx = create_transaction(
+                    customer_id=customer.customer_id,
+                    van_id=cfg['van_id'],
+                    total_amount=round(total, 2),
+                    items=order_items,
+                    stop_id=stop['stop_id'],
+                    payment_method=random.choice(['cash', 'card']),
+                )
+
+                tx.transaction_time = tx_date.replace(
+                    hour=random.randint(6, 10),
+                    minute=random.randint(0, 59),
+                    second=0,
+                )
+                db.session.add(tx)
+                tx_count += 1
 
     db.session.commit()
-    print(f"✓ Dummy transactions: {tx_count} transactions seeded over last 30 days")
+    print(f"✓ Dummy transactions: {tx_count} seeded over last 30 days (3 routes)")
+
+    # ── Dummy Route History (last 30 days) ────────────────────────────────────
+    # Weekday sessions only. Each van/driver/route pair runs once per weekday.
+    # 90 % complete successfully; 10 % left in_progress (forgot to end session).
+    # Route East runs slightly longer on average than the others.
+
+    van_route_driver = [
+        (van1.van_id, route_east.route_id, driver1.driver_id, 120, 240),  # 2–4 hrs
+        (van2.van_id, route_central.route_id, driver2.driver_id, 100, 200),  # 1.7–3.3 hrs
+        (van3.van_id, route_south.route_id, driver3.driver_id, 90, 180),  # 1.5–3 hrs
+    ]
+
+    history_count = 0
+
+    for days_ago in range(30, 0, -1):
+        session_date = datetime.now(UTC_MINUS_4) - timedelta(days=days_ago)
+        if session_date.weekday() >= 5:  # skip weekends
+            continue
+
+        for van_id, route_id, driver_id, min_dur, max_dur in van_route_driver:
+            h = RouteHistory(route_id=route_id, van_id=van_id, driver_id=driver_id)
+
+            h.started_at = session_date.replace(
+                hour=6, minute=random.randint(0, 20), second=0, microsecond=0,
+            )
+
+            if random.random() < 0.90:
+                h.ended_at = h.started_at + timedelta(minutes=random.randint(min_dur, max_dur))
+                h.status = 'completed'
+            else:
+                h.ended_at = None
+                h.status = 'in_progress'
+
+            db.session.add(h)
+            history_count += 1
+
+    db.session.commit()
+    print(f"✓ Route history   : {history_count} sessions seeded over last 30 days (weekdays only)")
 
     print("✓ Database initialised successfully!")
 

@@ -17,37 +17,18 @@
 <div class="page-wrapper">
   <div class="sidebar">
     <div class="sidebar-logo">LOGO</div>
-    <a class="sidebar-btn" href="{{ url_for('index_views.owner_homepage') }}"
-      >Dashboard</a
-    >
-    <a class="sidebar-btn" href="{{ url_for('index_views.owner_report') }}"
-      >Reports</a
-    >
-    <a class="sidebar-btn" href="{{ url_for('index_views.owner_inventory') }}"
-      >Set Inventory</a
-    >
-    <a class="sidebar-btn" href="{{ url_for('index_views.owner_routes') }}"
-      >Routes</a
-    >
-    <a
-      class="sidebar-btn active"
-      href="{{ url_for('index_views.owner_tracking') }}"
-      >Driver Tracking</a
-    >
-    <a class="sidebar-btn" href="{{ url_for('index_views.owner_fleet') }}">
-      Management</a
-    >
-    <a
-      class="sidebar-btn sidebar-logout"
-      href="{{ url_for('auth_views.logout') }}"
-      >Logout</a
-    >
+    <a class="sidebar-btn active" href="{{ url_for('index_views.owner_tracking') }}">Dashboard</a>
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_report') }}">Reports</a>
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_inventory') }}">Set Inventory</a>
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_routes') }}">Routes</a>
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_fleet') }}">Management</a>
+    <a class="sidebar-btn sidebar-logout" href="{{ url_for('auth_views.logout') }}">Logout</a>
   </div>
 
   <div class="content-wrapper">
     <div class="main-content">
       <div class="tracking-header">
-        <h1>📍 Live Tracking</h1>
+        <h1>Live Tracking</h1>
         <div class="header-controls">
           <button
             class="refresh-btn"

@@ -51,7 +51,7 @@ def create_transaction(customer_id, van_id, total_amount,
     return transaction
 
 
-# Report Data 
+# ── Report Data ───────────────────────────────────────────────────
 
 def get_report_data(period='week'):
     """
@@ -61,22 +61,28 @@ def get_report_data(period='week'):
         period: 'week' (7 days), 'month' (30 days), or 'year' (365 days)
 
     Returns a dict with:
-        - daily_labels:     list of date strings for the x-axis
-        - avg_order_values: average transaction total per day
-        - traffic:          number of transactions per day
-        - top_selling:      top 5 items by units sold
+        - daily_labels:               list of date strings for the x-axis
+        - avg_order_values:           average transaction total per day
+        - traffic:                    number of transactions per day
+        - top_selling:                top 5 items by units sold
         - frequently_bought_together: top 5 product pairings
+        - most_profitable_routes:     top 5 routes by total transaction revenue
+        - revenue_per_route:          total period revenue / number of routes with sales
+        - most_active_routes:         top 5 routes by number of history sessions
+        - driver_activity:            top 5 drivers by number of sessions
     """
-    days = {'week': 7, 'month': 30, 'year': 365}.get(period, 7)
-    now = datetime.now(UTC_MINUS_4)
+    from App.models import RouteHistory, Route, Driver, Van
+
+    days       = {'week': 7, 'month': 30, 'year': 365}.get(period, 7)
+    now        = datetime.now(UTC_MINUS_4)
     start_date = now - timedelta(days=days)
 
-    # Fetch all transactions in the period
+    # ── Transactions ──────────────────────────────────────────────
+
     transactions = db.session.scalars(
         db.select(Transaction).where(Transaction.transaction_time >= start_date)
     ).all()
 
-    # Build per-day buckets
     date_format = '%b %d' if days <= 30 else '%b %Y'
     buckets = {}
     for i in range(days):
@@ -99,7 +105,7 @@ def get_report_data(period='week'):
     ]
     traffic = [v['count'] for v in buckets.values()]
 
-    # Top 5 selling items by quantity
+    # Top 5 selling items
     top_selling_rows = db.session.execute(
         db.select(
             InventoryItem.name,
@@ -118,7 +124,7 @@ def get_report_data(period='week'):
         for i, row in enumerate(top_selling_rows)
     ]
 
-    # Top 5 frequently bought together pairings
+    # Top 5 frequently bought together
     pairing_rows = db.session.execute(
         db.select(
             InventoryItem.name.label('item1_name'),
@@ -139,10 +145,79 @@ def get_report_data(period='week'):
             'count': row.count,
         })
 
+    # ── Route Revenue ─────────────────────────────────────────────
+    # Join path: Transaction.van_id → Van.current_route_id → Route
+    # Revenue for each transaction is attributed to the route the van
+    # is currently assigned to.
+
+    route_revenue = {}  # route_id -> {'name': str, 'total': float}
+
+    for tx in transactions:
+        van = db.session.get(Van, tx.van_id)
+        if not van or not van.current_route_id:
+            continue
+        route_id = van.current_route_id
+        if route_id not in route_revenue:
+            route = db.session.get(Route, route_id)
+            route_revenue[route_id] = {
+                'name':  route.name if route else f'Route {route_id}',
+                'total': 0.0,
+            }
+        route_revenue[route_id]['total'] += float(tx.total_amount)
+
+    most_profitable_routes = [
+        {
+            'rank':       i + 1,
+            'route_name': v['name'],
+            'revenue':    round(v['total'], 2),
+        }
+        for i, (_, v) in enumerate(
+            sorted(route_revenue.items(), key=lambda x: x[1]['total'], reverse=True)[:5]
+        )
+    ]
+
+    total_revenue     = sum(v['total'] for v in route_revenue.values())
+    n_routes          = len(route_revenue)
+    revenue_per_route = round(total_revenue / n_routes, 2) if n_routes > 0 else 0.0
+
+    # ── Route History ─────────────────────────────────────────────
+
+    history_in_period = db.session.scalars(
+        db.select(RouteHistory).where(RouteHistory.started_at >= start_date)
+    ).all()
+
+    route_counts = {}
+    for h in history_in_period:
+        route_counts[h.route_id] = route_counts.get(h.route_id, 0) + 1
+
+    most_active_routes = []
+    for route_id, count in sorted(route_counts.items(), key=lambda x: x[1], reverse=True)[:5]:
+        route = db.session.get(Route, route_id)
+        most_active_routes.append({
+            'route_name': route.name if route else f'Route {route_id}',
+            'runs':       count,
+        })
+
+    driver_counts = {}
+    for h in history_in_period:
+        driver_counts[h.driver_id] = driver_counts.get(h.driver_id, 0) + 1
+
+    driver_activity = []
+    for driver_id, count in sorted(driver_counts.items(), key=lambda x: x[1], reverse=True)[:5]:
+        driver = db.session.get(Driver, driver_id)
+        driver_activity.append({
+            'driver_name': driver.name if driver else f'Driver {driver_id}',
+            'sessions':    count,
+        })
+
     return {
         'daily_labels':               daily_labels,
         'avg_order_values':           avg_order_values,
         'traffic':                    traffic,
         'top_selling':                top_selling,
         'frequently_bought_together': frequently_bought,
+        'most_profitable_routes':     most_profitable_routes,
+        'revenue_per_route':          revenue_per_route,
+        'most_active_routes':         most_active_routes,
+        'driver_activity':            driver_activity,
     }
