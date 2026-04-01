@@ -73,10 +73,6 @@ def driver_accept_request(stop_id):
         flash('Error Could not accept request.', 'error')
         return render_template('driver/requests_page.html', pending_stops=pending_stops)
 
-    if not add_stop_to_end_of_route(get_todays_route().route_id, stop_id):
-        flash('Error Could not accept request.', 'error')
-        return render_template('driver/requests_page.html', pending_stops=pending_stops)
-
     pending_stops = get_pending_stops()
     return render_template('driver/requests_page.html', pending_stops=pending_stops)
 
@@ -87,9 +83,6 @@ def driver_deny_request(stop_id):
         return redirect(url_for('index_views.index'))
 
     pending_stops = get_pending_stops()
-
-    stop = get_stop_by_id(stop_id)
-
 
     if not update_request_status(4, stop_id, False):
         flash('Error Could not deny request.', 'error')
@@ -180,6 +173,21 @@ def get_pending_requests():
 
     return stops
 
+@driver_views.route('/api/driver/update-stop', methods=['POST'])
+@jwt_required()
+def complete_stop():
+    if current_user.role != 'driver':
+        return jsonify(message='Unauthorized'), 403
+    
+    stop_id = request.get_json().get('stop_id')
+    status = request.get_json().get('status')
+
+    if not update_request_status(status, stop_id):
+        return '', 500
+    else:
+        return '', 200
+
+
 @driver_views.route('/api/driver/make-transaction', methods=['POST'])
 @jwt_required()
 def make_transaction():
@@ -193,19 +201,30 @@ def make_transaction():
     lat = request.get_json().get('lat')
     lng = request.get_json().get('lng')
 
-    for item in session['transaction_items']:
-        transaction_list.append(
-            {'item_id': item['transaction_item']['item_id'], 
-             'quantity': item['quantity']
-            })
-        total += float(item['total'])
+    #The below field is only present when driver completes 
+    #existing stop request with order attached
+    order_items = request.get_json().get('order_items')
+
+    if order_items:
+        for item in order_items:
+            transaction_list.append(
+                {'item_id': item['item']['item_id'], 
+                'quantity': item['quantity']
+                })
+            total += float(item['quantity'] * item['item']['price'])
+    else:
+        for item in session['transaction_items']:
+            transaction_list.append(
+                {'item_id': item['transaction_item']['item_id'], 
+                'quantity': item['quantity']
+                })
+            total += float(item['total'])
     
     try:
         current_stop = create_map_stop(
             address= address,
             lat=lat,
             lng=lng,
-            stop_order=0
         )
 
         transaction = create_transaction(

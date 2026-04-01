@@ -1,9 +1,12 @@
+selectedMarker = null;
+
 //Needed to wait for time
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function populateSideContent(marker) {
+  selectedMarker = marker;
   const sideContentBody = document.getElementById("side-content-body");
 
   //Do this check if not on homepage
@@ -38,8 +41,8 @@ function populateSideContent(marker) {
             </div>
           </div>
           <div class="request-buttons-container">
-            <button class="request-btn accept-btn">✕ CANCEL</button>
-            <button class="request-btn decline-btn">✓ COMPLETE</button>
+            <button onclick="cancelOrder()" class="request-btn decline-btn">✕ CANCEL</button>
+             <button onclick="createTransaction()" class="request-btn accept-btn">✓ COMPLETE</button>
           </div>`;
 
   sideContentBody.innerHTML = html;
@@ -59,6 +62,9 @@ function displayRequestDetails(e) {
 
 async function hideSideContent() {
   const sideContent = document.getElementById("side-content");
+
+  //Deselect marker for transaction making
+  selectedMarker = null;
 
   //Deselect marker
   if (currentlySelectedMarker) {
@@ -85,29 +91,3 @@ async function hideSideContent() {
 
   buildRoute();
 })();
-
-// //This code is for testing, remove later
-// map.on("click", function (e) {
-//   const lat = e.latlng.lat;
-//   const lng = e.latlng.lng;
-
-//   console.log("User clicked at:", lat, lng);
-// });
-
-// map.on("click", function (e) {
-//   // Create a new marker where the user clicks
-//   const newMarker = L.marker(e.latlng, {
-//     icon: markerIcon,
-//   }).addTo(map);
-
-//   // Add it to your markers array
-//   markers.push({ lat: e.latlng.lat, lng: e.latlng.lng });
-
-//   // Rebuild the route including the new marker
-//   const waypoints = [
-//     breadVanDummyMarker.getLatLng(),
-//     ...markers.map((marker) => L.latLng(marker.lat, marker.lng)),
-//   ];
-
-//   buildRoute(waypoints);
-// });
