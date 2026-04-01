@@ -83,12 +83,7 @@ async function hideSideContent() {
   await initMap();
   map.flyTo(driverLocation.getLatLng(), 17);
 
-  const waypoints = [
-    driverLocation.getLatLng(),
-    ...markers.map((marker) => L.latLng(marker.lat, marker.lng)),
-  ];
-
-  buildRoute(waypoints);
+  buildRoute();
 })();
 
 // //This code is for testing, remove later

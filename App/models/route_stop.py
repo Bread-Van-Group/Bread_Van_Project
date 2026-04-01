@@ -10,6 +10,7 @@ class RouteStop(MapStop):
     stop_id                = db.Column(db.Integer, db.ForeignKey("map_stops.stop_id"),  primary_key=True)
     route_id               = db.Column(db.Integer, db.ForeignKey("routes.route_id"),    nullable=False)
     owner_id               = db.Column(db.Integer, db.ForeignKey("owners.owner_id"),    nullable=False)
+    stop_order             = db.Column(db.Integer,     nullable=False)
 
     __mapper_args__ = {
         "polymorphic_identity": "route_stop",

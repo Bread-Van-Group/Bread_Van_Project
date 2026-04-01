@@ -51,7 +51,6 @@ async function loadPendingMarkers() {
         ...markers.map((m) => L.latLng(m.lat, m.lng)),
         L.latLng(marker.lat, marker.lng),
       ];
-      buildRoute(waypoints);
     });
   });
 }
@@ -90,8 +89,6 @@ function goToMarker(markerId) {
     ...markers.map((m) => L.latLng(m.lat, m.lng)),
     L.latLng(marker.lat, marker.lng),
   ];
-
-  buildRoute(waypoints);
 }
 
 //Execution of code

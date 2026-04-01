@@ -2,7 +2,7 @@ from flask import Blueprint, session, redirect, render_template, request, jsonif
 from flask_jwt_extended import jwt_required, current_user, verify_jwt_in_request, get_jwt_identity
 from jwt import ExpiredSignatureError
 from App.controllers import (
-    get_driver_routes,
+    get_assigned_driver_route,
     assign_driver_to_route,
     unassign_driver_from_route,
     get_daily_inventory_item_by_id,
@@ -123,26 +123,14 @@ def get_driver_plate():
     van_plate = get_van_by_driver(get_jwt_identity()).license_plate
     return jsonify({"plate":van_plate}), 200
 
-@driver_views.route('/api/driver/routes', methods=['GET'])
+@driver_views.route('/api/driver/route', methods=['GET'])
 @jwt_required()
-def get_my_routes():
-    """Return all routes assigned to the currently logged-in driver."""
+def get_assigned_route():
     if current_user.role != 'driver':
         return jsonify(message='Unauthorized'), 403
 
-    driver_routes = get_driver_routes(current_user.driver_id)
-    return jsonify([dr.get_json() for dr in driver_routes])
-
-
-@driver_views.route('/api/driver/routes/<int:route_id>/stops', methods=['GET'])
-@jwt_required()
-def get_stops_for_route(route_id):
-    """Return the ordered stops for a given route."""
-    if current_user.role != 'driver':
-        return jsonify(message='Unauthorized'), 403
-
-    stops = get_route_stops(route_id)
-    return jsonify([stop.get_json() for stop in stops])
+    route = get_assigned_driver_route(get_jwt_identity())
+    return jsonify([stop.get_json() for stop in route.stops])
 
 
 @driver_views.route('/api/driver/routes/<int:route_id>/assign', methods=['POST'])

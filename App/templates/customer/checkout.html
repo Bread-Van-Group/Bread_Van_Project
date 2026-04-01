@@ -108,14 +108,12 @@ block head %}
   }
 
   async function createOrder() {
-    // Production Code
-
-    addressData = await reverseGeocode(lat, lng);
-    address = addressData.display_name.replace(", Trinidad and Tobago", "");
-
     if (customerMarker) {
-      lat = customerMarker.getLatLng().lat;
-      lng = customerMarker.getLatLng().lng;
+      const lat = customerMarker.getLatLng().lat;
+      const lng = customerMarker.getLatLng().lng;
+
+      addressData = await reverseGeocode(lat, lng);
+      address = addressData.display_name.replace(", Trinidad and Tobago", "");
 
       fetch("/api/customer/make-order", {
         method: "POST",

@@ -35,8 +35,8 @@ const selectedMarkerIcon = L.divIcon({
 
 //Map initialization
 var map = L.map("map", {
-  center: [10.64179, -61.400861],
-  zoom: 17,
+  center: [10.433, -61.2282],
+  zoom: 10,
   maxZoom: 18,
   scrollWheelZoom: true,
   wheelPxPerZoomLevel: 200,
@@ -66,25 +66,6 @@ let markerClusterLayer = L.markerClusterGroup({
 });
 map.addLayer(markerClusterLayer);
 
-//Dummy Driver Location
-// var breadVanDummyMarker = L.marker([10.642156853165652, -61.39825880527497], {
-//   icon: L.divIcon({
-//     html: vanSVG,
-//     iconSize: [40, 40],
-//     className: "van-icon",
-//   }),
-// }).addTo(map);
-
-//Dummy websocket code with preset driver location
-// setInterval(() => {
-//   socket.emit("driver_location", {
-//     lat: 10.642156853165652,
-//     lng: -61.39825880527497,
-//   });
-// }, 3000);
-
-// **NOTE** The code below will be used to get the driver's live location
-
 let driverLocation = null;
 
 navigator.geolocation.watchPosition(success, error, {
@@ -97,12 +78,12 @@ async function success(position) {
   const lat = position.coords.latitude;
   const lon = position.coords.longitude;
 
-  plate = await getDriverPlate();
+  const plate_object = await getFromApi("/api/driver/plate");
 
   socket.emit("driver_location", {
     lat: position.coords.latitude,
     lng: position.coords.longitude,
-    plate: plate,
+    plate: plate_object.plate,
   });
 
   if (!driverLocation) {
@@ -117,13 +98,7 @@ async function success(position) {
     driverLocation.setLatLng([lat, lon]);
   }
 
-  //Recalculate the route
-  const waypoints = [
-    driverLocation.getLatLng(),
-    ...markers.map((marker) => L.latLng(marker.lat, marker.lng)),
-  ];
-
-  buildRoute(waypoints);
+  buildRoute();
 }
 
 function error(err) {
@@ -134,22 +109,15 @@ function error(err) {
   }
 }
 
-async function getDriverPlate() {
-  const res = await fetch("/api/driver/plate");
-  const json = await res.json();
-
-  return json.plate;
-}
-
-async function getActiveMarkers() {
-  const res = await fetch("/api/driver/active-stops");
+async function getFromApi(url) {
+  const res = await fetch(url);
   const json = await res.json();
 
   return json;
 }
 
 async function initMap() {
-  markers = await getActiveMarkers();
+  markers = await getFromApi("/api/driver/active-stops");
 
   markers.forEach(function (marker) {
     let mapMarker = L.marker([marker.lat, marker.lng], {
@@ -172,13 +140,6 @@ async function initMap() {
           currentlySelectedMarker.setIcon(markerIcon);
         else {
           currentlySelectedMarker.setIcon(newMarkerIcon);
-
-          //Rebuild the route without the previously selected new marker
-          const waypoints = [
-            driverLocation.getLatLng(),
-            ...markers.map((m) => L.latLng(m.lat, m.lng)),
-          ];
-          buildRoute(waypoints);
         }
       }
 
@@ -197,7 +158,14 @@ async function initMap() {
 //Routing Code
 let routingControl = null;
 
-function buildRoute(waypoints) {
+async function buildRoute() {
+  //Get Route from API
+  const route_stops = await getFromApi("/api/driver/route");
+  let waypoints = [
+    driverLocation.getLatLng(),
+    ...route_stops.map((stop) => L.latLng(stop.lat, stop.lng)),
+  ];
+
   if (routingControl) {
     routingControl.setWaypoints(waypoints);
   } else {

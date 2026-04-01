@@ -11,7 +11,6 @@ class MapStop(db.Model):
     lat                    = db.Column(db.Float,       nullable=False)
     lng                    = db.Column(db.Float,       nullable=False)
     stop_type              = db.Column(db.String(20),  nullable=False)
-    stop_order             = db.Column(db.Integer,     nullable=False)
     created_at             = db.Column(db.DateTime(timezone=True), nullable=True,
                                        default=lambda: datetime.now(UTC_MINUS_4))
    
@@ -23,11 +22,10 @@ class MapStop(db.Model):
     # Relationships
     transactions      = db.relationship("Transaction",     backref="map_stop", lazy=True)
 
-    def __init__(self, address, lat, lng, stop_order):
+    def __init__(self, address, lat, lng):
         self.address                = address
         self.lat                    = lat
         self.lng                    = lng
-        self.stop_order             = stop_order
 
     def get_json(self):
         return {
@@ -37,7 +35,6 @@ class MapStop(db.Model):
             "address":                self.address,
             "lat":                    self.lat,
             "lng":                    self.lng,
-            "stop_order":             self.stop_order,
             "created_at":             self.created_at.isoformat() if self.created_at else None,
         }
 

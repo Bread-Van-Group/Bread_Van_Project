@@ -110,6 +110,33 @@ def initialize():
         region_id=region_sf.region_id,
     )
 
+    customer4 = create_customer(
+        email="customer4@test.com",
+        password="password",
+        name="David Customer",
+        address="45 Coffee Street, San Fernando",
+        phone="868-300-0003",
+        region_id=region_sf.region_id,
+    )
+
+    customer5 = create_customer(
+        email="customer5@test.com",
+        password="password",
+        name="Eve Customer",
+        address="45 Coffee Street, San Fernando",
+        phone="868-300-0003",
+        region_id=region_sf.region_id,
+    )
+
+    customer6 = create_customer(
+        email="customer6@test.com",
+        password="password",
+        name="Frank Customer",
+        address="45 Coffee Street, San Fernando",
+        phone="868-300-0003",
+        region_id=region_sf.region_id,
+    )
+
     print(f"✓ Customers created")
 
     # ── Inventory Items ───────────────────────────────────────────────────────
@@ -160,13 +187,13 @@ def initialize():
         route_id=route_east.route_id, customer_id=customer2.customer_id,
         address="123 Main Street, St. Augustine",
         lat=10.640808716845667, lng=-61.39583945274354,
-        stop_order=2, status_id=confirmed.status_id,
+        status_id=confirmed.status_id,
     )
     stop_e2 = add_customer_stop_to_route(
         route_id=route_east.route_id, customer_id=customer3.customer_id,
         address="456 Oak Avenue, Toco",
         lat=10.64294795513197, lng=-61.395367383956916,
-        stop_order=3, status_id=confirmed.status_id,
+        status_id=confirmed.status_id,
     )
 
     # Central route stops
@@ -179,13 +206,13 @@ def initialize():
         route_id=route_central.route_id, customer_id=customer.customer_id,
         address="Centre Pointe Mall area, Chaguanas",
         lat=10.5190, lng=-61.4080,
-        stop_order=2, status_id=confirmed.status_id,
+        status_id=confirmed.status_id,
     )
     stop_c2 = add_customer_stop_to_route(
-        route_id=route_central.route_id, customer_id=customer2.customer_id,
+        route_id=route_central.route_id, customer_id=customer6.customer_id,
         address="Endeavour Road, Chaguanas",
         lat=10.5145, lng=-61.4050,
-        stop_order=3, status_id=confirmed.status_id,
+        status_id=confirmed.status_id,
     )
 
     # South route stops
@@ -195,16 +222,16 @@ def initialize():
         lat=10.2796, lng=-61.4589, stop_order=1,
     )
     stop_s1 = add_customer_stop_to_route(
-        route_id=route_south.route_id, customer_id=customer3.customer_id,
+        route_id=route_south.route_id, customer_id=customer4.customer_id,
         address="Coffee Street, San Fernando",
         lat=10.2810, lng=-61.4600,
-        stop_order=2, status_id=confirmed.status_id,
+         status_id=confirmed.status_id,
     )
     stop_s2 = add_customer_stop_to_route(
-        route_id=route_south.route_id, customer_id=customer.customer_id,
+        route_id=route_south.route_id, customer_id=customer5.customer_id,
         address="High Street, San Fernando",
         lat=10.2775, lng=-61.4570,
-        stop_order=3, status_id=confirmed.status_id,
+        status_id=confirmed.status_id,
     )
 
     print(f"✓ Routes created  : {route_east.name}, {route_central.name}, {route_south.name}")
@@ -311,7 +338,7 @@ def initialize():
         },
         {
             'van_id': van3.van_id,
-            'stops': [stop_s1, stop_s2],
+            'stops': [ stop_s1, stop_s2],
             'items': [(channa, 0.35), (whole, 0.25), (hops, 0.20), (cake, 0.15), (cookie, 0.05)],
             'weekday_orders': (4, 8),
             'weekend_orders': (1, 3),

@@ -32,14 +32,17 @@ def get_active_stops():
 
 
 
-def add_customer_stop_to_route(route_id, customer_id, address, lat, lng, stop_order, status_id):
+def add_customer_stop_to_route(route_id, customer_id, address, lat, lng, status_id):
+    if get_today_customer_request(customer_id):
+        print("Customer already has an active stop request for today.")
+        return None
+
     stop = StopRequest(
         route_id=route_id,
         customer_id=customer_id,
         address=address,
         lat=lat,
         lng=lng,
-        stop_order=stop_order,
         status_id=status_id,
     )
 
@@ -91,27 +94,30 @@ def get_today_customer_request(customer_id):
     today_start = datetime.combine(datetime.today(), time.min) 
     today_end = datetime.combine(datetime.today(), time.max)
     
-    stop = db.session.execute(
-        db.select(StopRequest)
-        .filter(StopRequest.customer_id == customer_id)
-        .filter(StopRequest.created_at.between(today_start, today_end))
-    ).scalar_one_or_none()
+    try:
+        stop = db.session.execute(
+            db.select(StopRequest)
+            .filter(StopRequest.customer_id == customer_id)
+            .filter(StopRequest.created_at.between(today_start, today_end))
+        ).scalar_one_or_none()
 
-    if stop:
-        return stop.get_json()
-    
-    return None
+        if stop:
+            return stop.get_json()
+        else:
+            return None
+    except:
+        return None
 
 def get_customer_request_total(customer_id, stop_id):
     stop = get_stop_request_by_id(customer_id)
     if not stop:
         return 0
-        
-    stop = stop.customer_requests
+ 
+    requests = stop.customer_requests
 
     return sum(
         order.quantity * order.item.price
-        for order in stop.customer_requests
+        for order in requests
     )
 
 def delete_today_pending_customer_order(customer_id):

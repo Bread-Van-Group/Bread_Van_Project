@@ -10,12 +10,13 @@ def get_all_drivers():
     return db.session.scalars(db.select(Driver)).all()
 
 
-def get_driver_routes(driver_id):
-    """Return all routes assigned to a driver."""
-    return db.session.scalars(
+def get_assigned_driver_route(driver_id):
+    #Return Route Assigned to Driver
+    assigned_route = db.session.execute(
         db.select(DriverRoute).filter_by(driver_id=driver_id)
-    ).all()
+    ).scalar_one_or_none()
 
+    return db.session.get(Route, assigned_route.route_id)
 
 def assign_driver_to_route(driver_id, route_id):
     """

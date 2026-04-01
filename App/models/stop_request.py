@@ -22,13 +22,12 @@ class StopRequest(MapStop):
     status = db.relationship("Status", backref="stop", lazy=True)
 
 
-    def __init__(self, route_id, customer_id, address, lat, lng, stop_order, status_id):
+    def __init__(self, route_id, customer_id, address, lat, lng, status_id):
         self.route_id               = route_id
         self.customer_id            = customer_id
         self.address                = address
         self.lat                    = lat
         self.lng                    = lng
-        self.stop_order             = stop_order
         self.status_id              = status_id
 
     def get_json(self):
@@ -39,7 +38,6 @@ class StopRequest(MapStop):
             "address":                self.address,
             "lat":                    self.lat,
             "lng":                    self.lng,
-            "stop_order":             self.stop_order,
             "status_id":              self.status_id,
             "created_at":             self.created_at.isoformat() if self.created_at else None,
             "fulfilled_time":         self.fulfilled_time,
@@ -47,4 +45,4 @@ class StopRequest(MapStop):
         }
 
     def __repr__(self):
-        return f"<RouteStop {self.stop_id} | Route {self.route_id} | Order {self.stop_order}>"
+        return f"<RouteStop {self.stop_id} | Route {self.route_id}>"

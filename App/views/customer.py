@@ -163,7 +163,6 @@ def customer_make_request():
             address=address,
             lat=lat,
             lng=lng,
-            stop_order=0,
             status_id=1
         )
     else:
@@ -205,7 +204,6 @@ def customer_request_stop():
             address=address,
             lat=lat,
             lng=lng,
-            stop_order=0,
             status_id=1
         )
     else:
@@ -234,7 +232,6 @@ def customer_clear_request_items():
             address=stop["address"],
             lat=stop['lat'],
             lng=stop['lng'],
-            stop_order=stop['stop_order'],
             status_id=stop['status_id']
     )
 

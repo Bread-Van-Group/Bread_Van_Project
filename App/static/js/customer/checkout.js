@@ -7,51 +7,6 @@ const checkoutCustomerMarkerIcon = L.divIcon({
 //CHANGE THIS DEPENDING ON DESIRED VAN SPEED
 const VAN_SPEED = 48.2803; //km an hour
 
-//----------------------------TESTING CODE---------------------------
-// //Dummy Driver Location
-// breadVanMarker = L.marker([10.642156853165652, -61.39825880527497], {
-//   icon: L.divIcon({
-//     html: vanSVG,
-//     iconSize: [30, 30],
-//     className: "van-icon",
-//   }),
-// }).addTo(map);
-
-// //Popup Code
-// const vanDistanceMetres = breadVanMarker
-//   .getLatLng()
-//   .distanceTo(dummyCustomerMarker.getLatLng());
-// const vanDistanceKm = (vanDistanceMetres / 1000).toFixed(2);
-
-// const popupContent = `
-//       <div class="popup-container">
-//         <p class="popup-van-plate">Plate No. : <span>${van_plate}</span></p>
-//         <p class="popup-van-dist">Distance : <span>${vanDistanceKm}km</span></p>
-//       </div>
-// `;
-
-// if (breadVanMarker) {
-//   breadVanMarker
-//     .bindPopup(popupContent, {
-//       autoClose: false,
-//       closeOnClick: false,
-//     })
-//     .openPopup();
-// }
-
-// //Build the route between customer and driver
-// const waypoints = [breadVanMarker.getLatLng(), dummyCustomerMarker.getLatLng()];
-// buildRoute(waypoints);
-
-// //Do this to fly to center of driver and customer
-// const m1 = breadVanMarker.getLatLng();
-// const m2 = dummyCustomerMarker.getLatLng();
-
-// const avgLat = (m1.lat + m2.lat) / 2;
-// const avgLng = (m1.lng + m2.lng) / 2;
-
-// map.flyTo([avgLat, avgLng], 15);
-
 //--------------------------PRODUCTION CODE BELOW---------------
 
 var isCentered = false;
