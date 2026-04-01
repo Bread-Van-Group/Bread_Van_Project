@@ -6,17 +6,15 @@ from App.controllers import (
     assign_driver_to_route,
     unassign_driver_from_route,
     get_daily_inventory_item_by_id,
-    get_pending_stops,
-    get_active_stops,
+    get_pending_stops_by_area_route,
+    get_active_stops_by_area_route,
     get_daily_inventory,
-    get_stop_by_id,
     update_request_status,
-    add_stop_to_end_of_route,
-    get_todays_route,
     get_van_by_driver,
     create_transaction,
     create_map_stop,
-    update_stock
+    update_stock,
+    get_van_daily_inventory,
 )
 from App.controllers.route import get_route_stops
 
@@ -44,10 +42,11 @@ def driver_inventory_page():
         return redirect(url_for('index_views.index'))
 
     driver_id = int(get_jwt_identity())
+    van_id = get_van_by_driver(driver_id).van_id
 
     today = date.today()
 
-    daily_inventory = get_daily_inventory(today)
+    daily_inventory = get_van_daily_inventory(van_id, today)
 
     return render_template('driver/inventory.html', daily_inventory = daily_inventory)
 
@@ -57,7 +56,10 @@ def driver_requests_page():
     if current_user.role != 'driver':
         return redirect(url_for('index_views.index'))
 
-    pending_stops = get_pending_stops()
+    route_id = get_assigned_driver_route(get_jwt_identity()).route_id
+    pending_stops = get_pending_stops_by_area_route(route_id)
+
+    print(route_id)
 
     return render_template('driver/requests_page.html', pending_stops=pending_stops)
 
@@ -67,13 +69,14 @@ def driver_accept_request(stop_id):
     if current_user.role != 'driver':
         return redirect(url_for('index_views.index'))
     
-    pending_stops = get_pending_stops()
+    route_id = get_assigned_driver_route(get_jwt_identity()).route_id
+    pending_stops = get_pending_stops_by_area_route(route_id)
 
     if not update_request_status(2, stop_id):
         flash('Error Could not accept request.', 'error')
         return render_template('driver/requests_page.html', pending_stops=pending_stops)
 
-    pending_stops = get_pending_stops()
+    pending_stops = get_pending_stops_by_area_route(route_id)
     return render_template('driver/requests_page.html', pending_stops=pending_stops)
 
 @driver_views.route('/driver/requests/deny/<int:stop_id>', methods=['GET'])
@@ -81,14 +84,15 @@ def driver_accept_request(stop_id):
 def driver_deny_request(stop_id):
     if current_user.role != 'driver':
         return redirect(url_for('index_views.index'))
-
-    pending_stops = get_pending_stops()
+    
+    route_id = get_assigned_driver_route(get_jwt_identity()).route_id
+    pending_stops = get_pending_stops_by_area_route(route_id)
 
     if not update_request_status(4, stop_id, False):
         flash('Error Could not deny request.', 'error')
         return render_template('driver/requests_page.html', pending_stops=pending_stops)
 
-    pending_stops = get_pending_stops()
+    pending_stops = get_pending_stops_by_area_route(route_id)
     return render_template('driver/requests_page.html', pending_stops=pending_stops)
 
 @driver_views.route('/driver/transaction', methods=['GET'])
@@ -158,9 +162,10 @@ def get_active_requests():
         return jsonify(message='Unauthorized'), 403
 
     # Get pending requests
-    stops = get_active_stops()
+    route_id = get_assigned_driver_route(get_jwt_identity()).route_id
+    active_stops = get_active_stops_by_area_route(route_id)
 
-    return stops
+    return active_stops
 
 @driver_views.route('/api/driver/pending-stops', methods=['GET'])
 @jwt_required()
@@ -169,9 +174,10 @@ def get_pending_requests():
         return jsonify(message='Unauthorized'), 403
 
     # Get pending requests
-    stops = get_pending_stops()
+    route_id = get_assigned_driver_route(get_jwt_identity()).route_id
+    pending_stops = get_pending_stops_by_area_route(route_id)
 
-    return stops
+    return pending_stops
 
 @driver_views.route('/api/driver/update-stop', methods=['POST'])
 @jwt_required()
