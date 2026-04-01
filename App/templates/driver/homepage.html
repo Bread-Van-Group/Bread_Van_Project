@@ -45,7 +45,7 @@ https://github.com/perliedman/leaflet-routing-machine/releases
 <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
 
 <!-- The Actual Homepage Content-->
-{% endblock %} {{ super() }} {% block content %}
+{% endblock %} {% block content %}
 <!-- This is used to set a height for the map container on this page, you dont need it on others-->
 <div id="top-content" class="top-content-container">
   <div id="side-content" class="side-content">
@@ -63,4 +63,78 @@ https://github.com/perliedman/leaflet-routing-machine/releases
 
 {% endblock %} {% block scripts %}
 <script src="{{url_for('static', filename='js/driver/homepage.js')}}"></script>
+<script>
+  async function createTransaction() {
+    const addressData = await reverseGeocode(
+      selectedMarker.lat,
+      selectedMarker.lng,
+    );
+    const address = addressData.display_name.replace(
+      ", Trinidad and Tobago",
+      "",
+    );
+
+    await fetch("/api/driver/update-stop", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        stop_id: selectedMarker.stop_id,
+        status: 3,
+      }),
+    })
+      .then((response) => {
+        if (response.ok) {
+          //Check if there are customer requests associated with this stop,
+          // if not return
+          if (selectedMarker.customer_requests.length == 0) {
+            window.location.href =
+              "{{ url_for('driver_views.driver_homepage',message='Request Completed!') }}";
+            return;
+          }
+
+          return fetch("/api/driver/make-transaction", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              address: address,
+              lat: selectedMarker.lat,
+              lng: selectedMarker.lng,
+              order_items: selectedMarker.customer_requests,
+            }),
+          });
+        } else {
+          window.location.href =
+            "{{ url_for('driver_views.driver_homepage',message='Could not complete Request, please try again') }}";
+        }
+      })
+      .then((response) => {
+        if (response.ok) {
+          window.location.href =
+            "{{ url_for('driver_views.driver_homepage',message='Request Completed!') }}";
+        } else {
+          window.location.href =
+            "{{ url_for('driver_views.driver_homepage',message='Could not complete Request, please try again') }}";
+        }
+      });
+  }
+
+  async function cancelOrder() {
+    await fetch("/api/driver/update-stop", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        stop_id: selectedMarker.stop_id,
+        status: 4,
+      }),
+    }).then((response) => {
+      if (response.ok) {
+        window.location.href =
+          "{{ url_for('driver_views.driver_homepage',message='Request Cancelled!') }}";
+      } else {
+        window.location.href =
+          "{{ url_for('driver_views.driver_homepage',message='Could not cancel Request, please try again') }}";
+      }
+    });
+  }
+</script>
 {% endblock %}

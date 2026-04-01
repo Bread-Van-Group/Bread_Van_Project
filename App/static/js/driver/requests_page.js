@@ -28,8 +28,17 @@ async function loadPendingMarkers() {
 
     tempLeafletMarkers[marker.stop_id] = mapMarker;
     mapMarker.on("click", function (e) {
+      //This code is UI related and updates the card on the requests page
+      const previousCard = document.querySelector(".request-card-active");
+      const selectedCard = document.querySelector(
+        "#request-card_" + String(marker.stop_id),
+      );
+      if (previousCard) previousCard.classList.remove("request-card-active");
+      if (selectedCard) selectedCard.classList.add("request-card-active");
+
       if (currentlySelectedMarker) {
         //This is done to get correct icon to display for previous selected marker
+        //This checks if it is a marker that has not been accepted yet
         const isNewMarker = pendingMarkers.find(
           (m) =>
             m.lat == currentlySelectedMarker._latlng.lat &&
@@ -46,17 +55,20 @@ async function loadPendingMarkers() {
       currentlySelectedMarker = mapMarker;
 
       map.flyTo([marker.lat, marker.lng], 17);
-      const waypoints = [
-        breadVanDummyMarker.getLatLng(),
-        ...markers.map((m) => L.latLng(m.lat, m.lng)),
-        L.latLng(marker.lat, marker.lng),
-      ];
     });
   });
 }
 
 //This function is used in the frontend to go to the selected marker
 function goToMarker(markerId) {
+  const previousCard = document.querySelector(".request-card-active");
+  const selectedCard = document.querySelector(
+    "#request-card_" + String(markerId),
+  );
+
+  if (previousCard) previousCard.classList.remove("request-card-active");
+  if (selectedCard) selectedCard.classList.add("request-card-active");
+
   const marker = pendingMarkers.find(
     (m) => Number(m.stop_id) === Number(markerId),
   );
@@ -83,12 +95,6 @@ function goToMarker(markerId) {
   currentlySelectedMarker = leafletMarker;
 
   map.flyTo([marker.lat, marker.lng], 17);
-
-  const waypoints = [
-    breadVanDummyMarker.getLatLng(),
-    ...markers.map((m) => L.latLng(m.lat, m.lng)),
-    L.latLng(marker.lat, marker.lng),
-  ];
 }
 
 //Execution of code

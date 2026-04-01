@@ -12,19 +12,21 @@ def get_stop_request_by_id(stop_request_id):
 #Status id 1 = pending
 #Status id 2 = confirmed
 
-def get_pending_stops():
+def get_pending_stops_by_area_route(route_id):
     pending_stops  = db.session.execute(
         db.select(StopRequest)
         .filter(StopRequest.status_id == 1)
+        .filter(StopRequest.route_id == route_id)
         .distinct()
     ).scalars().all()
 
     return [pending_stop.get_json() for pending_stop in pending_stops]
 
-def get_active_stops():
+def get_active_stops_by_area_route(route_id):
     active_stops = db.session.execute(
         db.select(StopRequest)
         .filter(StopRequest.status_id == 2)
+        .filter(StopRequest.route_id == route_id)
         .distinct()
     ).scalars().all()
 

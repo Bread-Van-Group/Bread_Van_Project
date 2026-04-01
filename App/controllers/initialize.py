@@ -298,12 +298,12 @@ def initialize():
     print("✓ Route inventory set for today (all three vans)")
 
     # ── Customer Requests ─────────────────────────────────────────────────────
-    create_customer_request(stop_id=stop_e1['stop_id'], item_id=hops.item_id, quantity=2)
-    create_customer_request(stop_id=stop_e1['stop_id'], item_id=bara.item_id, quantity=1)
-    create_customer_request(stop_id=stop_c1['stop_id'], item_id=hops.item_id, quantity=1)
-    create_customer_request(stop_id=stop_c1['stop_id'], item_id=cake.item_id, quantity=2)
-    create_customer_request(stop_id=stop_s1['stop_id'], item_id=channa.item_id, quantity=1)
-    create_customer_request(stop_id=stop_s1['stop_id'], item_id=whole.item_id, quantity=1)
+    create_customer_request(van1.van_id, stop_id=stop_e1['stop_id'], item_id=hops.item_id, quantity=2)
+    create_customer_request(van1.van_id, stop_id=stop_e1['stop_id'], item_id=bara.item_id, quantity=1)
+    create_customer_request(van2.van_id, stop_id=stop_c1['stop_id'], item_id=hops.item_id, quantity=1)
+    create_customer_request(van2.van_id, stop_id=stop_c1['stop_id'], item_id=cake.item_id, quantity=2)
+    create_customer_request(van3.van_id, stop_id=stop_s1['stop_id'], item_id=channa.item_id, quantity=1)
+    create_customer_request(van3.van_id, stop_id=stop_s1['stop_id'], item_id=whole.item_id, quantity=1)
     print("✓ Customer requests created")
 
     # ── Driver → Route assignments ────────────────────────────────────────────

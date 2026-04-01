@@ -134,6 +134,15 @@
   animation: cardFadeIn 0.35s ease both;
 }
 
+.request-card-active {
+  background: var(--orange-blush);
+  border-color: var(--orange-light);
+  transform: translateX(3px);
+  box-shadow:
+    rgba(180, 80, 10, 0.18) 0px 2px 6px,
+    rgba(180, 80, 10, 0.1) 0px 1px 3px;
+}
+
 .request-card:hover {
   cursor: pointer;
   background: var(--orange-blush);

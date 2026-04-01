@@ -67,6 +67,8 @@ def get_van_daily_inventory(van_id, target_date=None):
         db.select(DailyInventory).filter_by(van_id=van_id, date=target_date)
     ).all()
 
+def get_customers_storepage_inventory():
+    print()
 
 def set_van_inventory(van_id, item_id, quantity, date):
     """Set or delete daily inventory for a van"""

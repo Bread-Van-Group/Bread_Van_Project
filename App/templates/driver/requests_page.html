@@ -52,7 +52,11 @@ https://github.com/perliedman/leaflet-routing-machine/releases
     </div>
     <div id="requests-content-body" class="requests-content-body">
       {% if pending_stops %} {% for pending_stop in pending_stops %}
-      <div class="request-card" onclick="goToMarker({{pending_stop.stop_id}})">
+      <div
+        id="request-card_{{pending_stop.stop_id}}"
+        class="request-card"
+        onclick="goToMarker({{pending_stop.stop_id}})"
+      >
         <h2 class="address-header">ADDRESS:</h2>
         <h2 class="address-body">{{pending_stop.address}}</h2>
         <div class="order-details">
