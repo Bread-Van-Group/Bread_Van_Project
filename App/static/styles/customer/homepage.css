@@ -132,19 +132,31 @@
   transition: all 0.5s ease-in-out;
 }
 
-.map-text {
+.active-driver-text {
   position: absolute;
-  top: 40%;
+  top: 2%;
+  left: 14.5%;
+
   opacity: 0;
-  font-family: "Caveat Brush", cursive;
-  font-size: 1.7rem;
+
+  font-family: "Shadows Into Light Two", cursive;
+  font-size: 1.4rem;
   font-style: italic;
+  font-weight: 400;
+
   text-align: center;
   letter-spacing: 0.5px;
-  border-radius: 15px;
-  color: var(--ink);
-  transition: all 0.5s ease-in-out;
-  z-index: 2;
+  padding: 4px;
+
+  color: var(--orange-light);
+  background-color: var(--orange-deep);
+
+  box-shadow:
+    rgba(0, 0, 0, 0.05) 0px 0px 0px 1px,
+    rgb(209, 213, 219) 0px 0px 0px 1px inset;
+
+  transition: all 0.2s ease-in-out;
+  z-index: -99;
 }
 
 /* ─── Orders Section ───────────────────────────────────────────────── */

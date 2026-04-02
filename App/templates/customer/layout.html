@@ -74,12 +74,14 @@
           href="{{ url_for('customer_views.customer_homepage') }}"
           ><i class="fa-solid fa-home"></i><span>Home</span></a
         >
-        <a
+        <button
           id="store"
           class="nav-btn"
-          href="{{ url_for('customer_views.customer_store') }}"
-          ><i class="fa-solid fa-store"></i><span>Store</span></a
+          style="border: none"
+          onclick="goToStorePage()"
         >
+          <i class="fa-solid fa-store"></i><span>Store</span>
+        </button>
         <a
           id="schedule"
           class="nav-btn"
@@ -95,6 +97,9 @@
     <!--Web Socket Code-->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script src="{{url_for('static', filename='js/customer/reverse_geocoder.js')}}"></script>
+    <!--Location Retriever Code For Customer and Driver-->
+    <script src="{{url_for('static', filename='js/customer/location_retriever.js')}}"></script>
+
     <script>
       function showToast(message) {
         const toast = document.createElement("div");
@@ -132,5 +137,20 @@
     </script>
 
     {% block scripts %}{% endblock %}
+    <!--Code To Determine Whether Customer Can Access Store Page-->
+    <script>
+      function goToStorePage() {
+        if (vanArrivalTime == null) {
+          window.location.href =
+            "{{ url_for('customer_views.customer_homepage', message='The Bread Van Is Not Nearby, Come Back Later') }}";
+        } else if (!isClose()) {
+          window.location.href =
+            "{{ url_for('customer_views.customer_homepage', message='The Bread Van Is Not Nearby, Come Back Later') }}";
+        } else {
+          window.location.href =
+            "{{ url_for('customer_views.customer_store') }}";
+        }
+      }
+    </script>
   </body>
 </html>

@@ -51,68 +51,6 @@ let markers = L.markerClusterGroup({
 map.addLayer(markers);
 
 let orderMarker = null;
-//Getting User's Current Location
-let customerMarker = null;
-
-navigator.geolocation.watchPosition(success, error, {
-  enableHighAccuracy: true,
-  maximumAge: 1000,
-  timeout: 10000,
-});
-
-function success(position) {
-  const lat = position.coords.latitude;
-  const lon = position.coords.longitude;
-
-  if (!customerMarker) {
-    customerMarker = L.marker([lat, lon], {
-      icon: customerMarkerIcon,
-      iconSize: [40, 40],
-      className: "marker-icon",
-    }).addTo(map);
-
-    markers.addLayer(customerMarker);
-  } else {
-    customerMarker.setLatLng([lat, lon]);
-  }
-}
-
-function error(err) {
-  if (err.code === 1) {
-    alert("Error: Please allow geolocation access");
-  } else {
-    alert("Error: Position is unavailable!");
-  }
-}
-
-//Getting the driver's live location
-const socket = io();
-var breadVanMarker = null;
-let lastUpdate = 0;
-const MIN_UPDATE_INTERVAL = 3000;
-
-socket.on("driver_update", function (data) {
-  const now = Date.now();
-
-  // Only update if enough time has passed
-  if (now - lastUpdate < MIN_UPDATE_INTERVAL) {
-    return;
-  }
-  lastUpdate = now;
-
-  if (breadVanMarker == null) {
-    breadVanMarker = L.marker([data.lat, data.lng], {
-      icon: L.divIcon({
-        html: vanSVG,
-        iconSize: [40, 40],
-        className: "van-icon",
-      }),
-    }).addTo(map);
-    markers.addLayer(breadVanMarker);
-  } else {
-    breadVanMarker.setLatLng([data.lat, data.lng]);
-  }
-});
 
 //Routing Code
 let routingControl = null;

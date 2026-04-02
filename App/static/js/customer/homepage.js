@@ -1,6 +1,3 @@
-//CHANGE THIS DEPENDING ON DESIRED VAN SPEED
-const VAN_SPEED = 48.2803; //km an hour
-
 function changeContent(page) {
   const mainContent = document.querySelector("#main-content");
 
@@ -38,31 +35,27 @@ function changeContent(page) {
   }
 }
 
-//Checks to see if Van is active every second
-//Also updates ETA if it is
+//If on Homepage This Code is Mounted
+//Update the ETA field every second with current
+//ETA calculated at location_retriever.js from
+//the customer's location and the van's location
+//Also states whether bread van is nearby on homepage
 setInterval(() => {
-  if (breadVanMarker == null) return;
+  if (vanArrivalTime == null) return;
 
-  if (orderMarker != null) destination = orderMarker;
-  else destination = customerMarker;
+  const map = document.querySelector("#map");
+
+  if (isClose() && map.style.zIndex == 1) {
+    const activeDriverText = document.querySelector("#active-driver-text");
+    activeDriverText.style.opacity = 1;
+    activeDriverText.style.zIndex = 99;
+  } else {
+    const activeDriverText = document.querySelector("#active-driver-text");
+    activeDriverText.style.opacity = 0;
+    activeDriverText.style.zIndex = -99;
+  }
 
   const eta = document.querySelector("#order-eta");
 
-  const vanDistanceMetres = breadVanMarker
-    .getLatLng()
-    .distanceTo(destination.getLatLng());
-  const vanDistanceKm = vanDistanceMetres / 1000;
-
-  const seconds = Math.floor((vanDistanceKm / VAN_SPEED) * 3600);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-
-  const arrivalTime =
-    String(hours).padStart(2, "0") +
-    ":" +
-    String(minutes).padStart(2, "0") +
-    ":" +
-    String(seconds).padStart(2, "0");
-
-  eta.innerHTML = arrivalTime;
+  eta.innerHTML = vanArrivalTime;
 }, 1000);

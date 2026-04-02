@@ -52,7 +52,7 @@ def add_customer_stop_to_route(route_id, customer_id, address, lat, lng, status_
     db.session.commit()
     return stop.get_json()
 
-def edit_customer_stop(id, lat, lng, status):
+def edit_customer_stop(id, lat, lng, address, status):
     stop = get_stop_request_by_id(id)
 
     if not stop:
@@ -60,6 +60,7 @@ def edit_customer_stop(id, lat, lng, status):
     
     stop.lat = lat
     stop.lng = lng
+    stop.address = address
     stop.status_id = status
     
     db.session.add(stop)

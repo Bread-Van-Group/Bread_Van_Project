@@ -95,7 +95,7 @@
 
   <div id="clear-modal" class="modal">
     <div class="modal-content">
-      <div class="modal-close-button" onclick="closeModal('delete-modal')">
+      <div class="modal-close-button" onclick="closeModal('clear-modal')">
         X
       </div>
       <p class="modal-text" style="font-size: 1.6rem">
@@ -164,6 +164,9 @@
     </div>
     <div id="main-content" class="main-content">
       <div id="map" class="map"></div>
+      <div id="active-driver-text" class="active-driver-text">
+        Bread Van Is Nearby!
+      </div>
 
       <div id="order-section" class="orders-section">
         <div class="order-items">
@@ -313,7 +316,6 @@
 
       addressData = await reverseGeocode(lat, lng);
       address = addressData.display_name.replace(", Trinidad and Tobago", "");
-
       fetch("/api/customer/make-stop-request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
