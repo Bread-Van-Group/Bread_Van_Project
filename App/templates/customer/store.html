@@ -21,8 +21,7 @@ block head %}
       <option value="bread">Bread</option>
       <option value="fried">Fried</option>
       <option value="filling">Filling</option>
-      <option value="pastry">Pastry</option>
-      <option value="cake">Cake</option>
+      <option value="sweets">Sweets</option>
     </select>
   </div>
   <button class="cart-btn" onclick="openCart()">
@@ -50,10 +49,13 @@ block head %}
     <img class="store-card-image" src="\static\assets\images\fillings.png" />
     {%elif store_item.item.category == 'fried' %}
     <img class="store-card-image" src="\static\assets\images\fried.png" />
-    {%elif store_item.item.category == 'pastry' %}
-    <img class="store-card-image" src="\static\assets\images\pastry.png" />
-    {%elif store_item.item.category == 'cake' %}
-    <img class="store-card-image" src="\static\assets\images\cakes.png" />
+    {%elif store_item.item.category == 'sweets' %}
+    <img class="store-card-image" src="\static\assets\images\sweets.png" />
+    {% else %}
+    <img
+      class="store-card-image"
+      src="\static\assets\images\miscellaneous.png"
+    />
     {% endif %}
     <div class="store-card-details">
       <p class="store-card-name">{{store_item.item.name}}</p>

@@ -78,14 +78,6 @@ def increment_pairing(item1_id, item2_id):
     db.session.commit()
     return pairing
 
-def get_daily_inventory(date):
-    daily_inventory = db.session.execute(
-        db.select(DailyInventory).filter_by(date=date)
-    ).scalars().all()
-    
-    return [inventory_item.get_json() for inventory_item in daily_inventory]
-
-
 def update_item_price(item_id, new_price):
     """Update the price of an inventory item"""
     from App.models import InventoryItem

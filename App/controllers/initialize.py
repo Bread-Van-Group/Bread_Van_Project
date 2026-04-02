@@ -3,7 +3,7 @@ from .user import create_driver, create_customer, create_owner
 from .request_item import create_customer_request
 from .status import create_status
 from .inventory_item import create_item
-from .route import create_route, add_stop_to_route
+from .route import create_route, add_stop_to_route, assign_route_to_area
 from .stop_request import add_customer_stop_to_route
 from .van import create_van, assign_van_to_route, set_van_inventory
 from .driver import assign_driver_to_route
@@ -90,7 +90,7 @@ def initialize():
         name="Bob Customer",
         address="789 Pine Road, Port of Spain",
         phone="868-100-0001",
-        region_id=region_pos.region_id,
+        region_id=region_tunapuna.region_id,
     )
 
     customer2 = create_customer(
@@ -155,11 +155,11 @@ def initialize():
     # meaningful variation across routes.
 
     route_east = create_route(
-        name="Morning East Route",
+        name="Tunapuna-Piarco Route",
         start_time=time(6, 0), end_time=time(10, 0),
         day_of_week="Monday",
         owner_id=owner.owner_id,
-        description="East Trinidad morning bread delivery",
+        description="Tunapuna-Piarco morning bread delivery",
     )
     route_central = create_route(
         name="Central Chaguanas Run",
@@ -175,6 +175,27 @@ def initialize():
         owner_id=owner.owner_id,
         description="San Fernando early morning delivery circuit",
     )
+
+    #Assigning Route's To The Respective Area
+    tunapuna_route_assignment = assign_route_to_area(
+        route_id=route_east.route_id, 
+        region_id=region_tunapuna.region_id
+    )
+
+    chaguanas_route_assignment = assign_route_to_area(
+        route_id=route_central.route_id, 
+        region_id=region_chag.region_id
+    )
+
+    sando_route_assignment = assign_route_to_area(
+        route_id=route_south.route_id, 
+        region_id=region_sf.region_id
+    )
+
+    print("✓ Routes assigned to areas: ")
+    print(tunapuna_route_assignment)
+    print(chaguanas_route_assignment)
+    print(sando_route_assignment)
 
     # ── Stops ─────────────────────────────────────────────────────────────────
     # East route stops
