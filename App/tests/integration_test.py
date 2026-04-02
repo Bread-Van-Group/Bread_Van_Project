@@ -65,11 +65,9 @@ class TestAuthFlow:
         from App.controllers.user import create_customer
         from App.controllers.auth import login
 
-        # Step 1 — Register
         customer = create_customer("newuser@test.com", "securepass", "New User")
         assert customer is not None, "Registration failed — customer was not created"
 
-        # Step 2 — Login with correct password
         token = login("newuser@test.com", "securepass")
         assert token is not None, "Login failed — no token returned for valid credentials"
 
@@ -97,7 +95,7 @@ class TestAuthFlow:
         from App.controllers.user import create_owner, create_driver
         from App.controllers.auth import login
 
-        owner = create_owner("driverowner@test.com", "pass")
+        owner  = create_owner("driverowner@test.com", "pass")
         driver = create_driver("newdriver@test.com", "driverpass", "Test Driver",
                                owner_id=owner.owner_id)
         assert driver is not None
@@ -126,47 +124,38 @@ class TestAuthFlow:
 class TestCustomerOrderFlow:
     """
     Integration tests for the full order flow:
-    customer created → inventory stocked → stop added → request placed →
-    inventory levels updated.
+    customer created → inventory stocked → stop request added →
+    request item placed → inventory levels updated.
     """
 
     def _setup_order_environment(self, db):
         """
         Helper: build the minimum required environment for placing an order.
-        Creates owner, customer, van, item, route, stop, and daily inventory.
+        Creates owner, customer, van, item, route, stop request, and daily inventory.
         Returns all created objects for use in tests.
         """
         from App.controllers.user import create_owner, create_customer
         from App.controllers.van import create_van
         from App.controllers.inventory_item import create_item
-        from App.controllers.route import create_route, add_customer_stop_to_route
-        from App.controllers.status import create_status
+        from App.controllers.route import create_route
+        from App.controllers.stop_request import add_customer_stop_to_route
         from App.models import DailyInventory
 
-        # Users
         owner    = create_owner("orderowner@test.com", "pass")
         customer = create_customer("ordercust@test.com", "pass", "Order Customer")
+        van      = create_van("ORD 0001", owner.owner_id, status="active")
+        item     = create_item("Hops Bread", price=3.50, category="bread")
+        route    = create_route("Test Route", time(6, 0), time(10, 0), "Monday", owner.owner_id)
 
-        # Van
-        van = create_van("ORD 0001", owner.owner_id, status="active")
-
-        # Item
-        item = create_item("Hops Bread", price=3.50, category="bread")
-
-        # Route & stop
-        status  = create_status("confirmed")
-        route   = create_route("Test Route", time(6, 0), time(10, 0), "Monday", owner.owner_id)
-        stop    = add_customer_stop_to_route(
+        stop_json = add_customer_stop_to_route(
             route_id    = route.route_id,
             customer_id = customer.customer_id,
             address     = "123 Test Street",
             lat         = 10.65,
             lng         = -61.52,
-            stop_order  = 1,
-            status_id   = status.status_id,
+            status_id   = 1,
         )
 
-        # Stock the van
         inventory = DailyInventory(
             van_id             = van.van_id,
             date               = date.today(),
@@ -178,7 +167,7 @@ class TestCustomerOrderFlow:
         db.session.add(inventory)
         db.session.commit()
 
-        return owner, customer, van, item, route, stop, inventory
+        return owner, customer, van, item, route, stop_json, inventory
 
     def test_placing_order_reduces_available_inventory(self, db):
         """
@@ -188,17 +177,15 @@ class TestCustomerOrderFlow:
         from App.controllers.request_item import create_customer_request
         from App.models import DailyInventory
 
-        owner, customer, van, item, route, stop, inventory = self._setup_order_environment(db)
+        owner, customer, van, item, route, stop_json, inventory = self._setup_order_environment(db)
 
         create_customer_request(
-            customer_id = customer.customer_id,
-            van_id      = van.van_id,
-            stop_id     = stop["stop_id"],
-            item_id     = item.item_id,
-            quantity    = 3,
+            van_id   = van.van_id,
+            stop_id  = stop_json["stop_id"],
+            item_id  = item.item_id,
+            quantity = 3,
         )
 
-        # Refresh from DB and check inventory was updated
         updated = db.session.get(DailyInventory, inventory.inventory_id)
         assert updated.quantity_available == 17, \
             f"Expected 17 available, got {updated.quantity_available}"
@@ -207,25 +194,24 @@ class TestCustomerOrderFlow:
 
     def test_placing_order_creates_customer_request_record(self, db):
         """
-        A customer request record should exist in the database
+        A RequestItem record should exist in the database
         after an order is successfully placed.
         """
         from App.controllers.request_item import create_customer_request
 
-        owner, customer, van, item, route, stop, inventory = self._setup_order_environment(db)
+        owner, customer, van, item, route, stop_json, inventory = self._setup_order_environment(db)
 
         request = create_customer_request(
-            customer_id = customer.customer_id,
-            van_id      = van.van_id,
-            stop_id     = stop["stop_id"],
-            item_id     = item.item_id,
-            quantity    = 2,
+            van_id   = van.van_id,
+            stop_id  = stop_json["stop_id"],
+            item_id  = item.item_id,
+            quantity = 2,
         )
 
         assert request is not None
-        assert request.customer_id == customer.customer_id
-        assert request.item_id     == item.item_id
-        assert request.quantity    == 2
+        assert request.stop_id  == stop_json["stop_id"]
+        assert request.item_id  == item.item_id
+        assert request.quantity == 2
 
     def test_order_exceeding_stock_fails_gracefully(self, db):
         """
@@ -235,19 +221,17 @@ class TestCustomerOrderFlow:
         from App.controllers.request_item import create_customer_request
         from App.models import DailyInventory
 
-        owner, customer, van, item, route, stop, inventory = self._setup_order_environment(db)
+        owner, customer, van, item, route, stop_json, inventory = self._setup_order_environment(db)
 
         result = create_customer_request(
-            customer_id = customer.customer_id,
-            van_id      = van.van_id,
-            stop_id     = stop["stop_id"],
-            item_id     = item.item_id,
-            quantity    = 999,
+            van_id   = van.van_id,
+            stop_id  = stop_json["stop_id"],
+            item_id  = item.item_id,
+            quantity = 999,
         )
 
         assert result is None, "Order above stock limit should have returned None"
 
-        # Inventory should be unchanged
         unchanged = db.session.get(DailyInventory, inventory.inventory_id)
         assert unchanged.quantity_available == 20, \
             "Inventory should not change after a failed order"
@@ -255,15 +239,15 @@ class TestCustomerOrderFlow:
     def test_full_order_flow_end_to_end(self, db):
         """
         Full end-to-end flow:
-        register customer → stock van → place order → verify inventory updated.
-        This mirrors a real customer interaction with the system.
+        register customer → stock van → place stop request → place item request
+        → verify inventory updated.
         """
         from App.controllers.user import create_owner, create_customer
         from App.controllers.auth import login
         from App.controllers.van import create_van
         from App.controllers.inventory_item import create_item
-        from App.controllers.route import create_route, add_customer_stop_to_route
-        from App.controllers.status import create_status
+        from App.controllers.route import create_route
+        from App.controllers.stop_request import add_customer_stop_to_route
         from App.controllers.request_item import create_customer_request
         from App.models import DailyInventory
 
@@ -284,21 +268,20 @@ class TestCustomerOrderFlow:
         db.session.add(inventory)
         db.session.commit()
 
-        # Step 3 — Create route and stop
-        status = create_status("confirmed")
-        route  = create_route("E2E Route", time(7, 0), time(11, 0), "Tuesday", owner.owner_id)
-        stop   = add_customer_stop_to_route(
+        # Step 3 — Create route and stop request
+        route     = create_route("E2E Route", time(7, 0), time(11, 0), "Tuesday", owner.owner_id)
+        stop_json = add_customer_stop_to_route(
             route_id=route.route_id, customer_id=customer.customer_id,
-            address="456 E2E Avenue", lat=10.70, lng=-61.50,
-            stop_order=1, status_id=status.status_id,
+            address="456 E2E Avenue", lat=10.70, lng=-61.50, status_id=1,
         )
+        assert stop_json is not None, "Stop request should have been created"
 
-        # Step 4 — Place order
+        # Step 4 — Place item request
         request = create_customer_request(
-            customer_id=customer.customer_id, van_id=van.van_id,
-            stop_id=stop["stop_id"], item_id=item.item_id, quantity=5,
+            van_id=van.van_id, stop_id=stop_json["stop_id"],
+            item_id=item.item_id, quantity=5,
         )
-        assert request is not None, "Order should have been created"
+        assert request is not None, "Request item should have been created"
 
         # Step 5 — Verify inventory reflects the order
         updated = db.session.get(DailyInventory, inventory.inventory_id)
