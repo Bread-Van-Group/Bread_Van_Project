@@ -21,6 +21,7 @@ var map = L.map("map", {
   center: [10.64179, -61.400861],
   zoom: 15,
   maxZoom: 18,
+  minZoom: 13,
   scrollWheelZoom: true,
   zoomControl: false,
   wheelPxPerZoomLevel: 200,
@@ -74,3 +75,5 @@ function buildRoute(waypoints) {
     });
   }
 }
+
+function drawRouteOnMap() {}

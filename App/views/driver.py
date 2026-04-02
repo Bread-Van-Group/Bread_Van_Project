@@ -70,8 +70,9 @@ def driver_accept_request(stop_id):
     
     route_id = get_assigned_driver_route(get_jwt_identity()).route_id
     pending_stops = get_pending_stops_by_area_route(route_id)
+    van_id = get_van_by_driver(get_jwt_identity()).van_id
 
-    if not update_request_status(2, stop_id):
+    if not update_request_status(2, stop_id, van_id):
         flash('Error Could not accept request.', 'error')
         return render_template('driver/requests_page.html', pending_stops=pending_stops)
 
@@ -86,8 +87,9 @@ def driver_deny_request(stop_id):
     
     route_id = get_assigned_driver_route(get_jwt_identity()).route_id
     pending_stops = get_pending_stops_by_area_route(route_id)
+    van_id = get_van_by_driver(get_jwt_identity()).van_id
 
-    if not update_request_status(4, stop_id, False):
+    if not update_request_status(4, stop_id, van_id, False):
         flash('Error Could not deny request.', 'error')
         return render_template('driver/requests_page.html', pending_stops=pending_stops)
 
@@ -161,8 +163,9 @@ def complete_stop():
     
     stop_id = request.get_json().get('stop_id')
     status = request.get_json().get('status')
+    van_id = get_van_by_driver(get_jwt_identity()).van_id
 
-    if not update_request_status(status, stop_id):
+    if not update_request_status(status, stop_id, van_id):
         return '', 500
     else:
         return '', 200

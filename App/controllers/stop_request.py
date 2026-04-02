@@ -69,7 +69,7 @@ def edit_customer_stop(id, lat, lng, address, status):
     return True
 
 
-def update_request_status(status_id, stop_id , fulfilled=False):
+def update_request_status(status_id, stop_id ,van_id, fulfilled=False):
     """Update the status (and optionally fulfilled_time) of a customer request."""
     stop = get_stop_request_by_id(stop_id)
     if not stop:
@@ -80,7 +80,6 @@ def update_request_status(status_id, stop_id , fulfilled=False):
         stop.fulfilled_time = datetime.now(UTC_MINUS_4)
 
     if status_id == 3 or status_id == 4:
-        van_id = get_active_van().van_id
         requests = stop.customer_requests
 
         for request in requests:
