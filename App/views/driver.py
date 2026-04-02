@@ -8,7 +8,6 @@ from App.controllers import (
     get_daily_inventory_item_by_id,
     get_pending_stops_by_area_route,
     get_active_stops_by_area_route,
-    get_daily_inventory,
     update_request_status,
     get_van_by_driver,
     create_transaction,
@@ -103,7 +102,8 @@ def driver_transaction_page():
 
     today = date.today()
 
-    daily_inventory = get_daily_inventory(today)
+    van = get_van_by_driver(get_jwt_identity())
+    daily_inventory = get_van_daily_inventory(van.van_id)
 
     transaction_items = session.get('transaction_items', [])
 
@@ -128,32 +128,6 @@ def get_assigned_route():
 
     route = get_assigned_driver_route(get_jwt_identity())
     return jsonify([stop.get_json() for stop in route.stops])
-
-
-@driver_views.route('/api/driver/routes/<int:route_id>/assign', methods=['POST'])
-@jwt_required()
-def assign_route(route_id):
-    """Assign the current driver to a route."""
-    if current_user.role != 'driver':
-        return jsonify(message='Unauthorized'), 403
-
-    result = assign_driver_to_route(current_user.driver_id, route_id)
-    if not result:
-        return jsonify(message='Already assigned to this route'), 400
-    return jsonify(result.get_json()), 201
-
-
-@driver_views.route('/api/driver/routes/<int:route_id>/unassign', methods=['DELETE'])
-@jwt_required()
-def unassign_route(route_id):
-    """Remove the current driver from a route."""
-    if current_user.role != 'driver':
-        return jsonify(message='Unauthorized'), 403
-
-    success = unassign_driver_from_route(current_user.driver_id, route_id)
-    if not success:
-        return jsonify(message='Assignment not found'), 404
-    return jsonify(message='Unassigned successfully')
 
 @driver_views.route('/api/driver/active-stops', methods=['GET'])
 @jwt_required()

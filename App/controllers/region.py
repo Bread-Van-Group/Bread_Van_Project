@@ -17,7 +17,6 @@ def get_region_by_name(name):
 def get_all_regions():
     return db.session.scalars(db.select(Region)).all()
 
-
 # ── Create / update / delete ───────────────────────────────────────────────────
 
 def create_region(name, description=None):

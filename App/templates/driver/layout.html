@@ -42,7 +42,10 @@
     <div class="page-container" id="content">
       <!-- Top bar -->
       <div class="top-bar">
-        <a href="{{ url_for('auth_views.logout') }}" class="logout-btn">
+        <button onclick="centerMap()" class="top-btn center-map-btn">
+          <i class="fa-solid fa-map"></i> <span>Center Map</span>
+        </button>
+        <a href="{{ url_for('auth_views.logout') }}" class="top-btn logout-btn">
           <i class="fa-solid fa-right-from-bracket"></i>
           <span>Logout</span>
         </a>
@@ -54,6 +57,7 @@
       <!-- Bottom navigation -->
       <div class="bottom-btn-container">
         <a
+          id="requests"
           class="bottom-btn"
           href="{{ url_for('driver_views.driver_requests_page')}}"
         >
@@ -61,6 +65,7 @@
           <span>New Requests</span>
         </a>
         <a
+          id="inventory"
           class="bottom-btn"
           href="{{ url_for('driver_views.driver_inventory_page') }}"
         >
@@ -68,6 +73,7 @@
           <span>Inventory</span>
         </a>
         <a
+          id="transactions"
           class="bottom-btn"
           href="{{ url_for('driver_views.driver_transaction_page') }}"
         >
@@ -103,6 +109,20 @@
         const message = params.get("message");
         if (message) showToast(message);
       });
+    </script>
+    <script>
+      //-----Navbar Code----------
+      const currentURL = "{{ request.path }}";
+      const id = currentURL.slice(currentURL.lastIndexOf("/") + 1);
+      const currentNavBtn = document.querySelector(`#${id}`);
+      if (currentNavBtn) currentNavBtn.classList.add("active");
+    </script>
+    <script>
+      //-----Centering Map Code----------
+
+      function centerMap() {
+        map.flyTo(driverLocation.getLatLng(), 17);
+      }
     </script>
 
     {% block scripts %}{% endblock %}

@@ -1,5 +1,8 @@
 from App.database import db
 from App.models import Van, DailyInventory
+from App.controllers.customer import get_customer_by_id
+from App.controllers.route_area import get_route_for_region
+from App.controllers.route import get_route_by_id, get_driver_id_for_route
 from datetime import date
 
 def get_van_by_id(van_id):
@@ -67,8 +70,18 @@ def get_van_daily_inventory(van_id, target_date=None):
         db.select(DailyInventory).filter_by(van_id=van_id, date=target_date)
     ).all()
 
-def get_customers_storepage_inventory():
-    print()
+def get_customers_storepage_inventory(customer_id):
+    customer = get_customer_by_id(customer_id)
+    route_assignment = get_route_for_region(customer.region_id)
+
+    if route_assignment is None:
+        return None
+    driver_id = get_driver_id_for_route(route_assignment.route_id)
+
+    van_for_route = get_van_by_driver(driver_id)
+
+    return get_van_daily_inventory(van_for_route.van_id)
+    
 
 def set_van_inventory(van_id, item_id, quantity, date):
     """Set or delete daily inventory for a van"""

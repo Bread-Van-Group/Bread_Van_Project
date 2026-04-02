@@ -1,7 +1,10 @@
 from App.database import db
-from App.models import Route, RouteStop
+from App.models import Route, RouteStop, RouteArea, DriverRoute
+from App.controllers.region import get_region_by_id
 from sqlalchemy import func
 from datetime import datetime
+
+
 def get_route_by_id(route_id):
     return db.session.get(Route, route_id)
 
@@ -13,11 +16,48 @@ def get_todays_route():
         )
     ).scalar_one_or_none()
 
+def get_driver_id_for_route(route_id):
+    route_assignment = db.session.execute(
+        db.select(DriverRoute).filter_by(route_id=route_id)
+    ).scalar_one_or_none()
+
+    return route_assignment.driver_id
+
 def get_stop_by_id(stop_id):
     return db.session.get(RouteStop, stop_id)
 
 def get_all_routes():
     return db.session.scalars(db.select(Route)).all()
+
+def get_route_for_area(route_id):
+    return db.session.execute(
+        db.select(RouteArea).filter_by(route_id=route_id)
+    ).scalar_one_or_none()
+
+def assign_route_to_area(route_id, region_id):
+    existing_assignment = get_route_for_area(route_id)
+    region = get_region_by_id(region_id)
+
+    try:
+        if existing_assignment:
+            db.session.delete(existing_assignment)
+            db.session.commit()
+        
+        new_assignment = RouteArea(
+            route_id=route_id,
+            region_id=region_id
+        )
+        
+        db.session.add(new_assignment)
+        db.session.commit()
+
+        return new_assignment
+    except Exception as e:
+        print(f"Error could not assign route to region: {region}")
+        print(e)
+
+        db.session.rollback()
+        return None
 
 def create_route(name, start_time, end_time, day_of_week, owner_id, description=None):
     route = Route(

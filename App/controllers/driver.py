@@ -76,8 +76,6 @@ def unassign_van_from_driver(van_id):
     db.session.commit()
     return van
 
-
-
 def update_driver_info(driver_id, name=None, address=None, phone=None, owner_id=None):
     """
     Partially update a driver's profile fields.

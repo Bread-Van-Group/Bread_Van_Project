@@ -94,6 +94,9 @@ async function success(position) {
         className: "van-icon",
       }),
     }).addTo(map);
+
+    //Adds driver marker to allow clustering
+    markerClusterLayer.addLayer(driverLocation);
   } else {
     driverLocation.setLatLng([lat, lon]);
   }
@@ -123,6 +126,9 @@ async function initMap() {
     let mapMarker = L.marker([marker.lat, marker.lng], {
       icon: markerIcon,
     }).addTo(map);
+
+    //Adds each marker to allow clustering
+    markerClusterLayer.addLayer(mapMarker);
 
     leafletMarkers[marker.stop_id] = mapMarker;
 

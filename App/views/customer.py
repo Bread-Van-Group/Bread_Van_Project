@@ -7,10 +7,9 @@ from App.controllers import (
     get_active_van_plate, 
     get_todays_route, 
     add_customer_stop_to_route, 
-    get_active_van,  
     create_customer_request, 
     get_daily_inventory_item, 
-    get_daily_inventory, 
+    get_customers_storepage_inventory,
     get_customer_request_total
 )
 from App.controllers.transaction import get_report_data
@@ -56,13 +55,18 @@ def customer_store():
     if current_user.role != 'customer':
         return redirect(url_for('index_views.index'))
     
-    today = date.today()
     stop = get_today_customer_request(get_jwt_identity())
 
     if stop and (stop['status_id'] == 3 or stop['status_id'] == 4):
         return redirect(url_for('customer_views.customer_homepage', message="You have already made an order for today.The store is now unavailable until tomorrow."))
 
-    store_items = get_daily_inventory(today)
+    store_items = get_customers_storepage_inventory(get_jwt_identity())
+    
+    #The store should never be empty if route is assigned
+    #to the customers region
+    if store_items is None:
+        store_items = []
+
     customer_order = session.get('order', [])
 
     return render_template('customer/store.html', store_items=store_items, customer_order= customer_order)
