@@ -5,7 +5,8 @@ from App.controllers import (
     get_today_customer_request, 
     delete_today_pending_customer_order,  
     get_active_van_plate, 
-    get_todays_route, 
+    get_van_for_customer_route,
+    get_customer_route_id, 
     add_customer_stop_to_route, 
     create_customer_request, 
     get_daily_inventory_item, 
@@ -30,7 +31,7 @@ def customer_homepage():
     stop = get_today_customer_request(customer_id)
 
     if stop:
-        order_total = get_customer_request_total(customer_id, stop['stop_id'])
+        order_total = get_customer_request_total(customer_id, stop)
     else:
         order_total = 0
     return render_template('customer/homepage.html', stop=stop, order_total = order_total)
@@ -162,7 +163,7 @@ def customer_make_request():
     #Create stop if there isnt an existing one
     if not stop:
         stop = add_customer_stop_to_route(
-            route_id=get_todays_route().route_id,
+            route_id=get_customer_route_id(get_jwt_identity()),
             customer_id=get_jwt_identity(),
             address=address,
             lat=lat,
@@ -175,6 +176,7 @@ def customer_make_request():
     
     for item in order:
         new_request = create_customer_request(
+            van_id= get_van_for_customer_route(get_jwt_identity()).van_id,
             stop_id=stop['stop_id'],
             item_id=item['inventory_id'],
             quantity=item['quantity'],
@@ -196,14 +198,14 @@ def customer_request_stop():
     address = data.get('address')
 
     stop = get_today_customer_request(get_jwt_identity())
-    todays_route = get_todays_route()    
+    todays_route_id = get_customer_route_id(get_jwt_identity())    
 
-    if not todays_route:
+    if not todays_route_id:
          return '', 400
 
     if not stop:
         stop = add_customer_stop_to_route(
-            route_id=todays_route.route_id,
+            route_id=todays_route_id,
             customer_id=get_jwt_identity(),
             address=address,
             lat=lat,
@@ -228,10 +230,13 @@ def customer_clear_request_items():
     
     customer_id = get_jwt_identity()
     stop = get_today_customer_request(customer_id)
+
+    #Deletes the orders along with its associated stop request
     isDeleted = delete_today_pending_customer_order(customer_id)
 
+    #Remakes a new stop request from scratch for the customer
     stop = add_customer_stop_to_route(
-            route_id=get_todays_route().route_id,
+            route_id=get_customer_route_id(get_jwt_identity()),
             customer_id=get_jwt_identity(),
             address=stop["address"],
             lat=stop['lat'],

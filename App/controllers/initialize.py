@@ -90,7 +90,7 @@ def initialize():
         name="Bob Customer",
         address="789 Pine Road, Port of Spain",
         phone="868-100-0001",
-        region_id=region_tunapuna.region_id,
+        region_id=region_chag.region_id,
     )
 
     customer2 = create_customer(
@@ -99,7 +99,7 @@ def initialize():
         name="Alice Customer",
         address="12 High Street, Chaguanas",
         phone="868-200-0002",
-        region_id=region_chag.region_id,
+        region_id=region_tunapuna.region_id,
     )
     customer3 = create_customer(
         email="customer3@test.com",
@@ -107,7 +107,7 @@ def initialize():
         name="Charlie Customer",
         address="45 Coffee Street, San Fernando",
         phone="868-300-0003",
-        region_id=region_sf.region_id,
+        region_id=region_tunapuna.region_id,
     )
 
     customer4 = create_customer(
@@ -134,7 +134,7 @@ def initialize():
         name="Frank Customer",
         address="45 Coffee Street, San Fernando",
         phone="868-300-0003",
-        region_id=region_sf.region_id,
+        region_id=region_chag.region_id,
     )
 
     print(f"✓ Customers created")
@@ -157,7 +157,7 @@ def initialize():
     route_east = create_route(
         name="Tunapuna-Piarco Route",
         start_time=time(6, 0), end_time=time(10, 0),
-        day_of_week="Monday",
+        day_of_week= str(datetime.now().strftime("%A") ),
         owner_id=owner.owner_id,
         description="Tunapuna-Piarco morning bread delivery",
     )

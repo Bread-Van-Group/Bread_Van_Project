@@ -1,6 +1,8 @@
 from App.database import db
 from App.models import Route, RouteStop, RouteArea, DriverRoute
 from App.controllers.region import get_region_by_id
+from App.controllers.customer import get_customer_by_id
+from App.controllers.route_area import get_routes_for_region
 from sqlalchemy import func
 from datetime import datetime
 
@@ -15,6 +17,23 @@ def get_todays_route():
             day_of_week = day
         )
     ).scalar_one_or_none()
+
+def get_customer_route_id(customer_id):
+    customer = get_customer_by_id(customer_id)
+    route_assignments = get_routes_for_region(customer.region_id)
+    route_id = None
+
+    if route_assignments is None:
+        return None
+
+    for route in route_assignments:
+        route = get_route_by_id(route.route_id)
+        todays_day = datetime.now().strftime("%A") 
+        if route.day_of_week == todays_day:
+            route_id = route.route_id
+            break
+
+    return route_id
 
 def get_driver_id_for_route(route_id):
     route_assignment = db.session.execute(
@@ -35,13 +54,9 @@ def get_route_for_area(route_id):
     ).scalar_one_or_none()
 
 def assign_route_to_area(route_id, region_id):
-    existing_assignment = get_route_for_area(route_id)
     region = get_region_by_id(region_id)
 
     try:
-        if existing_assignment:
-            db.session.delete(existing_assignment)
-            db.session.commit()
         
         new_assignment = RouteArea(
             route_id=route_id,

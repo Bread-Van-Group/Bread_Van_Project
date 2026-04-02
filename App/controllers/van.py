@@ -1,9 +1,7 @@
 from App.database import db
 from App.models import Van, DailyInventory
-from App.controllers.customer import get_customer_by_id
-from App.controllers.route_area import get_route_for_region
-from App.controllers.route import get_route_by_id, get_driver_id_for_route
-from datetime import date
+from App.controllers.route import get_customer_route_id, get_driver_id_for_route
+from datetime import date, datetime
 
 def get_van_by_id(van_id):
     return db.session.get(Van, van_id)
@@ -19,6 +17,16 @@ def get_active_van():
     return db.session.execute(
         db.select(Van).filter_by(status='active')
     ).scalars().first()  # ✅ Returns first active van
+
+def get_van_for_customer_route(customer_id):
+    customer_route_id = get_customer_route_id(customer_id)
+
+    if customer_route_id is None:
+        return None
+
+    driver_id = get_driver_id_for_route(customer_route_id)
+
+    return get_van_by_driver(driver_id)
 
 def get_active_van_plate():
     van = db.session.execute(
@@ -71,14 +79,17 @@ def get_van_daily_inventory(van_id, target_date=None):
     ).all()
 
 def get_customers_storepage_inventory(customer_id):
-    customer = get_customer_by_id(customer_id)
-    route_assignment = get_route_for_region(customer.region_id)
+    customer_route_id = get_customer_route_id(customer_id)
 
-    if route_assignment is None:
+    if customer_route_id is None:
         return None
-    driver_id = get_driver_id_for_route(route_assignment.route_id)
+
+    driver_id = get_driver_id_for_route(customer_route_id)
 
     van_for_route = get_van_by_driver(driver_id)
+
+    if van_for_route is None:
+        return None
 
     return get_van_daily_inventory(van_for_route.van_id)
     

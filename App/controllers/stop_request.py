@@ -110,15 +110,11 @@ def get_today_customer_request(customer_id):
     except:
         return None
 
-def get_customer_request_total(customer_id, stop_id):
-    stop = get_stop_request_by_id(customer_id)
-    if not stop:
-        return 0
- 
-    requests = stop.customer_requests
+def get_customer_request_total(customer_id, stop):
+    requests = stop['customer_requests']
 
     return sum(
-        order.quantity * order.item.price
+        order['quantity'] * order['item']['price']
         for order in requests
     )
 
