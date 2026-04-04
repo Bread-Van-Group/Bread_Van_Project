@@ -1,17 +1,8 @@
-const checkoutCustomerMarkerIcon = L.divIcon({
-  html: customerMarkerSVG,
-  iconSize: [30, 30],
-  className: "marker-icon ",
-});
-
-//CHANGE THIS DEPENDING ON DESIRED VAN SPEED
-const VAN_SPEED = 48.2803; //km an hour
-
-//--------------------------PRODUCTION CODE BELOW---------------
-
 var isCentered = false;
 var popupOpened = false;
 let detectDriverInterval = null;
+
+let checkoutRoutingControl = null;
 
 detectDriverInterval = setInterval(() => {
   if (breadVanMarker != null && customerMarker != null) {
@@ -49,7 +40,7 @@ detectDriverInterval = setInterval(() => {
 
     //Build the route between customer and driver
     const waypoints = [breadVanMarker.getLatLng(), customerMarker.getLatLng()];
-    buildRoute(waypoints);
+    checkoutRoutingControl = buildRoute(waypoints, checkoutRoutingControl);
 
     centerMap();
     clearInterval(detectDriverInterval);
@@ -61,29 +52,14 @@ setInterval(() => {
   if (breadVanMarker == null) return;
 
   //ETA Code
-  const vanDistanceMetres = breadVanMarker
-    .getLatLng()
-    .distanceTo(customerMarker.getLatLng());
-  const vanDistanceKm = vanDistanceMetres / 1000;
-
-  const eta = document.querySelector("#order-eta");
-
-  const seconds = Math.floor((vanDistanceKm / VAN_SPEED) * 3600);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-
-  const arrivalTime =
-    String(hours).padStart(2, "0") +
-    ":" +
-    String(minutes).padStart(2, "0") +
-    ":" +
-    String(seconds).padStart(2, "0");
+  vanLatLng = L.latLng(data.lat, data.lng);
+  arrivalTime = calculateETAToCustomer(customerMarker, vanLatLng);
 
   eta.innerHTML = arrivalTime;
 
   //Build the route between customer and driver
   const waypoints = [breadVanMarker.getLatLng(), customerMarker.getLatLng()];
-  buildRoute(waypoints);
+  checkoutRoutingControl = buildRoute(waypoints, checkoutRoutingControl);
 
   document.querySelector("#van-distance").innerHTML = vanDistanceKm + "km";
 }, 1000);

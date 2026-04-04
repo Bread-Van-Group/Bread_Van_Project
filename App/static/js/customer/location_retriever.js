@@ -1,7 +1,3 @@
-//CONSTANTS
-const VAN_SPEED = 35; //km an hour
-const STORE_OPENING_ETA = 30; // minutes
-
 //Global Variables
 let vanArrivalTime = null;
 
@@ -54,16 +50,11 @@ socket.on("driver_update", function (data) {
   }
   lastUpdate = now;
 
-  //Use either the customer marker or the location of their
-  //Order if they have one
-  if (orderMarker != null) destination = orderMarker;
-  else destination = customerMarker;
-
   //Get the ETA From Customer or Order
   vanLatLng = L.latLng(data.lat, data.lng);
-  vanArrivalTime = calculateETAToCustomer(destination, vanLatLng);
+  vanArrivalTime = calculateETAToCustomer(customerMarker, vanLatLng);
 
-  if (isClose()) {
+  if (breadVanIsClose()) {
     if (breadVanMarker == null) {
       breadVanMarker = L.marker([data.lat, data.lng], {
         icon: L.divIcon({
@@ -100,7 +91,11 @@ function calculateETAToCustomer(destination, vanLatLng) {
   return arrivalTime;
 }
 
-function isClose() {
+function breadVanIsClose() {
+  //Check if breadvan is active,
+  //vanArrivalTime will not be null if so
+  if (vanArrivalTime == null) return false;
+
   //Strip ETA into its parts for calculation and check if van is close
   const [hours, minutes, seconds] = vanArrivalTime.split(":").map(Number);
   const totalSeconds = hours * 3600 + minutes * 60 + seconds;

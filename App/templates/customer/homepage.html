@@ -203,6 +203,10 @@
       window.location.href =
         "{{url_for('customer_views.customer_homepage', message='You have a request made already')}}";
       return;
+    } else if (!breadVanIsClose()) {
+      window.location.href =
+        "{{ url_for('customer_views.customer_homepage', message='The Bread Van Is Not Nearby, Come Back Later') }}";
+      return;
     }
 
     showToast("Making Request...");

@@ -95,6 +95,8 @@ async function success(position) {
       }),
     }).addTo(map);
 
+    map.flyTo(driverLocation.getLatLng(), 17);
+
     //Adds driver marker to allow clustering
     markerClusterLayer.addLayer(driverLocation);
   } else {
@@ -177,6 +179,9 @@ async function buildRoute() {
   } else {
     routingControl = L.Routing.control({
       waypoints: waypoints,
+      router: L.Routing.osrmv1({
+        serviceUrl: "https://bread-van-osrm-server.onrender.com/route/v1",
+      }),
       show: false,
       createMarker: function (i, wp, nWps) {
         return null;

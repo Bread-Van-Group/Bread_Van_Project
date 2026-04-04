@@ -50,11 +50,27 @@ def customer_profile():
         return redirect(url_for('index_views.index'))
     return render_template('customer/profile.html')
 
+
+@customer_views.route('/customer/authorize-store', methods=['POST'])
+def authorize_store():
+    # Receive the validation result from the frontend
+    data = request.get_json()
+    
+    if data.get('authorized'):
+        session['store_access'] = True
+        return jsonify({'redirect': url_for('customer_views.customer_store')})
+    
+    return jsonify({'error': 'Not authorized'}), 403
+
 @customer_views.route('/customer/store', methods=['GET'])
 @jwt_required()
 def customer_store():
     if current_user.role != 'customer':
         return redirect(url_for('index_views.index'))
+    
+    if not session.pop('store_access', False):  # consume the flag immediately
+        return redirect(url_for('customer_views.customer_homepage', 
+                                message='Access Denied'))
     
     stop = get_today_customer_request(get_jwt_identity())
 
@@ -98,6 +114,20 @@ def customer_checkout():
     return render_template('customer/checkout.html', order=order, order_total =order_total, van_plate = van_plate )
 
 # ── API Routes ────────────────────────────────────────────────────────────────
+@customer_views.route('/api/customer/route', methods=['GET'])
+@jwt_required()
+def get_customer_route():
+    if current_user.role != 'customer':
+        return jsonify(message='Unauthorized'), 403
+
+    todays_route_id, route_stops = get_customer_route_id(get_jwt_identity())
+
+    if not todays_route_id:
+         return '', 400
+    
+    return jsonify({"route_id": todays_route_id, "stops": route_stops}), 200
+
+
 @customer_views.route('/api/customer/item/<int:item_id>', methods=['GET'])
 @jwt_required()
 def get_store_item(item_id):
@@ -159,7 +189,7 @@ def customer_make_request():
     address = data.get('address')
 
     stop = get_today_customer_request(get_jwt_identity())
-    todays_route_id = get_customer_route_id(get_jwt_identity())
+    todays_route_id, route_stops = get_customer_route_id(get_jwt_identity())
 
     if not todays_route_id:
          return '', 400
@@ -202,14 +232,14 @@ def customer_request_stop():
     address = data.get('address')
 
     stop = get_today_customer_request(get_jwt_identity())
-    todays_route_id = get_customer_route_id(get_jwt_identity())    
+    todays_route_id, route_stops = get_customer_route_id(get_jwt_identity())    
 
     if not todays_route_id:
          return '', 400
 
     if not stop:
         stop = add_customer_stop_to_route(
-            route_id=get_customer_route_id(get_jwt_identity()),
+            route_id=todays_route_id,
             customer_id=get_jwt_identity(),
             address=address,
             lat=lat,
@@ -231,9 +261,15 @@ def customer_clear_request_items():
     #Deletes the orders along with its associated stop request
     isDeleted = delete_today_pending_customer_order(customer_id)
 
+    todays_route_id, route_stops = get_customer_route_id(get_jwt_identity())    
+
+    if not todays_route_id:
+         return '', 400
+
+
     #Remakes a new stop request from scratch for the customer
     stop = add_customer_stop_to_route(
-            route_id=get_customer_route_id(get_jwt_identity()),
+            route_id=todays_route_id,
             customer_id=get_jwt_identity(),
             address=stop["address"],
             lat=stop['lat'],

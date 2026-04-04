@@ -87,7 +87,4 @@ async function hideSideContent() {
 //All execution of other code afterwards
 (async () => {
   await initMap();
-  map.flyTo(driverLocation.getLatLng(), 17);
-
-  buildRoute();
 })();

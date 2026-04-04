@@ -1,3 +1,13 @@
+/*THIS IS NEEDED ONLY ON THIS PAGE SO CUSTOMER DOESNT SEE ROUTE */
+.leaflet-routing-container {
+  display: none !important;
+}
+
+.leaflet-overlay-pane path.leaflet-interactive {
+  stroke-opacity: 0 !important;
+  fill-opacity: 0 !important;
+}
+
 /* ─── Page Content ───────────────────────────────────────────────── */
 .page-content {
   position: relative;

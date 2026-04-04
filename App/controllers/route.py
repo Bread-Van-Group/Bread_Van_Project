@@ -33,9 +33,12 @@ def get_customer_route_id(customer_id):
             route_id = route.route_id
             break
 
-    return route_id
+    route_stops = [stop.get_json() for stop in route.stops]
+    
+    return route_id, route_stops
 
 def get_driver_id_for_route(route_id):
+    print(route_id)
     route_assignment = db.session.execute(
         db.select(DriverRoute).filter_by(route_id=route_id)
     ).scalar_one_or_none()

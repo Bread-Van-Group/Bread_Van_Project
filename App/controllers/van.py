@@ -19,7 +19,7 @@ def get_active_van():
     ).scalars().first()  # ✅ Returns first active van
 
 def get_van_for_customer_route(customer_id):
-    customer_route_id = get_customer_route_id(customer_id)
+    customer_route_id, route_stops = get_customer_route_id(customer_id)
 
     if customer_route_id is None:
         return None
@@ -81,7 +81,7 @@ def get_van_daily_inventory(van_id, target_date=None):
     return [record.get_json() for record in daily_inventory]
 
 def get_customers_storepage_inventory(customer_id):
-    customer_route_id = get_customer_route_id(customer_id)
+    customer_route_id, route_stops = get_customer_route_id(customer_id)
 
     if customer_route_id is None:
         return None
