@@ -145,6 +145,7 @@ def get_active_order():
     else:
         return jsonify({"response":False})
 
+#REQUEST WITH AN ORDER ATTACHED
 @customer_views.route('/api/customer/make-order', methods=['POST'])
 @jwt_required()
 def customer_make_request():
@@ -156,23 +157,25 @@ def customer_make_request():
     lat = data.get('lat')
     lng = data.get('lng')
     address = data.get('address')
+
     stop = get_today_customer_request(get_jwt_identity())
+    todays_route_id = get_customer_route_id(get_jwt_identity())
+
+    if not todays_route_id:
+         return '', 400
 
     order = session.get('order', [])
 
     #Create stop if there isnt an existing one
     if not stop:
         stop = add_customer_stop_to_route(
-            route_id=get_customer_route_id(get_jwt_identity()),
+            route_id=todays_route_id,
             customer_id=get_jwt_identity(),
             address=address,
             lat=lat,
             lng=lng,
             status_id=1
-        )
-    else:
-        edit_customer_stop(stop['stop_id'], lat, lng, address, stop['status_id'])
-        
+        )        
     
     for item in order:
         new_request = create_customer_request(
@@ -185,6 +188,8 @@ def customer_make_request():
     session.pop('order', None) 
     return '', 200
 
+
+#REQUEST WITHOUT AN ORDER
 @customer_views.route('/api/customer/make-stop-request', methods=['POST'])
 @jwt_required()
 def customer_request_stop():
@@ -194,7 +199,6 @@ def customer_request_stop():
     data = request.get_json()
     lat = data.get('lat')
     lng = data.get('lng')
-    loc_change = data.get('locationChanged')
     address = data.get('address')
 
     stop = get_today_customer_request(get_jwt_identity())
@@ -205,20 +209,13 @@ def customer_request_stop():
 
     if not stop:
         stop = add_customer_stop_to_route(
-            route_id=todays_route_id,
+            route_id=get_customer_route_id(get_jwt_identity()),
             customer_id=get_jwt_identity(),
             address=address,
             lat=lat,
             lng=lng,
             status_id=1
         )
-    else:
-        if loc_change:
-            status = 1 #Have the status go back to pending since location change
-        else:
-            status = stop['status_id']
-
-        edit_customer_stop(stop['stop_id'], lat, lng, address, status)
 
     return '', 200
 

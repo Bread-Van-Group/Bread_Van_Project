@@ -85,31 +85,19 @@
 
     <!---Web Socket Code Below-->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <!--Materialize Code-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-    <script src="{{url_for('static', filename='js/customer/reverse_geocoder.js')}}"></script>
-    <script src="{{url_for('static', filename='js/driver/map.js')}}"></script>
     <script>
       M.AutoInit();
-
-      function showToast(message) {
-        const toast = document.createElement("div");
-        toast.className = "toast";
-        toast.innerText = message;
-        document.body.appendChild(toast);
-
-        setTimeout(() => toast.classList.add("show"), 10);
-        setTimeout(() => {
-          toast.classList.remove("show");
-          setTimeout(() => toast.remove(), 300);
-        }, 2500);
-      }
-
-      document.addEventListener("DOMContentLoaded", function () {
-        const params = new URLSearchParams(window.location.search);
-        const message = params.get("message");
-        if (message) showToast(message);
-      });
     </script>
+
+    <script src="{{url_for('static', filename='js/customer/reverse_geocoder.js')}}"></script>
+    <script src="{{url_for('static', filename='js/driver/map.js')}}"></script>
+
+    <!--Flash Message Code-->
+    <script src="{{url_for('static', filename='js/handle_flash_message.js')}}"></script>
+
+    <!--SERVER SIDE RELIANT CODE-->
     <script>
       //-----Navbar Code----------
       const currentURL = "{{ request.path }}";
