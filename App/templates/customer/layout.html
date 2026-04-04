@@ -93,33 +93,22 @@
         >
       </div>
     </div>
+    <!--Constants Across Customer Side-->
+    <script src="{{url_for('static', filename = 'js/customer/constants.js')}}"></script>
 
     <!--Web Socket Code-->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script src="{{url_for('static', filename='js/customer/reverse_geocoder.js')}}"></script>
+    <script src="{{url_for('static', filename='js/reverse_geocoder.js')}}"></script>
     <!--Location Retriever Code For Customer and Driver-->
     <script src="{{url_for('static', filename='js/customer/location_retriever.js')}}"></script>
+    <!--Flash Message Code-->
+    <script src="{{url_for('static', filename='js/handle_flash_message.js')}}"></script>
 
-    <script>
-      function showToast(message) {
-        const toast = document.createElement("div");
-        toast.className = "toast";
-        toast.innerText = message;
-        document.body.appendChild(toast);
+    <!--OSRM Routing Code-->
+    <script src="{{url_for('static', filename='js/handle_routing.js')}}"></script>
 
-        setTimeout(() => toast.classList.add("show"), 10);
-        setTimeout(() => {
-          toast.classList.remove("show");
-          setTimeout(() => toast.remove(), 300);
-        }, 2500);
-      }
+    <!--SERVER SIDE RELIANT CODE-->
 
-      document.addEventListener("DOMContentLoaded", function () {
-        const params = new URLSearchParams(window.location.search);
-        const message = params.get("message");
-        if (message) showToast(message);
-      });
-    </script>
     <!--Navbar Code -->
     <script>
       const currentURL = "{{ request.path  }}";
@@ -136,19 +125,74 @@
       currentNavBtn.classList.add("active");
     </script>
 
+    <!--Get Route And Store For Customer For Later Checks-->
+    <script>
+      //Get Route from API
+      //IT IS ASSUMED A ROUTE WILL HAVE A START AND END AND MORE THAN TWO POINTS
+
+      let routingControl = null;
+      let routeCoordinates = [];
+
+      async function getBakeryRoute() {
+        const res = await fetch("/api/customer/route");
+        const { route_id, stops } = await res.json();
+
+        let waypoints = [...stops.map((stop) => L.latLng(stop.lat, stop.lng))];
+
+        routingControl = buildRoute(waypoints, routingControl);
+      }
+
+      function isOnVanRoute(markerLatLng) {
+        if (routeCoordinates.length === 0) return false;
+
+        return routeCoordinates.some((coord) => {
+          return markerLatLng.distanceTo(coord) <= ROUTE_PROXIMITY_RADIUS;
+        });
+      }
+
+      (async () => {
+        await getBakeryRoute();
+      })();
+    </script>
+
     {% block scripts %}{% endblock %}
     <!--Code To Determine Whether Customer Can Access Store Page-->
     <script>
-      function goToStorePage() {
+      async function goToStorePage() {
+        let authorized = false;
+        let redirectUrl = null;
+
         if (vanArrivalTime == null) {
-          window.location.href =
-            "{{ url_for('customer_views.customer_homepage', message='The Bread Van Is Not Nearby, Come Back Later') }}";
-        } else if (!isClose()) {
-          window.location.href =
+          redirectUrl =
+            "{{ url_for('customer_views.customer_homepage', message='The Bread Van Is Not Operational At The Moment, Come Back Later') }}";
+        } else if (!isOnVanRoute(customerMarker.getLatLng())) {
+          redirectUrl =
+            "{{ url_for('customer_views.customer_homepage', message='The Bread Van Is Not Servicing Your Area Currently') }}";
+        } else if (!breadVanIsClose()) {
+          redirectUrl =
             "{{ url_for('customer_views.customer_homepage', message='The Bread Van Is Not Nearby, Come Back Later') }}";
         } else {
-          window.location.href =
-            "{{ url_for('customer_views.customer_store') }}";
+          authorized = true;
+        }
+
+        if (!authorized) {
+          window.location.href = redirectUrl;
+          return;
+        }
+
+        // Request server-side authorization
+        const response = await fetch(
+          "{{ url_for('customer_views.authorize_store') }}",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ authorized: true }),
+          },
+        );
+
+        const data = await response.json();
+        if (response.ok) {
+          window.location.href = data.redirect;
         }
       }
     </script>

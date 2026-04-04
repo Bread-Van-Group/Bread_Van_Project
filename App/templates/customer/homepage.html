@@ -14,31 +14,6 @@
   </div>
 
   <!--Modals Stored Here-->
-  <div id="stop-request-modal" class="modal">
-    <div class="modal-content">
-      <div
-        class="modal-close-button"
-        onclick="closeModal('#stop-request-modal')"
-      >
-        X
-      </div>
-      <p class="modal-text">
-        Make Stop Request at your current location or choose another location?
-      </p>
-      <div class="modal-btns">
-        <div class="modal-btn" onclick="createStopRequest()">
-          Current Location
-        </div>
-        <div
-          class="modal-btn"
-          onclick="enableMarkerAdding('stop-request-modal')"
-        >
-          Different Location
-        </div>
-      </div>
-    </div>
-  </div>
-
   <div id="delete-modal" class="modal">
     <div class="modal-content">
       <div class="modal-close-button" onclick="closeModal('delete-modal')">
@@ -61,33 +36,6 @@
           onclick="closeModal('delete-modal')"
         >
           No
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="edit-modal" class="modal">
-    <div class="modal-content">
-      <div class="modal-close-button" onclick="closeModal('edit-modal')">X</div>
-      <p class="modal-text" style="font-size: 1.2rem">
-        Change Request to your current location or another location?
-        <span
-          class="descriptor-info"
-          style="
-            margin-bottom: 2vh;
-            background-color: var(--orange-light);
-            font-size: 0.8rem;
-          "
-          >(Warning:Your order will need to be confirmed by the driver
-          again!)</span
-        >
-      </p>
-      <div class="modal-btns">
-        <div class="modal-btn" onclick="editStopLocation(true)">
-          Current Location
-        </div>
-        <div class="modal-btn" onclick="editStopLocation(false)">
-          Different Location
         </div>
       </div>
     </div>
@@ -198,9 +146,6 @@
             Clear Items
           </button>
           {% endif %}
-          <button class="order-mng-btn" onclick="openModal('edit-modal')">
-            Edit Location
-          </button>
           <button class="order-mng-btn" onclick="openModal('delete-modal')">
             Delete Order
           </button>
@@ -214,7 +159,7 @@
         </div>
       </div>
     </div>
-    <button class="stop-request-btn" onclick="openStopModal()">
+    <button class="stop-request-btn" onclick="createStopRequest()">
       Request Stop
     </button>
   </div>
@@ -223,69 +168,10 @@
 {% endblock %} {% block scripts %}
 <script src="{{url_for('static', filename='js/customer/map.js')}}"></script>
 <script src="{{url_for('static', filename='js/customer/homepage.js')}}"></script>
+
+<!--JINJA SERVER SIDE RELIANT SCRIPTS-->
 <!--This Script is For Making Stop Requests Without an Order-->
 <script>
-  let checkOrderIntervalId = null;
-  let isAddingMarker = false;
-  let locationChanged = false;
-
-  const customerStop = {{stop |tojson }}
-
-  //If a customer order was made, periodically check if
-  //the order is the same as the customer location
-  //If not, create a new order marker on map
-  if (customerStop) {
-    checkOrderIntervalId = setInterval(() => {
-      if (
-        customerMarker &&
-        !(
-          customerMarker.getLatLng().lat.toFixed(4) ==
-            customerStop.lat.toFixed(4) &&
-          customerMarker.getLatLng().lng.toFixed(4) ==
-            customerStop.lng.toFixed(4)
-        )
-      ) {
-        orderMarker = L.marker([customerStop.lat, customerStop.lng], {
-          icon: orderMarkerIcon,
-          iconSize: [40, 40],
-          className: "marker-icon",
-        }).addTo(map);
-
-        markers.addLayer(orderMarker);
-        map.flyTo([customerStop.lat, customerStop.lng], 14);
-        clearInterval(checkOrderIntervalId);
-      }
-    }, 1000);
-  }
-
-  //This code is toggled when the customer chooses a new location
-  map.on("click", async function (e) {
-    if (isAddingMarker) {
-      const lat = e.latlng.lat;
-      const lng = e.latlng.lng;
-
-      isAddingMarker = false;
-      addressData = await reverseGeocode(lat, lng);
-      address = addressData.display_name.replace(", Trinidad and Tobago", "");
-
-      fetch("/api/customer/make-stop-request", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          lat: lat,
-          lng: lng,
-          locationChanged: locationChanged,
-          address: address,
-        }),
-      }).then((response) => {
-        if (response.ok) {
-          window.location.href =
-            "{{ url_for('customer_views.customer_homepage',message='Stop Requested!') }}";
-        }
-      });
-    }
-  });
-
   async function getActiveOrder() {
     const res = await fetch("/api/customer/get-order");
     const json = await res.json();
@@ -293,67 +179,73 @@
     return json;
   }
 
-  function enableMarkerAdding(modalId) {
-    dimmer = document.querySelector("#modal-dimmer");
-    modal = document.querySelector("#" + String(modalId));
-    instructions = document.querySelector("#map-instructions");
+  function waitForLocation(interval = 300, timeout = 10000) {
+    return new Promise((resolve, reject) => {
+      if (customerMarker) return resolve();
 
-    dimmer.style.zIndex = "1";
-
-    modal.style.zIndex = "-100";
-    modal.style.opacity = 0;
-
-    instructions.style.zIndex = "100";
-    instructions.style.opacity = 1;
-
-    isAddingMarker = true;
+      const start = Date.now();
+      const timer = setInterval(() => {
+        if (customerMarker) {
+          clearInterval(timer);
+          resolve();
+        } else if (Date.now() - start >= timeout) {
+          clearInterval(timer);
+          reject(new Error("Could not retrieve location in time"));
+        }
+      }, interval);
+    });
   }
 
   async function createStopRequest() {
-    if (customerMarker) {
-      lat = customerMarker.getLatLng().lat;
-      lng = customerMarker.getLatLng().lng;
-
-      addressData = await reverseGeocode(lat, lng);
-      address = addressData.display_name.replace(", Trinidad and Tobago", "");
-      fetch("/api/customer/make-stop-request", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          lat: lat,
-          lng: lng,
-          locationChanged: locationChanged,
-          address: address,
-        }),
-      }).then((response) => {
-        if (response.ok) {
-          window.location.href =
-            "{{ url_for('customer_views.customer_homepage',message='Stop Requested!') }}";
-        } else {
-          window.location.href =
-            "{{ url_for('customer_views.customer_homepage',message='Could Not Request Stop, Please Try Later') }}";
-        }
-      });
-    }
-  }
-
-  async function openStopModal() {
     activeOrder = await getActiveOrder();
 
     if (activeOrder.response) {
       window.location.href =
         "{{url_for('customer_views.customer_homepage', message='You have a request made already')}}";
       return;
+    } else if (!breadVanIsClose()) {
+      window.location.href =
+        "{{ url_for('customer_views.customer_homepage', message='The Bread Van Is Not Nearby, Come Back Later') }}";
+      return;
     }
 
-    dimmer = document.querySelector("#modal-dimmer");
-    modal = document.querySelector("#stop-request-modal");
+    showToast("Making Request...");
 
-    dimmer.style.zIndex = "99";
-    modal.style.zIndex = "100";
-    modal.style.opacity = 1;
+    //Wait till the customer location is available
+    try {
+      await waitForLocation();
+    } catch (e) {
+      window.location.href =
+        "{{url_for('customer_views.customer_homepage', message='Location could not be retrieved in time, please try again')}}";
+      return;
+    }
+
+    lat = customerMarker.getLatLng().lat;
+    lng = customerMarker.getLatLng().lng;
+
+    addressData = await reverseGeocode(lat, lng);
+    address = addressData.display_name.replace(", Trinidad and Tobago", "");
+    fetch("/api/customer/make-stop-request", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        lat: lat,
+        lng: lng,
+        address: address,
+      }),
+    }).then((response) => {
+      if (response.ok) {
+        window.location.href =
+          "{{ url_for('customer_views.customer_homepage',message='Stop Requested!') }}";
+      } else {
+        window.location.href =
+          "{{ url_for('customer_views.customer_homepage',message='Could Not Request Stop, Please Try Later') }}";
+      }
+    });
   }
-
+</script>
+<!--This script handles order section functionality and modals-->
+<script>
   function closeModal(modalId) {
     dimmer = document.querySelector("#modal-dimmer");
     modal = document.querySelector("#" + String(modalId));
@@ -370,9 +262,7 @@
     instructions.style.zIndex = "-100";
     instructions.style.opacity = 0;
   }
-</script>
-<!--This script handles order section functionality-->
-<script>
+
   function openModal(modalId, operation, text, option1, option2) {
     modal = document.querySelector("#" + String(modalId));
     dimmer = document.querySelector("#modal-dimmer");
@@ -392,16 +282,6 @@
           "{{ url_for('customer_views.customer_homepage',message='Order Deleted') }}";
       }
     });
-  }
-
-  function editStopLocation(use_curr_loc) {
-    locationChanged = true;
-    if (use_curr_loc) {
-      createStopRequest();
-    } else {
-      changeContent("map");
-      enableMarkerAdding("edit-modal");
-    }
   }
 
   function clearRequestItems() {

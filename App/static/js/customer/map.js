@@ -52,28 +52,3 @@ let markers = L.markerClusterGroup({
 map.addLayer(markers);
 
 let orderMarker = null;
-
-//Routing Code
-let routingControl = null;
-
-function buildRoute(waypoints) {
-  if (routingControl) {
-    routingControl.setWaypoints(waypoints);
-  } else {
-    routingControl = L.Routing.control({
-      waypoints: waypoints,
-      show: false,
-      collapsible: false,
-      createMarker: function (i, wp, nWps) {
-        return null;
-      },
-    }).addTo(map);
-
-    routingControl.on("routesfound", function () {
-      const container = routingControl.getContainer();
-      if (container) container.style.display = "none";
-    });
-  }
-}
-
-function drawRouteOnMap() {}

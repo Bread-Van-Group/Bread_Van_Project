@@ -1,3 +1,5 @@
+let isOnMapSection = true;
+
 function changeContent(page) {
   const mainContent = document.querySelector("#main-content");
 
@@ -13,6 +15,8 @@ function changeContent(page) {
   if (String(page) === "map") {
     map.style.zIndex = 1;
     map.style.opacity = 1;
+
+    isOnMapSection = true;
 
     orderBtn.classList.add("content-navbar-btn-inactive");
     mapBtn.classList.remove("content-navbar-btn-inactive");
@@ -32,6 +36,8 @@ function changeContent(page) {
 
     map.style.zIndex = -1;
     map.style.opacity = 0;
+
+    isOnMapSection = false;
   }
 }
 
@@ -45,7 +51,8 @@ setInterval(() => {
 
   const map = document.querySelector("#map");
 
-  if (isClose() && map.style.zIndex == 1) {
+  if (breadVanIsClose() && isOnMapSection) {
+    console.log("ok");
     const activeDriverText = document.querySelector("#active-driver-text");
     activeDriverText.style.opacity = 1;
     activeDriverText.style.zIndex = 99;
