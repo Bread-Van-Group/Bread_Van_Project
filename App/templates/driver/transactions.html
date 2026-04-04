@@ -61,15 +61,18 @@
                     {% for item in daily_inventory %}
                     <div class="catalogue-item" data-category="{{item.item.category}}" onclick="addToTransaction({{item.inventory_id}})">
                         {%if item.item.category == 'bread' %}
-                        <img class="catalogue-item-image" src="\static\assets\images\bread.png" />
+                        <img class="store-card-image" src="\static\assets\images\bread.png" />
                         {%elif item.item.category == 'filling' %}
-                        <img class="catalogue-item-image" src="\static\assets\images\fillings.png" />
+                        <img class="store-card-image" src="\static\assets\images\fillings.png" />
                         {%elif item.item.category == 'fried' %}
-                        <img class="catalogue-item-image" src="\static\assets\images\fried.png" />
-                        {%elif item.item.category == 'pastry' %}
-                        <img class="catalogue-item-image" src="\static\assets\images\pastry.png" />
-                        {%elif item.item.category == 'cake' %}
-                        <img class="catalogue-item-image" src="\static\assets\images\cakes.png" />
+                        <img class="store-card-image" src="\static\assets\images\fried.png" />
+                        {%elif item.item.category == 'sweets' %}
+                        <img class="store-card-image" src="\static\assets\images\sweets.png" />
+                        {% else %}
+                        <img
+                          class="store-card-image"
+                          src="\static\assets\images\miscellaneous.png"
+                        />
                         {% endif %}
                         <p class="catalogue-item-name">{{item.item.name}}</p>
                         <div class="catalogue-item-details">

@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, jsonify, request, flash, redirect, url_for
+from flask import Blueprint, render_template, jsonify,session, request, flash, redirect, url_for
 from flask_jwt_extended import (
     jwt_required, current_user, unset_jwt_cookies,
     set_access_cookies, decode_token
@@ -59,6 +59,7 @@ def logout():
     """Logout the user by clearing JWT cookies"""
     response = redirect(url_for('index_views.index'))
     unset_jwt_cookies(response)
+    session.clear()  # Clear Flask session data as well
     flash('You have been logged out successfully.', 'success')
     return response
 

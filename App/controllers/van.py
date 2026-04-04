@@ -74,9 +74,11 @@ def get_daily_inventory_item_by_id(inventory_id):
 def get_van_daily_inventory(van_id, target_date=None):
     """Return today's inventory records for a van (or a specified date)."""
     target_date = target_date or date.today()
-    return db.session.scalars(
+    daily_inventory = db.session.scalars(
         db.select(DailyInventory).filter_by(van_id=van_id, date=target_date)
     ).all()
+
+    return [record.get_json() for record in daily_inventory]
 
 def get_customers_storepage_inventory(customer_id):
     customer_route_id = get_customer_route_id(customer_id)
