@@ -5,6 +5,7 @@ async function reverseGeocode(lat, lng) {
     const res = await fetch(url, {
       headers: {
         // Nominatim requires a User-Agent identifying your app
+        "User-Agent": "BreadVan/1.0 (ddaagsdem@gmail.com)",
         "Accept-Language": "en",
       },
     });

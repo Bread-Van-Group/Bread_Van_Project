@@ -1,7 +1,7 @@
 from App.database import db
 from App.models import Van, DailyInventory
 from App.controllers.route import get_customer_route_id, get_driver_id_for_route
-from datetime import date, datetime
+from datetime import date
 
 def get_van_by_id(van_id):
     return db.session.get(Van, van_id)
@@ -35,10 +35,6 @@ def get_active_van_plate():
     ).scalars().first()
 
     return van.license_plate
-
-def get_all_vans():
-    return db.session.scalars(db.select(Van)).all()
-
 
 def create_van(license_plate, owner_id, current_route_id=None, status="inactive"):
     van = Van(license_plate=license_plate, owner_id=owner_id,
@@ -136,11 +132,7 @@ def set_van_inventory(van_id, item_id, quantity, date):
         db.session.commit()
 
     return True
-def reserve_inventory(van_id, item_id, quantity, target_date=None):
-    """
-    Reserve `quantity` units for a customer request.
-    Returns the updated DailyInventory or None if insufficient stock.
-    """
+def reserve_inventory(van_id, item_id, quantity,is_complete = False ,target_date=None):
     target_date = target_date or date.today()
     record = db.session.execute(
         db.select(DailyInventory).filter_by(
@@ -152,8 +144,12 @@ def reserve_inventory(van_id, item_id, quantity, target_date=None):
         return None
 
     try:
-        record.quantity_reserved  += quantity
-        record.quantity_available -= quantity
+        if is_complete:
+            record.quantity_available -= quantity
+            record.quantity_in_stock -= quantity
+        else:
+            record.quantity_reserved  += quantity
+            record.quantity_available -= quantity
     except:
         db.session.rollback()
         return None
@@ -161,29 +157,6 @@ def reserve_inventory(van_id, item_id, quantity, target_date=None):
     db.session.commit()
     return record
 
-def update_stock(van_id, item_id, quantity,target_date =None):
-    target_date = target_date or date.today()
-    
-    record = db.session.execute(
-        db.select(DailyInventory).filter_by(
-            van_id=van_id, item_id=item_id, date=target_date
-        )
-    ).scalar_one_or_none()
-
-    if not record:
-        return None
-    
-    try:
-        record.quantity_in_stock -= quantity
-        record.quantity_available -= quantity
-    except:
-        db.session.rollback()
-        return None
-    
-    db.session.commit()
-    return record
-
-#New - Set inven
 
 def get_route_daily_inventory(route_id: int, target_date: date) -> list[dict]:
     """

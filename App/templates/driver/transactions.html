@@ -59,7 +59,9 @@
             <div class="catalogue-list">
                 <div class="catalogue-scrollable">
                     {% for item in daily_inventory %}
-                    <div class="catalogue-item" data-category="{{item.item.category}}" onclick="addToTransaction({{item.inventory_id}})">
+                    <div class="catalogue-item" data-category="{{ item.item.category }}"
+                        onclick="{{ 'addToTransaction(' + item.inventory_id | string + ')' if item.quantity_available != 0 
+                        else 'showOutOfStock()' }}">
                         {%if item.item.category == 'bread' %}
                         <img class="store-card-image" src="\static\assets\images\bread.png" />
                         {%elif item.item.category == 'filling' %}
@@ -76,8 +78,12 @@
                         {% endif %}
                         <p class="catalogue-item-name">{{item.item.name}}</p>
                         <div class="catalogue-item-details">
+                            {% if item.quantity_available == 0 %}
+                            <p class="catalogue-item-out-of-stock"><span>Out of Stock</p>
+                            {% else %}
                             <p class="catalogue-item-quantity"><span>Qty: </span>{{item.quantity_available}}</p>
                             <p class="catalogue-item-price">${{"%.2f" %   item.item.price}}</p>
+                            {% endif %}
                         </div>
                     </div>
                     {% endfor %}
@@ -177,7 +183,7 @@
         if (message) showToast(message);
       });
     </script>
-    <script src="{{url_for('static', filename='js/customer/reverse_geocoder.js')}}"></script>
+    <script src="{{url_for('static', filename='js/reverse_geocoder.js')}}"></script>
     <script src="{{url_for('static', filename='js/driver/transaction.js')}}"></script>
   
     <!--This script handles all major functionality and communication
@@ -186,15 +192,21 @@
       //Set all totals on load
       updateTransactionTotal()
 
+      function showOutOfStock(){
+          window.location.href =
+                "{{ url_for('driver_views.driver_transaction_page',message='Item no longer in stock') }}";
+          return;
+      }
+
       async function addToTransaction(inventory_id) {
         daily_inventory = {{daily_inventory |tojson}}
 
         daily_inventory.forEach(item => {
             if(item['inventory_id'] == inventory_id){
               if(item['quantity_available'] ==0)
-              console.log(item)
                window.location.href =
                 "{{ url_for('driver_views.driver_transaction_page',message='Item no longer in stock') }}";
+                return;
             }          
         });
       

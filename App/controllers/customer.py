@@ -1,3 +1,4 @@
+from App.controllers.region import get_region_by_id
 from App.database import db
 from App.models import Customer
 
@@ -14,6 +15,13 @@ def get_customers_by_region(region_id):
         db.select(Customer).filter_by(region_id=region_id)
     ).all()
 
+def get_customer_region(customer_id):
+    customer = get_customer_by_id(customer_id)
+
+    if customer:
+        return get_region_by_id(customer.region_id)
+    else:
+        return None
 
 def update_customer_info(customer_id, name=None, address=None, phone=None, region_id=None):
     """

@@ -1,6 +1,6 @@
 from App.database import db
 from App.models import  RequestItem
-from App.controllers.van import reserve_inventory, get_active_van 
+from App.controllers.van import reserve_inventory 
 
 def get_request_by_id(request_id):
     return db.session.execute(
