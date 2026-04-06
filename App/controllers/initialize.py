@@ -202,7 +202,7 @@ def initialize():
     add_stop_to_route(
         route_id=route_east.route_id, owner_id=owner.owner_id,
         address="Bakery depot, St. Augustine",
-        lat=10.640908716845667, lng=-61.39593945274354, stop_order=1,
+        lat=10.640908716845667, lng=-61.39593945274354, stop_order=0,
     )
     stop_e1 = add_customer_stop_to_route(
         route_id=route_east.route_id, customer_id=customer2.customer_id,
@@ -221,7 +221,7 @@ def initialize():
     add_stop_to_route(
         route_id=route_central.route_id, owner_id=owner.owner_id,
         address="Bakery depot, Chaguanas",
-        lat=10.5167, lng=-61.4114, stop_order=1,
+        lat=10.5167, lng=-61.4114, stop_order=0,
     )
     stop_c1 = add_customer_stop_to_route(
         route_id=route_central.route_id, customer_id=customer.customer_id,
@@ -240,7 +240,7 @@ def initialize():
     add_stop_to_route(
         route_id=route_south.route_id, owner_id=owner.owner_id,
         address="Bakery depot, San Fernando",
-        lat=10.2796, lng=-61.4589, stop_order=1,
+        lat=10.2796, lng=-61.4589, stop_order=0,
     )
     stop_s1 = add_customer_stop_to_route(
         route_id=route_south.route_id, customer_id=customer4.customer_id,

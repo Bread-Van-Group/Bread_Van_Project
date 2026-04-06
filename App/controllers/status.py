@@ -11,11 +11,6 @@ def get_status_by_name(status_name):
         db.select(Status).filter_by(status_name=status_name)
     ).scalar_one_or_none()
 
-
-def get_all_statuses():
-    return db.session.scalars(db.select(Status)).all()
-
-
 def create_status(status_name, description=None):
     existing = get_status_by_name(status_name)
     if existing:

@@ -1,7 +1,8 @@
 from flask import Blueprint, session, redirect,flash, render_template, request, jsonify, url_for
-from flask_jwt_extended import jwt_required, current_user, verify_jwt_in_request, get_jwt_identity
+from flask_jwt_extended import jwt_required, current_user, get_jwt_identity
 from App.controllers import (
-    edit_customer_stop,
+    get_customer_region,
+    get_route_by_id,
     get_today_customer_request, 
     delete_today_pending_customer_order,  
     get_active_van_plate, 
@@ -13,9 +14,7 @@ from App.controllers import (
     get_customers_storepage_inventory,
     get_customer_request_total
 )
-from App.controllers.transaction import get_report_data
 
-from datetime import date, time
 import json
 
 customer_views = Blueprint('customer_views', __name__, template_folder='../templates')
@@ -41,15 +40,19 @@ def customer_homepage():
 def customer_schedule():
     if current_user.role != 'customer':
         return redirect(url_for('index_views.index'))
-    return render_template('customer/schedule.html')
 
-@customer_views.route('/customer/profile', methods=['GET'])
-@jwt_required()
-def customer_profile():
-    if current_user.role != 'customer':
-        return redirect(url_for('index_views.index'))
-    return render_template('customer/profile.html')
+    todays_route_id, route_stops = get_customer_route_id(get_jwt_identity())
+    
+    if todays_route_id is None:
+        return redirect(url_for('customer_views.customer_homepage', 
+                                message='The Bread Van is not scheduled to operate in your area at the moment'))
+    
+    customer_route = get_route_by_id(todays_route_id)
+    route_start_time = customer_route.start_time
 
+    customer_region = get_customer_region(get_jwt_identity())    
+
+    return render_template('customer/schedule.html', route_start_time=route_start_time, route_stops=route_stops, customer_region=customer_region.name)
 
 @customer_views.route('/customer/authorize-store', methods=['POST'])
 def authorize_store():

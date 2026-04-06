@@ -653,6 +653,19 @@ td:nth-child(4) {
   border-top: 1px solid rgba(232, 210, 185, 0.7);
 }
 
+.catalogue-item-out-of-stock {
+  background-color: var(--orange-light);
+  color: var(--orange-deep);
+  border-radius: 0;
+  border-left: 3px solid var(--orange-deep);
+
+  font-family: "Shadows Into Light Two", cursive;
+  font-weight: 400;
+  font-size: 1.05rem;
+  font-style: italic;
+  padding-right: 5px;
+}
+
 .catalogue-item-quantity {
   font-family: "Shadows Into Light Two", cursive;
   font-weight: 400;

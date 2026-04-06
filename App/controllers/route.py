@@ -2,7 +2,6 @@ from App.database import db
 from App.models import Route, RouteStop, RouteArea, DriverRoute
 from App.controllers.region import get_region_by_id
 from App.controllers.customer import get_customer_by_id
-from App.controllers.route_area import get_routes_for_region
 from sqlalchemy import func
 from datetime import datetime
 
@@ -18,13 +17,18 @@ def get_todays_route():
         )
     ).scalar_one_or_none()
 
+def get_routes_for_region(region_id):
+    return db.session.execute(
+        db.select(RouteArea).filter_by(region_id=region_id)
+    ).scalars().all()
+
 def get_customer_route_id(customer_id):
     customer = get_customer_by_id(customer_id)
     route_assignments = get_routes_for_region(customer.region_id)
     route_id = None
 
     if route_assignments is None:
-        return None
+        return None, None
 
     for route in route_assignments:
         route = get_route_by_id(route.route_id)

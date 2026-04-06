@@ -12,7 +12,7 @@ from App.controllers import (
     get_van_by_driver,
     create_transaction,
     create_map_stop,
-    update_stock,
+    reserve_inventory,
     get_van_daily_inventory,
 )
 from App.controllers.route import get_route_stops
@@ -220,10 +220,11 @@ def make_transaction():
         )
 
         for item in transaction_list:
-            update_stock(
+            reserve_inventory(
                 van_id=get_van_by_driver(get_jwt_identity()).van_id,
                 item_id = item['item_id'],
-                quantity= item['quantity']
+                quantity= item['quantity'],
+                is_complete=True
             )
 
         session.pop('transaction_items', None)
