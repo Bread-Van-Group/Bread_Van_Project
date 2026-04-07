@@ -26,6 +26,9 @@ function addTimes(time1, time2) {
   return [h, m, s].map((v) => String(v).padStart(2, "0")).join(":");
 }
 
+//Helper function to delay requests to avoid hitting API rate limits
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 //Populate the stop list with the route stop details
 document.addEventListener("DOMContentLoaded", async function () {
   const stopItems = document.querySelectorAll(".stop-item");
