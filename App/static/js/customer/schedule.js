@@ -68,7 +68,8 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     item.querySelector(".stop-area").innerHTML = address;
     item.querySelector(".stop-time").innerHTML = eta + " p.m";
-    item.querySelector(".stop-distance").innerHTML = distance.toFixed(2) + "km";
+    item.querySelector(".stop-distance").innerHTML =
+      distance.toFixed(2) + "km From Start";
 
     await delay(1100);
   }
