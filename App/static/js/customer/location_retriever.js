@@ -36,7 +36,6 @@ function error(err) {
 }
 
 //Getting the driver's live location
-const socket = io();
 var breadVanMarker = null;
 let lastUpdate = 0;
 const MIN_UPDATE_INTERVAL = 50;
@@ -65,6 +64,7 @@ socket.on("driver_update", function (data) {
         }),
       }).addTo(map);
       markers.addLayer(breadVanMarker);
+      showToast("The Bread Van is Nearby");
     } else {
       breadVanMarker.setLatLng([data.lat, data.lng]);
     }
@@ -72,6 +72,7 @@ socket.on("driver_update", function (data) {
     if (breadVanMarker !== null) {
       breadVanMarker.remove();
       breadVanMarker = null;
+      showToast("The Bread Van Has Left Your Area, Store Is Closed");
     }
   }
 });

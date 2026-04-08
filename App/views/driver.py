@@ -3,8 +3,7 @@ from flask_jwt_extended import jwt_required, current_user, verify_jwt_in_request
 from jwt import ExpiredSignatureError
 from App.controllers import (
     get_assigned_driver_route,
-    assign_driver_to_route,
-    unassign_driver_from_route,
+    get_assigned_driver_region,
     get_daily_inventory_item_by_id,
     get_pending_stops_by_area_route,
     get_active_stops_by_area_route,
@@ -302,3 +301,15 @@ def clear_driver_session():
     session.pop('transaction_items', None)
     return '', 200
 
+@driver_views.route('/api/driver/region', methods=['GET'])
+@jwt_required()
+def get_driver_region():
+    if current_user.role != 'driver':
+        return jsonify(message='Unauthorized'), 403
+    
+    route_name = get_assigned_driver_region(get_jwt_identity()).name
+
+    if route_name:
+        return jsonify({"region": route_name}), 200
+    else:
+        return '', 400

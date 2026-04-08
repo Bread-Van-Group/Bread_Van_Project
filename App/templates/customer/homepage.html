@@ -196,6 +196,15 @@
     });
   }
 
+  async function broadCastOrder() {
+    const res = await fetch("/api/customer/region");
+    const { region } = await res.json();
+
+    socket.emit("customer_request", {
+      region: region,
+    });
+  }
+
   async function createStopRequest() {
     activeOrder = await getActiveOrder();
 
@@ -233,8 +242,9 @@
         lng: lng,
         address: address,
       }),
-    }).then((response) => {
+    }).then(async (response) => {
       if (response.ok) {
+        await broadCastOrder();
         window.location.href =
           "{{ url_for('customer_views.customer_homepage',message='Stop Requested!') }}";
       } else {
@@ -280,6 +290,9 @@
       if (response.ok) {
         window.location.href =
           "{{ url_for('customer_views.customer_homepage',message='Order Deleted') }}";
+      } else {
+        window.location.href =
+          "{{ url_for( 'customer_views.customer_homepage', message ='Can not delete denied/completed request, please come back another day') }}";
       }
     });
   }

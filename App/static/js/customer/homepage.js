@@ -52,7 +52,6 @@ setInterval(() => {
   const map = document.querySelector("#map");
 
   if (breadVanIsClose() && isOnMapSection) {
-    console.log("ok");
     const activeDriverText = document.querySelector("#active-driver-text");
     activeDriverText.style.opacity = 1;
     activeDriverText.style.zIndex = 99;

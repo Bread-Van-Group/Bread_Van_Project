@@ -1,5 +1,5 @@
-import os
-from flask import Flask, request, render_template, redirect, flash, url_for
+import time
+from flask import Flask, request, redirect, flash, url_for
 from flask_uploads import DOCUMENTS, IMAGES, TEXT, UploadSet, configure_uploads
 from flask_cors import CORS
 from flask_socketio import SocketIO
@@ -32,9 +32,25 @@ socketio = SocketIO(
 @socketio.on("driver_location")
 def handle_driver_location(data):
     # Add a small delay or throttle on server side
-    import time
     time.sleep(0.5) 
     socketio.emit("driver_update", data, skip_sid=request.sid)
+
+@socketio.on("customer_request")
+def handle_customer_request_made(data):
+    time.sleep(0.5) 
+    socketio.emit("customer_request_made", data, skip_sid=request.sid)
+
+@socketio.on("accept_request")
+def handle_customer_request_accept(data):
+    print("driver ok")
+    time.sleep(0.5) 
+    socketio.emit("customer_request_accepted", data, skip_sid=request.sid)
+
+@socketio.on("deny_request")
+def handle_customer_request_deny(data):
+    print("driver ok")
+    time.sleep(0.5) 
+    socketio.emit("customer_request_denied", data, skip_sid=request.sid)
 
 
 def add_views(app):

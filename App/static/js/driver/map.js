@@ -1,6 +1,3 @@
-//This io() function is loaded from socket.io min.js
-const socket = io();
-
 var vanSVG = `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M96 128C60.7 128 32 156.7 32 192L32 400C32 435.3 60.7 464 96 464L96.4 464C100.4 508.9 138.1 544 184 544C229.9 544 267.6 508.9 271.6 464L376.3 464C380.3 508.9 418 544 463.9 544C510 544 547.8 508.6 551.6 463.5C583.3 459.7 607.9 432.7 607.9 400L607.9 298.7C607.9 284.9 603.4 271.4 595.1 260.3L515.1 153.6C503.1 137.5 484.1 128 464 128L96 128zM536 288L416 288L416 192L464 192L536 288zM96 288L96 192L192 192L192 288L96 288zM256 288L256 192L352 192L352 288L256 288zM424 456C424 433.9 441.9 416 464 416C486.1 416 504 433.9 504 456C504 478.1 486.1 496 464 496C441.9 496 424 478.1 424 456zM184 416C206.1 416 224 433.9 224 456C224 478.1 206.1 496 184 496C161.9 496 144 478.1 144 456C144 433.9 161.9 416 184 416z"/></svg>
     `;
@@ -80,6 +77,7 @@ async function success(position) {
 
   const plate_object = await getFromApi("/api/driver/plate");
 
+  //Web Socket Location Broadcast
   socket.emit("driver_location", {
     lat: position.coords.latitude,
     lng: position.coords.longitude,
@@ -120,6 +118,20 @@ async function getFromApi(url) {
 
   return json;
 }
+
+//Check the active markers on the map currently
+let checkActiveMarkers = setInterval(async function () {
+  const newMarkers = await getFromApi("/api/driver/active-stops");
+
+  const activeStopIds = new Set(newMarkers.map((m) => Number(m.stop_id)));
+
+  for (const [key, marker] of Object.entries(leafletMarkers)) {
+    // If this map marker is no longer in the active stops, remove it
+    if (!activeStopIds.has(Number(key))) {
+      marker.remove();
+    }
+  }
+}, 2000);
 
 async function initMap() {
   markers = await getFromApi("/api/driver/active-stops");

@@ -1,5 +1,5 @@
 from App.database import db
-from App.models import Driver, DriverRoute, Route
+from App.models import Driver, DriverRoute, Route, RouteArea, Region
 
 
 def get_driver_by_id(driver_id):
@@ -17,6 +17,15 @@ def get_assigned_driver_route(driver_id):
     ).scalar_one_or_none()
 
     return db.session.get(Route, assigned_route.route_id)
+
+def get_assigned_driver_region(driver_id):
+    driver_route = get_assigned_driver_route(driver_id)
+
+    assigned_region = db.session.execute(
+        db.select(RouteArea).filter_by(route_id = driver_route.route_id)
+    ).scalar_one_or_none()
+
+    return db.session.get(Region, assigned_region.region_id)
 
 def assign_driver_to_route(driver_id, route_id):
     """

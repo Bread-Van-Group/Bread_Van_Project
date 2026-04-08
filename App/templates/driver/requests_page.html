@@ -68,13 +68,11 @@ https://github.com/perliedman/leaflet-routing-machine/releases
           </div>
           {% endfor %}
         </div>
-        <a
-          href="/driver/requests/deny/{{pending_stop.stop_id}}"
-          class="deny-button"
+        <a onclick="denyRequest({{pending_stop.stop_id}})" class="deny-button"
           >Deny</a
         >
         <a
-          href="/driver/requests/accept/{{pending_stop.stop_id}}"
+          onclick="acceptRequest({{pending_stop.stop_id}})"
           class="accept-button"
           >Accept</a
         >
@@ -93,4 +91,27 @@ https://github.com/perliedman/leaflet-routing-machine/releases
 {% endblock %} {% block scripts %}
 <script src="{{url_for('static', filename='js/driver/homepage.js')}}"></script>
 <script src="{{url_for('static', filename='js/driver/requests_page.js')}}"></script>
+<script>
+  async function broadcastRequestDecision(stop_id, decision) {
+    if (String(decision) == String("accept")) {
+      socket.emit("accept_request", {
+        stop_id: stop_id,
+      });
+    } else {
+      socket.emit("deny_request", {
+        stop_id: stop_id,
+      });
+    }
+  }
+
+  async function acceptRequest(stopId) {
+    await broadcastRequestDecision(stopId, "accept");
+    window.location.href = `/driver/requests/accept/${stopId}`;
+  }
+
+  async function denyRequest(stopId) {
+    await broadcastRequestDecision(stopId, "deny");
+    window.location.href = `/driver/requests/deny/${stopId}`;
+  }
+</script>
 {% endblock %}

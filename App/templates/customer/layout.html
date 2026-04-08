@@ -96,18 +96,49 @@
     <!--Constants Across Customer Side-->
     <script src="{{url_for('static', filename = 'js/customer/constants.js')}}"></script>
 
+    <!--Flash Message Code-->
+    <script src="{{url_for('static', filename='js/handle_flash_message.js')}}"></script>
+
     <!--Web Socket Code-->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+      //This io() function is loaded from socket.io min.js
+      const socket = io();
+
+      socket.on("customer_request_denied", async (data) => {
+        const res = await fetch("/api/customer/stop-request");
+        const { stop_id } = await res.json();
+
+        if (Number(data.stop_id) == Number(stop_id)) {
+          showToast(
+            "The Bread Van Has Denied Your Request, Please Refresh The Page",
+          );
+        }
+      });
+      socket.on("customer_request_accepted", async (data) => {
+        const res = await fetch("/api/customer/stop-request");
+        const { stop_id } = await res.json();
+        console.log(stop_id);
+        console.log(data.stop_id);
+        if (Number(data.stop_id) == Number(stop_id)) {
+          showToast(
+            "The Bread Van Has Accepted Your Request!, Please Refresh The Page",
+          );
+        }
+      });
+    </script>
+
     <script src="{{url_for('static', filename='js/reverse_geocoder.js')}}"></script>
     <!--Location Retriever Code For Customer and Driver-->
     <script src="{{url_for('static', filename='js/customer/location_retriever.js')}}"></script>
-    <!--Flash Message Code-->
-    <script src="{{url_for('static', filename='js/handle_flash_message.js')}}"></script>
 
     <!--OSRM Routing Code-->
     <script src="{{url_for('static', filename='js/handle_routing.js')}}"></script>
 
     <!--SERVER SIDE RELIANT CODE-->
+
+    <!--Notifaction Code-->
+    <script></script>
 
     <!--Navbar Code -->
     <script>

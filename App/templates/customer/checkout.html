@@ -107,6 +107,15 @@ block head %}
     return json;
   }
 
+  async function broadCastOrder() {
+    const res = await fetch("/api/customer/region");
+    const { region } = await res.json();
+
+    socket.emit("customer_request", {
+      region: region,
+    });
+  }
+
   async function createOrder() {
     if (customerMarker) {
       const lat = customerMarker.getLatLng().lat;
@@ -119,8 +128,9 @@ block head %}
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ lat: lat, lng: lng, address: address }),
-      }).then((response) => {
+      }).then(async (response) => {
         if (response.ok) {
+          await broadCastOrder();
           window.location.href =
             "{{ url_for('customer_views.customer_homepage', message='Order Created!') }}";
         }

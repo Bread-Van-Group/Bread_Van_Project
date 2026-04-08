@@ -112,6 +112,7 @@ html {
 }
 
 .bottom-btn {
+  position: relative;
   flex: 1;
   display: flex;
   flex-direction: row;
@@ -134,8 +135,32 @@ html {
   background: linear-gradient(145deg, #e8a764, #d89752);
   color: white;
   cursor: pointer;
-  position: relative;
-  overflow: hidden;
+}
+
+.request-btn-marker {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+
+  width: 36px;
+  height: 36px;
+
+  font-family: "Caveat Brush", cursive;
+  font-size: 1.3rem;
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.5px;
+
+  top: -10px;
+  right: -10px;
+  color: white;
+  background-color: #b8390a;
+  border: 2.5px solid #fff5ee;
+  box-shadow: 0 2px 6px rgba(150, 40, 0, 0.35);
+  z-index: 100;
 }
 
 .bottom-btn.active {

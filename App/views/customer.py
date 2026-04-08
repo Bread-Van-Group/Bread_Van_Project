@@ -157,12 +157,17 @@ def delete_customer_orders():
         return jsonify(message='Unauthorized'), 403
     
     customer_id = get_jwt_identity()
+    customer_request = get_today_customer_request(customer_id)
+
+    if customer_request['status_id'] == 3 or customer_request['status_id'] == 4 :
+        return '', 400
+
     isDeleted = delete_today_pending_customer_order(customer_id)
 
     if isDeleted:
         return '', 200
     else:
-        return redirect(url_for('customer_views.customer_checkout', message="Could not delete order, please try again later"))
+        return redirect(url_for('customer_views.customer_checkout', message="Could not delete order, please try again later")), 500
 
 
 @customer_views.route('/api/customer/get-order', methods=['GET'])
@@ -281,3 +286,29 @@ def customer_clear_request_items():
     )
 
     return '', 200
+
+@customer_views.route('/api/customer/region', methods=['GET'])
+@jwt_required()
+def customer_get_region():
+    if current_user.role != 'customer':
+        return jsonify(message='Unauthorized'), 403
+    
+    customer_region = get_customer_region(get_jwt_identity()).name 
+
+    if customer_region:
+        return jsonify({"region":customer_region}), 200
+    else:
+        return '', 400
+    
+@customer_views.route('/api/customer/stop-request', methods=['GET'])
+@jwt_required()
+def customer_get_stop_request():
+    if current_user.role != 'customer':
+        return jsonify(message='Unauthorized'), 403
+    
+    customer_request = get_today_customer_request(get_jwt_identity())['stop_id'] 
+
+    if customer_request:
+        return jsonify({"stop_id":customer_request}), 200
+    else:
+        return '', 400   
