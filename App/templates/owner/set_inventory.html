@@ -14,10 +14,10 @@
   <div class="sidebar">
     <div class="sidebar-logo">LOGO</div>
     <a class="sidebar-btn" href="{{ url_for('index_views.owner_tracking') }}">Dashboard</a>
-    <a class="sidebar-btn" href="{{ url_for('index_views.owner_report') }}">Reports</a>
-    <a class="sidebar-btn active" href="{{ url_for('index_views.owner_inventory') }}">Set Inventory</a>
-    <a class="sidebar-btn" href="{{ url_for('index_views.owner_routes') }}">Routes</a>
     <a class="sidebar-btn" href="{{ url_for('index_views.owner_fleet') }}">Management</a>
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_routes') }}">Routes</a>
+    <a class="sidebar-btn active" href="{{ url_for('index_views.owner_inventory') }}">Set Inventory</a>
+    <a class="sidebar-btn" href="{{ url_for('index_views.owner_report') }}">Reports</a>
     <a class="sidebar-btn sidebar-logout" href="{{ url_for('auth_views.logout') }}">Logout</a>
   </div>
 

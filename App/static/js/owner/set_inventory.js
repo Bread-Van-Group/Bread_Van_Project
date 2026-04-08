@@ -367,18 +367,21 @@ async function saveInventory() {
     items.push({ item_id: parseInt(item_id), quantity: parseInt(quantity) });
   });
 
-  // Send removed items with quantity 0
+  // Send removed items with quantity 0 so they get deleted server-side
   deletedItems.forEach(item_id => {
     if (!selectedItems.has(item_id)) {
       items.push({ item_id: parseInt(item_id), quantity: 0 });
     }
   });
 
+  // Always send today's date so the backend stores against the right day
+  const today = new Date().toISOString().split('T')[0];
+
   try {
     const res = await fetch(`/api/owner/routes/${selectedRouteId}/inventory`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ items }),
+      body:    JSON.stringify({ date: today, items }),
     });
 
     if (res.ok) {
@@ -386,9 +389,13 @@ async function saveInventory() {
       deletedItems.clear();
       exitEditMode();
       await loadInventoryView();
+    } else if (res.status === 422) {
+
+      const body = await res.json().catch(() => ({}));
+      alert('⚠️ ' + (body.message || 'No van is assigned to this route. Go to Fleet Management and assign a van first.'));
     } else {
-      const err = await res.json().catch(() => ({}));
-      alert(`❌ Failed to save inventory: ${err.message || res.status}`);
+      const body = await res.json().catch(() => ({}));
+      alert('❌ Failed to save inventory: ' + (body.message || res.status));
     }
   } catch (err) {
     console.error('Failed to save inventory:', err);

@@ -3,8 +3,10 @@ from App.models import Van, DailyInventory
 from App.controllers.route import get_customer_route_id, get_driver_id_for_route
 from datetime import date
 
+
 def get_van_by_id(van_id):
     return db.session.get(Van, van_id)
+
 
 def get_van_by_driver(driver_id):
     return db.session.execute(
@@ -12,11 +14,13 @@ def get_van_by_driver(driver_id):
         .filter_by(current_driver_id=driver_id)
     ).scalar_one_or_none()
 
+
 def get_active_van():
     from App.models import Van
     return db.session.execute(
         db.select(Van).filter_by(status='active')
     ).scalars().first()  # ✅ Returns first active van
+
 
 def get_van_for_customer_route(customer_id):
     customer_route_id, route_stops = get_customer_route_id(customer_id)
@@ -28,6 +32,7 @@ def get_van_for_customer_route(customer_id):
 
     return get_van_by_driver(driver_id)
 
+
 def get_active_van_plate():
     van = db.session.execute(
         db.select(Van)
@@ -35,6 +40,7 @@ def get_active_van_plate():
     ).scalars().first()
 
     return van.license_plate
+
 
 def create_van(license_plate, owner_id, current_route_id=None, status="inactive"):
     van = Van(license_plate=license_plate, owner_id=owner_id,
@@ -67,6 +73,7 @@ def assign_van_to_route(van_id, route_id):
 def get_daily_inventory_item_by_id(inventory_id):
     return db.session.get(DailyInventory, inventory_id)
 
+
 def get_van_daily_inventory(van_id, target_date=None):
     """Return today's inventory records for a van (or a specified date)."""
     target_date = target_date or date.today()
@@ -75,6 +82,7 @@ def get_van_daily_inventory(van_id, target_date=None):
     ).all()
 
     return [record.get_json() for record in daily_inventory]
+
 
 def get_customers_storepage_inventory(customer_id):
     customer_route_id, route_stops = get_customer_route_id(customer_id)
@@ -90,7 +98,7 @@ def get_customers_storepage_inventory(customer_id):
         return None
 
     return get_van_daily_inventory(van_for_route.van_id)
-    
+
 
 def set_van_inventory(van_id, item_id, quantity, date):
     """Set or delete daily inventory for a van"""
@@ -132,7 +140,9 @@ def set_van_inventory(van_id, item_id, quantity, date):
         db.session.commit()
 
     return True
-def reserve_inventory(van_id, item_id, quantity,is_complete = False ,target_date=None):
+
+
+def reserve_inventory(van_id, item_id, quantity, is_complete=False, target_date=None):
     target_date = target_date or date.today()
     record = db.session.execute(
         db.select(DailyInventory).filter_by(
@@ -148,43 +158,71 @@ def reserve_inventory(van_id, item_id, quantity,is_complete = False ,target_date
             record.quantity_available -= quantity
             record.quantity_in_stock -= quantity
         else:
-            record.quantity_reserved  += quantity
+            record.quantity_reserved += quantity
             record.quantity_available -= quantity
     except:
         db.session.rollback()
         return None
-    
+
     db.session.commit()
     return record
 
 
-def get_route_daily_inventory(route_id: int, target_date: date) -> list[dict]:
+def _resolve_vans_for_route(route_id: int) -> list:
     """
-    Return today's inventory for all vans assigned to a given route.
+    Resolve which vans are responsible for a route using two strategies:
+    1. Van.current_route_id == route_id  (explicit assignment via assign_van_to_route)
+    2. Fallback: driver_routes -> driver -> Van.current_driver_id
+       (covers the common case where a driver is assigned to the route via the
+       Routes UI, and that driver has a van assigned via Fleet Management)
+    """
+    from App.models import DriverRoute
 
-    """
+    vans = Van.query.filter_by(current_route_id=route_id).all()
+
+    if not vans:
+        driver_routes = DriverRoute.query.filter_by(route_id=route_id).all()
+        seen = set()
+        for dr in driver_routes:
+            van = Van.query.filter_by(current_driver_id=dr.driver_id).first()
+            if van and van.van_id not in seen:
+                vans.append(van)
+                seen.add(van.van_id)
+
+    return vans
+
+
+def get_route_daily_inventory(route_id: int, target_date: date) -> list[dict]:
+    """Return inventory for all vans on a given route for a specific date."""
+    vans = _resolve_vans_for_route(route_id)
+    if not vans:
+        return []
+
+    van_ids = [v.van_id for v in vans]
     records = (
         db.session.query(DailyInventory)
-        .join(Van, Van.van_id == DailyInventory.van_id)
         .filter(
-            Van.current_route_id == route_id,
-            DailyInventory.date  == target_date,
+            DailyInventory.van_id.in_(van_ids),
+            DailyInventory.date == target_date,
         )
         .all()
     )
     return [r.get_json() for r in records]
 
 
-def set_route_inventory(route_id: int, items: list[dict], target_date: date) -> None:
+def set_route_inventory(route_id: int, items: list[dict], target_date: date) -> bool:
     """
-    Items with quantity == 0 are deleted from the inventory for that date.
+    Save inventory for all vans on a route for a given date.
+    Items with quantity == 0 are deleted.
+    Returns True if at least one van was found, False otherwise.
     """
-    # Find all vans on this route
-    vans = Van.query.filter_by(current_route_id=route_id).all()
+    vans = _resolve_vans_for_route(route_id)
+    if not vans:
+        return False
 
     for van in vans:
         for entry in items:
-            item_id  = int(entry['item_id'])
+            item_id = int(entry['item_id'])
             quantity = int(entry['quantity'])
 
             existing = (
@@ -194,20 +232,19 @@ def set_route_inventory(route_id: int, items: list[dict], target_date: date) -> 
             )
 
             if quantity == 0:
-                # Remove the record entirely so zero-stock items don't clutter the view
                 if existing:
                     db.session.delete(existing)
             elif existing:
-                existing.quantity_in_stock  = quantity
+                existing.quantity_in_stock = quantity
                 existing.quantity_available = quantity
             else:
-                record = DailyInventory(
+                db.session.add(DailyInventory(
                     van_id=van.van_id,
                     date=target_date,
                     item_id=item_id,
                     quantity_in_stock=quantity,
                     quantity_available=quantity,
-                )
-                db.session.add(record)
+                ))
 
     db.session.commit()
+    return True

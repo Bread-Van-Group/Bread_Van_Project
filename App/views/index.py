@@ -39,7 +39,7 @@ def index():
 def owner_homepage():
     if current_user.role != 'owner':
         return redirect(url_for('index_views.index'))
-    return render_template('owner/homepage.html')
+    return render_template('owner/live_tracking.html')
 
 
 @index_views.route('/owner/report', methods=['GET'])
@@ -735,33 +735,45 @@ def update_van_location(van_id):
 @index_views.route('/api/owner/routes/<int:route_id>/inventory', methods=['GET'])
 @jwt_required()
 def get_route_inventory(route_id):
-    """Return today's inventory for a specific route (all vans on that route)."""
+    """Return inventory for a route. Accepts optional ?date=YYYY-MM-DD param."""
     if current_user.role != 'owner':
         return jsonify(message='Unauthorized'), 403
 
     from App.controllers.van import get_route_daily_inventory
     from datetime import date
 
-    today = date.today()
-    inventory = get_route_daily_inventory(route_id, today)
-    return jsonify(inventory)
+    date_str = request.args.get('date')
+    target_date = date.fromisoformat(date_str) if date_str else date.today()
+    return jsonify(get_route_daily_inventory(route_id, target_date))
 
 
 @index_views.route('/api/owner/routes/<int:route_id>/inventory', methods=['POST'])
 @jwt_required()
 def set_route_inventory(route_id):
-    """Set today's inventory for every van currently assigned to a route."""
+    """Set inventory for a route on a given date.
+
+    Van resolution is handled by set_route_inventory in the van controller,
+    which looks up vans via current_route_id first, then falls back to the
+    driver assigned to the route via driver_routes.
+    """
     if current_user.role != 'owner':
         return jsonify(message='Unauthorized'), 403
 
     from App.controllers.van import set_route_inventory as set_inv
     from datetime import date
 
-    data = request.json
-    today = date.today()
+    data = request.json or {}
+    date_str = data.get('date')
+    target_date = date.fromisoformat(date_str) if date_str else date.today()
     items = data.get('items', [])
 
-    set_inv(route_id, items, today)
+    saved = set_inv(route_id, items, target_date)
+    if not saved:
+        return jsonify(
+            message='No van is linked to this route. '
+                    'In Fleet Management, assign a van to the driver on this route, then try again.'
+        ), 422
+
     return jsonify(message='Route inventory updated successfully')
 
 # region management
