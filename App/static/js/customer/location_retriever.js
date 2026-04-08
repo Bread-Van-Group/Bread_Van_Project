@@ -44,13 +44,14 @@ const MIN_UPDATE_INTERVAL = 3000;
 socket.on("driver_update", function (data) {
   const now = Date.now();
 
-  // Only update if enough time has passed
   if (now - lastUpdate < MIN_UPDATE_INTERVAL) {
     return;
   }
   lastUpdate = now;
 
-  //Get the ETA From Customer or Order
+  // Can't calculate ETA without customer location
+  if (!customerMarker) return;
+
   vanLatLng = L.latLng(data.lat, data.lng);
   vanArrivalTime = calculateETAToCustomer(customerMarker, vanLatLng);
 
@@ -68,7 +69,10 @@ socket.on("driver_update", function (data) {
       breadVanMarker.setLatLng([data.lat, data.lng]);
     }
   } else {
-    breadVanMarker.remove();
+    if (breadVanMarker !== null) {
+      breadVanMarker.remove();
+      breadVanMarker = null;
+    }
   }
 });
 
@@ -92,11 +96,8 @@ function calculateETAToCustomer(destination, vanLatLng) {
 }
 
 function breadVanIsClose() {
-  //Check if breadvan is active,
-  //vanArrivalTime will not be null if so
   if (vanArrivalTime == null) return false;
 
-  //Strip ETA into its parts for calculation and check if van is close
   const [hours, minutes, seconds] = vanArrivalTime.split(":").map(Number);
   const totalSeconds = hours * 3600 + minutes * 60 + seconds;
   return totalSeconds <= STORE_OPENING_ETA * 60;
