@@ -39,7 +39,7 @@ function error(err) {
 const socket = io();
 var breadVanMarker = null;
 let lastUpdate = 0;
-const MIN_UPDATE_INTERVAL = 3000;
+const MIN_UPDATE_INTERVAL = 50;
 
 socket.on("driver_update", function (data) {
   const now = Date.now();

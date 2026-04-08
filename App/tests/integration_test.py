@@ -287,3 +287,229 @@ class TestCustomerOrderFlow:
         updated = db.session.get(DailyInventory, inventory.inventory_id)
         assert updated.quantity_available == 10
         assert updated.quantity_reserved  == 5
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FLOW 3 — VAN GPS TRACKING
+# ─────────────────────────────────────────────────────────────────────────────
+
+class TestVanTrackingFlow:
+    """
+    Integration tests for van GPS location updates.
+    Verifies that location data is persisted correctly and driver
+    assignment works alongside location tracking.
+    """
+
+    def test_update_location_stores_lat_lng(self, db):
+        """
+        Calling update_location on a van should persist the
+        coordinates to the database.
+        """
+        from App.controllers.user import create_owner
+        from App.controllers.van import create_van, get_van_by_id
+
+        owner = create_owner("gpsowner@test.com", "pass")
+        van   = create_van("GPS 0001", owner.owner_id, status="active")
+
+        van.update_location(10.6420, -61.4005)
+        db.session.commit()
+
+        refreshed = get_van_by_id(van.van_id)
+        assert refreshed.current_lat == 10.6420, "Latitude was not saved"
+        assert refreshed.current_lng == -61.4005, "Longitude was not saved"
+
+    def test_update_location_sets_timestamp(self, db):
+        """
+        update_location should also record the time of the update
+        so the owner dashboard can show a 'last seen' value.
+        """
+        from App.controllers.user import create_owner
+        from App.controllers.van import create_van, get_van_by_id
+
+        owner = create_owner("tsowner@test.com", "pass")
+        van   = create_van("GPS 0002", owner.owner_id, status="active")
+
+        assert van.last_location_update is None, \
+            "Timestamp should be null before any location update"
+
+        van.update_location(10.6409, -61.3959)
+        db.session.commit()
+
+        refreshed = get_van_by_id(van.van_id)
+        assert refreshed.last_location_update is not None, \
+            "Timestamp should be set after location update"
+
+    def test_assign_driver_then_update_location(self, db):
+        """
+        A van with an assigned driver should still accept location
+        updates without losing the driver assignment.
+        """
+        from App.controllers.user import create_owner, create_driver
+        from App.controllers.van import create_van, get_van_by_id
+
+        owner  = create_owner("assignowner@test.com", "pass")
+        driver = create_driver("assigndriver@test.com", "pass", "Test Driver",
+                               owner_id=owner.owner_id)
+        van    = create_van("GPS 0003", owner.owner_id, status="active")
+
+        van.assign_driver(driver.driver_id)
+        van.update_location(10.6445, -61.3842)
+        db.session.commit()
+
+        refreshed = get_van_by_id(van.van_id)
+        assert refreshed.current_driver_id == driver.driver_id, \
+            "Driver assignment should not be cleared by a location update"
+        assert refreshed.current_lat == 10.6445
+        assert refreshed.current_lng == -61.3842
+
+    def test_location_update_overwrites_previous(self, db):
+        """
+        A second location update should replace the first,
+        not accumulate or fail.
+        """
+        from App.controllers.user import create_owner
+        from App.controllers.van import create_van, get_van_by_id
+
+        owner = create_owner("overwriteowner@test.com", "pass")
+        van   = create_van("GPS 0004", owner.owner_id, status="active")
+
+        van.update_location(10.6420, -61.4005)
+        db.session.commit()
+
+        van.update_location(10.6409, -61.3959)
+        db.session.commit()
+
+        refreshed = get_van_by_id(van.van_id)
+        assert refreshed.current_lat == 10.6409, "Location should reflect the latest update"
+        assert refreshed.current_lng == -61.3959
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FLOW 4 — DRIVER MAKES A SALE (TRANSACTION)
+# ─────────────────────────────────────────────────────────────────────────────
+
+class TestTransactionFlow:
+    """
+    Integration tests for the transaction/sale flow.
+    Verifies that sales are recorded correctly and inventory
+    is reduced when a driver completes a delivery.
+    """
+
+    def _setup(self, db):
+        """Minimal environment: owner, customer, van, item, stocked inventory."""
+        from App.controllers.user import create_owner, create_customer
+        from App.controllers.van import create_van
+        from App.controllers.inventory_item import create_item
+        from App.models import DailyInventory
+
+        owner    = create_owner("txowner@test.com", "pass")
+        customer = create_customer("txcust@test.com", "pass", "TX Customer")
+        van      = create_van("TX 0001", owner.owner_id, status="active")
+        item     = create_item("Hops Bread", price=3.50, category="bread")
+
+        inventory = DailyInventory(
+            van_id=van.van_id, date=date.today(), item_id=item.item_id,
+            quantity_in_stock=30, quantity_reserved=0, quantity_available=30,
+        )
+        db.session.add(inventory)
+        db.session.commit()
+
+        return owner, customer, van, item, inventory
+
+    def test_transaction_is_saved_to_database(self, db):
+        """
+        Creating a transaction should produce a Transaction record
+        with the correct customer, van, and total amount.
+        """
+        from App.controllers.transaction import create_transaction, get_transaction_by_id
+
+        owner, customer, van, item, inventory = self._setup(db)
+
+        tx = create_transaction(
+            customer_id=customer.customer_id,
+            van_id=van.van_id,
+            total_amount=7.00,
+            items=[{"item_id": item.item_id, "quantity": 2}],
+            payment_method="cash",
+        )
+
+        assert tx is not None
+        fetched = get_transaction_by_id(tx.transaction_id)
+        assert fetched.customer_id   == customer.customer_id
+        assert fetched.van_id        == van.van_id
+        assert float(fetched.total_amount) == 7.00
+        assert fetched.payment_method == "cash"
+
+    def test_transaction_creates_line_items(self, db):
+        """
+        Each item in the sale should produce a TransactionItem record
+        linked to the transaction.
+        """
+        from App.controllers.transaction import create_transaction
+        from App.models import TransactionItem
+
+        owner, customer, van, item, inventory = self._setup(db)
+
+        tx = create_transaction(
+            customer_id=customer.customer_id,
+            van_id=van.van_id,
+            total_amount=10.50,
+            items=[{"item_id": item.item_id, "quantity": 3}],
+        )
+
+        line_items = db.session.scalars(
+            db.select(TransactionItem).filter_by(transaction_id=tx.transaction_id)
+        ).all()
+
+        assert len(line_items) == 1
+        assert line_items[0].item_id  == item.item_id
+        assert line_items[0].quantity == 3
+
+    def test_transaction_reduces_van_inventory(self, db):
+        """
+        After a sale is made, the van's available inventory for that item
+        should decrease by the quantity sold.
+        """
+        from App.controllers.transaction import create_transaction
+        from App.controllers.van import reserve_inventory
+        from App.models import DailyInventory
+
+        owner, customer, van, item, inventory = self._setup(db)
+
+        qty_sold = 4
+        reserve_inventory(van.van_id, item.item_id, qty_sold, is_complete=True)
+
+        updated = db.session.get(DailyInventory, inventory.inventory_id)
+        assert updated.quantity_available == 26, \
+            f"Expected 26 available after selling 4, got {updated.quantity_available}"
+        assert updated.quantity_in_stock == 26, \
+            f"Expected stock of 26, got {updated.quantity_in_stock}"
+
+    def test_multiple_transactions_accumulate_correctly(self, db):
+        """
+        Two separate sales should each reduce inventory independently,
+        and both transaction records should exist in the database.
+        """
+        from App.controllers.transaction import create_transaction, get_customer_transactions
+        from App.controllers.van import reserve_inventory
+        from App.models import DailyInventory
+
+        owner, customer, van, item, inventory = self._setup(db)
+
+        create_transaction(
+            customer_id=customer.customer_id, van_id=van.van_id,
+            total_amount=3.50, items=[{"item_id": item.item_id, "quantity": 1}],
+        )
+        reserve_inventory(van.van_id, item.item_id, 1, is_complete=True)
+
+        create_transaction(
+            customer_id=customer.customer_id, van_id=van.van_id,
+            total_amount=7.00, items=[{"item_id": item.item_id, "quantity": 2}],
+        )
+        reserve_inventory(van.van_id, item.item_id, 2, is_complete=True)
+
+        transactions = get_customer_transactions(customer.customer_id)
+        assert len(transactions) == 2, "Both transactions should be recorded"
+
+        updated = db.session.get(DailyInventory, inventory.inventory_id)
+        assert updated.quantity_in_stock == 27, \
+            f"Expected 27 remaining after selling 3 total, got {updated.quantity_in_stock}"
