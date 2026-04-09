@@ -21,10 +21,10 @@ socketio = SocketIO(
     cors_allowed_origins="*",
 
     #Use below code for production
-    #async_mode='gevent',
+    async_mode='gevent',
 
     #Uncomment below code for development
-    async_mode='threading'  
+    #async_mode='threading'  
 )
 
 #Websocket functions
