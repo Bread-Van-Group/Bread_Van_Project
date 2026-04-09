@@ -42,13 +42,11 @@ def handle_customer_request_made(data):
 
 @socketio.on("accept_request")
 def handle_customer_request_accept(data):
-    print("driver ok")
     time.sleep(0.5) 
     socketio.emit("customer_request_accepted", data, skip_sid=request.sid)
 
 @socketio.on("deny_request")
 def handle_customer_request_deny(data):
-    print("driver ok")
     time.sleep(0.5) 
     socketio.emit("customer_request_denied", data, skip_sid=request.sid)
 

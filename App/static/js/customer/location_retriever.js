@@ -40,7 +40,7 @@ var breadVanMarker = null;
 let lastUpdate = 0;
 const MIN_UPDATE_INTERVAL = 50;
 
-socket.on("driver_update", function (data) {
+socket.on("driver_update", async function (data) {
   const now = Date.now();
 
   if (now - lastUpdate < MIN_UPDATE_INTERVAL) {
@@ -50,6 +50,13 @@ socket.on("driver_update", function (data) {
 
   // Can't calculate ETA without customer location
   if (!customerMarker) return;
+
+  const res = await fetch("/api/customer/region");
+  const { region } = await res.json();
+
+  //Check if this packet is from the driver of the
+  //same region as the customer
+  if (String(region) != String(data.region)) return;
 
   vanLatLng = L.latLng(data.lat, data.lng);
   vanArrivalTime = calculateETAToCustomer(customerMarker, vanLatLng);

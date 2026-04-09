@@ -76,12 +76,14 @@ async function success(position) {
   const lon = position.coords.longitude;
 
   const plate_object = await getFromApi("/api/driver/plate");
+  const { region } = await getFromApi("/api/driver/region");
 
   //Web Socket Location Broadcast
   socket.emit("driver_location", {
     lat: position.coords.latitude,
     lng: position.coords.longitude,
     plate: plate_object.plate,
+    region: region,
   });
 
   if (!driverLocation) {
