@@ -52,7 +52,12 @@ setInterval(() => {
   if (breadVanMarker == null) return;
 
   //ETA Code
-  vanLatLng = L.latLng(data.lat, data.lng);
+  eta = document.querySelector("#order-eta");
+
+  vanLatLng = L.latLng(
+    breadVanMarker.getLatLng().lat,
+    breadVanMarker.getLatLng().lng,
+  );
   arrivalTime = calculateETAToCustomer(customerMarker, vanLatLng);
 
   eta.innerHTML = arrivalTime;

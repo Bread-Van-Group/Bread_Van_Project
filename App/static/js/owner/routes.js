@@ -664,7 +664,7 @@ async function saveRoute() {
     return;
   }
 
-  if (!regionId) {
+  if (String(regionId) == "") {
     alert("Please select a route area");
     return;
   }

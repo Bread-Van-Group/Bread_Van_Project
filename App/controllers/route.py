@@ -26,16 +26,20 @@ def get_customer_route_id(customer_id):
     customer = get_customer_by_id(customer_id)
     route_assignments = get_routes_for_region(customer.region_id)
     route_id = None
+    route = None
 
     if route_assignments is None:
         return None, None
 
-    for route in route_assignments:
-        route = get_route_by_id(route.route_id)
+    for route_assignment in route_assignments:
+        route = get_route_by_id(route_assignment.route_id)
         todays_day = datetime.now().strftime("%A") 
         if route.day_of_week == todays_day:
             route_id = route.route_id
             break
+
+    if not route:
+        return None, None
 
     route_stops = [stop.get_json() for stop in route.stops]
     

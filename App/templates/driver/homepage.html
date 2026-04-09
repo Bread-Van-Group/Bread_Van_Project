@@ -115,7 +115,8 @@ https://github.com/perliedman/leaflet-routing-machine/releases
       })
       .then((response) => {
         if (response.ok) {
-          ("{{ url_for('driver_views.driver_homepage',message='Request Completed!') }}");
+          window.location.href =
+            "{{ url_for('driver_views.driver_homepage',message='Request Completed!') }}";
         } else {
           window.location.href =
             "{{ url_for('driver_views.driver_homepage',message='Could not complete Request, please try again') }}";

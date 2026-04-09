@@ -139,7 +139,7 @@
           <div class="order-info">You don't have an active order</div>
           {% endif %}
         </div>
-        {%if stop %}
+        {%if stop and stop.status_id != 4 and stop.status_id != 3 %}
         <div class="order-mng-panel">
           {%if stop.customer_requests %}
           <button class="order-mng-btn" onclick="openModal('clear-modal')">
