@@ -1,5 +1,6 @@
 from App.database import db
 from App.models import Region
+from App.models.route_area import RouteArea
 
 
 # ── Queries ────────────────────────────────────────────────────────────────────
@@ -12,6 +13,18 @@ def get_region_by_name(name):
     return db.session.execute(
         db.select(Region).filter_by(name=name)
     ).scalar_one_or_none()
+
+def get_all_regions():
+    return db.session.execute(db.select(Region)).scalars().all()
+
+def get_region_by_route_id(route_id):
+    route_area = db.session.execute(
+        db.select(RouteArea).filter_by(route_id=route_id)
+    ).scalar_one_or_none()
+
+    if route_area:
+        return get_region_by_id(route_area.region_id)
+    return None
 
 # ── Create / update / delete ───────────────────────────────────────────────────
 

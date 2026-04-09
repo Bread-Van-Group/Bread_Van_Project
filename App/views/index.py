@@ -1,6 +1,6 @@
 from flask import Blueprint, redirect, render_template, request, jsonify, url_for
 from flask_jwt_extended import jwt_required, current_user, verify_jwt_in_request
-from App.controllers import initialize
+from App.controllers import initialize,assign_route_to_area, get_region_by_route_id
 from App.controllers.transaction import get_report_data
 from flask import jsonify, request, render_template
 from flask_jwt_extended import jwt_required, current_user
@@ -483,6 +483,9 @@ def update_route(route_id):
     route.end_time = time.fromisoformat(data['end_time'])
     route.day_of_week = data['day_of_week']
     route.description = data.get('description', '')
+    route.region_id = data.get('region_id')
+
+    route_assginment = assign_route_to_area(route_id, route.region_id) if route.region_id else None
 
     # Replace all owner-placed stops; customer stops are managed separately
     RouteStop.query.filter_by(route_id=route_id).delete()
@@ -802,3 +805,15 @@ def create_region():
     db.session.commit()
 
     return jsonify(region.get_json()), 201
+
+@index_views.route('/api/owner/route-region/<int:route_id>', methods=['GET'])
+@jwt_required()
+def get_route_region(route_id):
+    if current_user.role != 'owner':
+        return jsonify(message='Unauthorized'), 403
+
+    region = get_region_by_route_id(route_id)
+    if not region:
+        return jsonify(message='No region assigned to this route'), 404
+
+    return jsonify(region.get_json())

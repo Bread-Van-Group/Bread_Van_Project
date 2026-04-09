@@ -62,6 +62,11 @@ def get_route_for_area(route_id):
 
 def assign_route_to_area(route_id, region_id):
     region = get_region_by_id(region_id)
+    existing_assignment = get_route_for_area(route_id)
+
+    if existing_assignment:
+        db.session.delete(existing_assignment)
+        db.session.commit()
 
     try:
         
@@ -75,7 +80,7 @@ def assign_route_to_area(route_id, region_id):
 
         return new_assignment
     except Exception as e:
-        print(f"Error could not assign route to region: {region}")
+        print(f"Error could not assign route to region: {region.region_id}")
         print(e)
 
         db.session.rollback()
