@@ -71,20 +71,24 @@ navigator.geolocation.watchPosition(success, error, {
   timeout: 10000,
 });
 
-async function success(position) {
-  const lat = position.coords.latitude;
-  const lon = position.coords.longitude;
-
+let driverLocationInterval = setInterval(async () => {
   const plate_object = await getFromApi("/api/driver/plate");
   const { region } = await getFromApi("/api/driver/region");
+  const lat = driverLocation.getLatLng().lat;
+  const lng = driverLocation.getLatLng().lng;
 
   //Web Socket Location Broadcast
   socket.emit("driver_location", {
-    lat: position.coords.latitude,
-    lng: position.coords.longitude,
+    lat: lat,
+    lng: lng,
     plate: plate_object.plate,
     region: region,
   });
+}, 2000);
+
+async function success(position) {
+  const lat = position.coords.latitude;
+  const lon = position.coords.longitude;
 
   if (!driverLocation) {
     driverLocation = L.marker([lat, lon], {
@@ -183,10 +187,7 @@ let routingControl = null;
 async function buildRoute() {
   //Get Route from API
   const route_stops = await getFromApi("/api/driver/route");
-  let waypoints = [
-    driverLocation.getLatLng(),
-    ...route_stops.map((stop) => L.latLng(stop.lat, stop.lng)),
-  ];
+  let waypoints = [...route_stops.map((stop) => L.latLng(stop.lat, stop.lng))];
 
   if (routingControl) {
     routingControl.setWaypoints(waypoints);
