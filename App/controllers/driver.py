@@ -25,6 +25,9 @@ def get_assigned_driver_region(driver_id):
         db.select(RouteArea).filter_by(route_id = driver_route.route_id)
     ).scalar_one_or_none()
 
+    if assigned_region is None:
+        return None
+
     return db.session.get(Region, assigned_region.region_id)
 
 def assign_driver_to_route(driver_id, route_id):
