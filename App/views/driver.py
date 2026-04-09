@@ -307,9 +307,10 @@ def get_driver_region():
     if current_user.role != 'driver':
         return jsonify(message='Unauthorized'), 403
     
-    route_name = get_assigned_driver_region(get_jwt_identity()).name
+    region = get_assigned_driver_region(get_jwt_identity())
+    region_name = region.name if region else None
 
-    if route_name:
-        return jsonify({"region": route_name}), 200
+    if region_name:
+        return jsonify({"region": region_name}), 200
     else:
         return '', 400
