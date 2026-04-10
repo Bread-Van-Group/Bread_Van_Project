@@ -9,7 +9,7 @@ class RouteHistory(db.Model):
     __tablename__ = "route_history"
 
     history_id = db.Column(db.Integer, primary_key=True)
-    route_id   = db.Column(db.Integer, db.ForeignKey("routes.route_id"), nullable=False)
+    route_id   = db.Column(db.Integer, db.ForeignKey("routes.route_id", ondelete="SET NULL"), nullable=True)
     van_id     = db.Column(db.Integer, db.ForeignKey("vans.van_id"), nullable=False)
     driver_id  = db.Column(db.Integer, db.ForeignKey("drivers.driver_id"), nullable=False)
     started_at = db.Column(db.DateTime(timezone=True), nullable=False,

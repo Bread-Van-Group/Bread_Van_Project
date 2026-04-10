@@ -5,8 +5,8 @@ class DriverRoute(db.Model):
     __tablename__ = "driver_routes"
 
     driver_route_id = db.Column(db.Integer, primary_key=True)
-    route_id        = db.Column(db.Integer, db.ForeignKey("routes.route_id"),   nullable=False)
-    driver_id       = db.Column(db.Integer, db.ForeignKey("drivers.driver_id"), nullable=False)
+    route_id        = db.Column(db.Integer, db.ForeignKey("routes.route_id", ondelete="CASCADE"),   nullable=False)
+    driver_id       = db.Column(db.Integer, db.ForeignKey("drivers.driver_id", ondelete="CASCADE"), nullable=False)
 
     def __init__(self, route_id, driver_id):
         self.route_id  = route_id

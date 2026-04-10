@@ -9,12 +9,12 @@ class Van(db.Model):
 
     van_id = db.Column(db.Integer, primary_key=True)
     license_plate = db.Column(db.String(20), nullable=False, unique=True)
-    current_route_id = db.Column(db.Integer, db.ForeignKey("routes.route_id"), nullable=True)
+    current_route_id = db.Column(db.Integer, db.ForeignKey("routes.route_id",ondelete="SET NULL"), nullable=True)
     status = db.Column(db.String(20), nullable=True)
     owner_id = db.Column(db.Integer, db.ForeignKey("owners.owner_id"), nullable=False)
 
     # NEW
-    current_driver_id = db.Column(db.Integer, db.ForeignKey("drivers.driver_id"), nullable=True)
+    current_driver_id = db.Column(db.Integer, db.ForeignKey("drivers.driver_id",ondelete="SET NULL"), nullable=True)
     current_lat = db.Column(db.Float, nullable=True)
     current_lng = db.Column(db.Float, nullable=True)
     last_location_update = db.Column(db.DateTime(timezone=True), nullable=True)

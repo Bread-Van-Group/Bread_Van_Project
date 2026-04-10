@@ -8,9 +8,9 @@ class DailyInventory(db.Model):
     __tablename__ = "daily_inventory"
 
     inventory_id       = db.Column(db.Integer, primary_key=True)
-    van_id             = db.Column(db.Integer, db.ForeignKey("vans.van_id"),              nullable=False)
+    van_id             = db.Column(db.Integer, db.ForeignKey("vans.van_id", ondelete="CASCADE"),              nullable=False)
     date               = db.Column(db.Date,    nullable=False)
-    item_id            = db.Column(db.Integer, db.ForeignKey("inventory_items.item_id"),  nullable=False)
+    item_id            = db.Column(db.Integer, db.ForeignKey("inventory_items.item_id", ondelete="CASCADE"),  nullable=False)
     quantity_in_stock  = db.Column(db.Integer, nullable=False, default=0)
     quantity_reserved  = db.Column(db.Integer, nullable=False, default=0)
     quantity_available = db.Column(db.Integer, nullable=False, default=0)

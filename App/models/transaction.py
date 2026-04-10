@@ -9,8 +9,8 @@ class Transaction(db.Model):
 
     transaction_id   = db.Column(db.Integer, primary_key=True)
     customer_id      = db.Column(db.Integer, db.ForeignKey("customers.customer_id"), nullable=True)
-    van_id           = db.Column(db.Integer, db.ForeignKey("vans.van_id"),           nullable=False)
-    stop_id          = db.Column(db.Integer, db.ForeignKey("map_stops.stop_id"),   nullable=True)
+    van_id           = db.Column(db.Integer, db.ForeignKey("vans.van_id",ondelete="SET NULL"),nullable=True)
+    stop_id          = db.Column(db.Integer, db.ForeignKey("map_stops.stop_id",ondelete="SET NULL"),   nullable=True)
     transaction_time = db.Column(db.DateTime(timezone=True), nullable=True,
                                  default=lambda: datetime.now(UTC_MINUS_4))
     total_amount     = db.Column(db.Numeric(10, 2), nullable=False)
