@@ -675,14 +675,15 @@ async function saveRoute() {
   }
 
   //Check if driver has van attached to them
-  driver_van = fetch(`/api/owner/driver-van/${driverId}`).then((res) => {
-    if (!res.ok) {
+  if (driverId) {
+    const vanRes = await fetch(`/api/owner/driver-van/${driverId}`);
+    if (!vanRes.ok) {
       alert(
         "NO VAN ASSIGNED TO THIS DRIVER, Please assign a van to the selected driver",
       );
       return;
     }
-  });
+  }
 
   const routeData = {
     name,
