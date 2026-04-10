@@ -6,6 +6,7 @@ from flask import jsonify, request, render_template
 from flask_jwt_extended import jwt_required, current_user
 from App.models import Van, Driver, Region, RouteArea, RouteHistory, Route
 from App.database import db
+from App.models.driver_route import DriverRoute
 
 index_views = Blueprint('index_views', __name__, template_folder='../templates')
 
@@ -447,6 +448,9 @@ def create_route():
     db.session.add(route)
     db.session.flush()  # get route_id before adding stops
 
+    route_assginment = assign_route_to_area(route.route_id, data.get('region_id')) if data.get('region_id') else None
+
+
     for stop_data in data.get('stops', []):
         stop = RouteStop(
             route_id=route.route_id,
@@ -485,6 +489,7 @@ def update_route(route_id):
     route.description = data.get('description', '')
     route.region_id = data.get('region_id')
 
+    
     route_assginment = assign_route_to_area(route_id, route.region_id) if route.region_id else None
 
     # Replace all owner-placed stops; customer stops are managed separately
@@ -514,9 +519,13 @@ def delete_route(route_id):
     from App.models import Route
 
     route = Route.query.get(route_id)
+    route_area = RouteArea.query.filter_by(route_id=route_id).first()
+    route_assignment = DriverRoute.query.filter_by(route_id=route_id).first()
     if not route or route.owner_id != current_user.owner_id:
         return jsonify(message='Route not found'), 404
 
+    db.session.delete(route_area) if route_area else None
+    db.session.delete(route_assignment) if route_assignment else None
     db.session.delete(route)
     db.session.commit()
 

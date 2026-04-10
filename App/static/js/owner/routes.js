@@ -674,6 +674,8 @@ async function saveRoute() {
     return;
   }
 
+  console.log(regionId);
+
   const routeData = {
     name,
     day_of_week: day,
