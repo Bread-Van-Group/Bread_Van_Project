@@ -1,12 +1,31 @@
 from flask import Blueprint, redirect, render_template, request, jsonify, url_for
-from flask_jwt_extended import jwt_required, current_user, verify_jwt_in_request
-from App.controllers import initialize,assign_route_to_area, get_region_by_route_id
-from App.controllers.transaction import get_report_data
-from flask import jsonify, request, render_template
-from flask_jwt_extended import jwt_required, current_user
-from App.models import Van, Driver, Region, RouteArea, RouteHistory, Route
+from flask_jwt_extended import  jwt_required, current_user, verify_jwt_in_request
+from App.controllers import (
+    initialize,
+    assign_route_to_area,
+    get_region_by_route_id,
+    get_van_by_driver,
+    assign_van_to_route,
+    get_report_data,
+    get_van_daily_inventory,
+    set_van_inventory as set_inventory,
+    get_route_daily_inventory,
+    set_route_inventory as set_inv,
+    get_route_stops,
+    assign_driver_to_route,
+    unassign_driver_from_route,
+    get_all_items,
+    update_item_price,
+    create_item,
+    get_user_by_email,
+)
+from App.models import Van, Driver, Region, RouteArea, Route, Transaction, TransactionItem, InventoryItem, DailyInventory
 from App.database import db
 from App.models.driver_route import DriverRoute
+from sqlalchemy import func
+from datetime import date, datetime, timedelta, timezone
+
+UTC_MINUS_4 = timezone(timedelta(hours=-4))
 
 index_views = Blueprint('index_views', __name__, template_folder='../templates')
 
@@ -81,9 +100,6 @@ def get_van_inventory(van_id):
     if current_user.role != 'owner':
         return jsonify(message='Unauthorized'), 403
 
-    from App.controllers.van import get_van_daily_inventory
-    from datetime import date
-
     date_str = request.args.get('date')
     target_date = date.fromisoformat(date_str) if date_str else date.today()
 
@@ -97,9 +113,6 @@ def set_van_inventory(van_id):
     if current_user.role != 'owner':
         return jsonify(message='Unauthorized'), 403
 
-    from App.controllers.van import set_van_inventory as set_inventory
-    from datetime import date
-
     data = request.json
     date_str = data.get('date')
     target_date = date.fromisoformat(date_str) if date_str else date.today()
@@ -112,8 +125,7 @@ def set_van_inventory(van_id):
 
 @index_views.route('/api/inventory/items', methods=['GET'])
 @jwt_required()
-def get_all_items():
-    from App.controllers.inventory_item import get_all_items
+def get_all_items_route():
     items = get_all_items()
     return jsonify([item.get_json() for item in items])
 
@@ -123,8 +135,6 @@ def get_all_items():
 def update_item_prices():
     if current_user.role != 'owner':
         return jsonify(message='Unauthorized'), 403
-
-    from App.controllers.inventory_item import update_item_price
 
     data = request.json
     updated = []
@@ -140,11 +150,8 @@ def update_item_prices():
 @index_views.route('/api/inventory/items/<int:item_id>', methods=['DELETE'])
 @jwt_required()
 def delete_inventory_item(item_id):
-    # Delete an inventory item/product
     if current_user.role != 'owner':
         return jsonify(message='Unauthorized'), 403
-
-    from App.models import InventoryItem
 
     item = InventoryItem.query.get(item_id)
     if not item:
@@ -159,11 +166,8 @@ def delete_inventory_item(item_id):
 @index_views.route('/api/inventory/items', methods=['POST'])
 @jwt_required()
 def create_inventory_item():
-    # Create a new inventory item
     if current_user.role != 'owner':
         return jsonify(message='Unauthorized'), 403
-
-    from App.controllers.inventory_item import create_item
 
     data = request.json
     item = create_item(
@@ -179,11 +183,8 @@ def create_inventory_item():
 @index_views.route('/api/inventory/items/<int:item_id>', methods=['PUT'])
 @jwt_required()
 def update_inventory_item(item_id):
-    # Update an existing inventory item
     if current_user.role != 'owner':
         return jsonify(message='Unauthorized'), 403
-
-    from App.models import InventoryItem
 
     item = InventoryItem.query.get(item_id)
     if not item:
@@ -200,35 +201,15 @@ def update_inventory_item(item_id):
     return jsonify(message='Product updated')
 
 
-# Controller function in App/controllers/inventory_item.py:
-
-def create_item(name, price, category='', description=''):
-    # Create a new inventory item
-    from App.models import InventoryItem
-    from App.database import db
-
-    item = InventoryItem(name=name, price=price, category=category, description=description)
-    db.session.add(item)
-    db.session.commit()
-    return item
-
-
 @index_views.route('/api/owner/dashboard/summary', methods=['GET'])
 @jwt_required()
 def owner_dashboard_summary():
-    # Get today's summary stats for owner dashboard
     if current_user.role != 'owner':
         return jsonify(message='Unauthorized'), 403
 
-    from App.models import Transaction, TransactionItem, InventoryItem
-    from datetime import date, datetime, timedelta, timezone
-    from sqlalchemy import func
-
-    UTC_MINUS_4 = timezone(timedelta(hours=-4))
     today_start = datetime.now(UTC_MINUS_4).replace(hour=0, minute=0, second=0, microsecond=0)
     today_end = datetime.now(UTC_MINUS_4).replace(hour=23, minute=59, second=59, microsecond=999999)
 
-    # Get today's transactions
     today_txs = Transaction.query.filter(
         Transaction.transaction_time >= today_start,
         Transaction.transaction_time <= today_end
@@ -237,7 +218,6 @@ def owner_dashboard_summary():
     total_transactions = len(today_txs)
     total_revenue = sum(float(tx.total_amount) for tx in today_txs)
 
-    # Find best-selling item today
     best_selling = db.session.query(
         InventoryItem.name,
         func.sum(TransactionItem.quantity).label('total_qty')
@@ -268,7 +248,7 @@ def get_owner_routes():
     if current_user.role != 'owner':
         return jsonify(message='Unauthorized'), 403
 
-    from App.models import Route, DriverRoute, Driver, RouteStop
+    from App.models import RouteStop
 
     routes = Route.query.filter_by(owner_id=current_user.owner_id).all()
 
@@ -276,11 +256,9 @@ def get_owner_routes():
     for route in routes:
         route_json = route.get_json()
 
-        # Add stops count
         stops_count = RouteStop.query.filter_by(route_id=route.route_id).count()
         route_json['stops_count'] = stops_count
 
-        # Add assigned drivers
         driver_routes = DriverRoute.query.filter_by(route_id=route.route_id).all()
         assigned_drivers = []
         for dr in driver_routes:
@@ -300,19 +278,13 @@ def get_owner_routes():
 @index_views.route('/api/owner/inventory/low-stock', methods=['GET'])
 @jwt_required()
 def get_low_stock_items():
-    # Get items with low stock for today
     if current_user.role != 'owner':
         return jsonify(message='Unauthorized'), 403
 
-    from App.models import DailyInventory, InventoryItem, Van
-    from datetime import date
-
-    # Get owner's van
     van = Van.query.filter_by(owner_id=current_user.owner_id).first()
     if not van:
         return jsonify([])
 
-    # Get today's inventory with stock < 20
     today = date.today()
     low_stock = db.session.query(
         DailyInventory, InventoryItem
@@ -340,12 +312,10 @@ def owner_routes():
 
 @index_views.route('/api/owner/routes/<int:route_id>/stops', methods=['GET'])
 @jwt_required()
-def get_route_stops(route_id):
-    # Get all stops for a route
+def get_route_stops_route(route_id):
     if current_user.role != 'owner':
         return jsonify(message='Unauthorized'), 403
 
-    from App.controllers.route import get_route_stops
     stops = get_route_stops(route_id)
 
     return jsonify([{
@@ -364,7 +334,7 @@ def create_route_stop(route_id):
     if current_user.role != 'owner':
         return jsonify(message='Unauthorized'), 403
 
-    from App.models import Route, RouteStop
+    from App.models import RouteStop
     from datetime import time
 
     route = Route.query.get(route_id)
@@ -406,7 +376,7 @@ def delete_route_stop(route_id, stop_id):
     if current_user.role != 'owner':
         return jsonify(message='Unauthorized'), 403
 
-    from App.models import Route, RouteStop
+    from App.models import RouteStop
 
     route = Route.query.get(route_id)
     if not route or route.owner_id != current_user.owner_id:
@@ -429,7 +399,7 @@ def create_route():
     if current_user.role != 'owner':
         return jsonify(message='Unauthorized'), 403
 
-    from App.models import Route, RouteStop
+    from App.models import RouteStop
     from datetime import time
 
     data = request.json
@@ -446,10 +416,9 @@ def create_route():
         description=data.get('description', '')
     )
     db.session.add(route)
-    db.session.flush()  # get route_id before adding stops
+    db.session.flush()
 
     route_assginment = assign_route_to_area(route.route_id, data.get('region_id')) if data.get('region_id') else None
-
 
     for stop_data in data.get('stops', []):
         stop = RouteStop(
@@ -473,7 +442,7 @@ def update_route(route_id):
     if current_user.role != 'owner':
         return jsonify(message='Unauthorized'), 403
 
-    from App.models import Route, RouteStop
+    from App.models import RouteStop
     from datetime import time
 
     route = Route.query.get(route_id)
@@ -489,10 +458,8 @@ def update_route(route_id):
     route.description = data.get('description', '')
     route.region_id = data.get('region_id')
 
-    
     route_assginment = assign_route_to_area(route_id, route.region_id) if route.region_id else None
 
-    # Replace all owner-placed stops; customer stops are managed separately
     RouteStop.query.filter_by(route_id=route_id).delete()
 
     for stop_data in data.get('stops', []):
@@ -509,14 +476,13 @@ def update_route(route_id):
     db.session.commit()
     return jsonify(message='Route updated')
 
+
 @index_views.route('/api/owner/routes/<int:route_id>', methods=['DELETE'])
 @jwt_required()
 def delete_route(route_id):
     """Delete a route"""
     if current_user.role != 'owner':
         return jsonify(message='Unauthorized'), 403
-
-    from App.models import Route
 
     route = Route.query.get(route_id)
     route_area = RouteArea.query.filter_by(route_id=route_id).first()
@@ -539,9 +505,6 @@ def assign_driver_to_route_api(route_id):
     if current_user.role != 'owner':
         return jsonify(message='Unauthorized'), 403
 
-    from App.models import Route
-    from App.controllers.driver import assign_driver_to_route
-
     route = Route.query.get(route_id)
     if not route or route.owner_id != current_user.owner_id:
         return jsonify(message='Route not found'), 404
@@ -552,7 +515,8 @@ def assign_driver_to_route_api(route_id):
         return jsonify(message='driver_id is required'), 400
 
     result = assign_driver_to_route(driver_id, route_id)
-    # None means assignment already exists — that's fine, treat as success
+    driver_van = get_van_by_driver(driver_id)
+    van_assignment = assign_van_to_route(driver_van.van_id, route_id) if driver_van else None
     return jsonify(message='Driver assigned to route'), 200
 
 
@@ -562,8 +526,6 @@ def unassign_driver_from_route_api(route_id):
     """Remove a driver from a route"""
     if current_user.role != 'owner':
         return jsonify(message='Unauthorized'), 403
-
-    from App.controllers.driver import unassign_driver_from_route
 
     data = request.json or {}
     driver_id = data.get('driver_id')
@@ -575,8 +537,6 @@ def unassign_driver_from_route_api(route_id):
         return jsonify(message='Assignment not found'), 404
     return jsonify(message='Driver unassigned from route'), 200
 
-
-# driver and van management
 
 @index_views.route('/owner/fleet', methods=['GET'])
 @jwt_required()
@@ -607,8 +567,6 @@ def create_driver():
 
     data = request.json
 
-    # Check for duplicate email
-    from App.controllers.user import get_user_by_email
     if get_user_by_email(data.get('email', '')):
         return jsonify(message='A user with that email already exists'), 409
 
@@ -676,7 +634,6 @@ def assign_driver_to_van(van_id):
     if not van or van.owner_id != current_user.owner_id:
         return jsonify(message='Van not found'), 404
 
-    # Verify driver belongs to owner
     driver = Driver.query.get(driver_id)
     if not driver or driver.owner_id != current_user.owner_id:
         return jsonify(message='Driver not found'), 404
@@ -706,8 +663,6 @@ def unassign_driver_from_van(van_id):
     return jsonify(van.get_json())
 
 
-# driver tracking
-
 @index_views.route('/owner/tracking', methods=['GET'])
 @jwt_required()
 def owner_tracking():
@@ -731,7 +686,7 @@ def get_vans_tracking():
 @index_views.route('/api/owner/vans/<int:van_id>/location', methods=['POST'])
 @jwt_required()
 def update_van_location(van_id):
-    """Update van's GPS location (called by driver app via WebSocket or API)"""
+    """Update van's GPS location"""
     data = request.json
 
     van = Van.query.get(van_id)
@@ -743,16 +698,13 @@ def update_van_location(van_id):
 
     return jsonify(van.get_json())
 
-#set inventory
+
 @index_views.route('/api/owner/routes/<int:route_id>/inventory', methods=['GET'])
 @jwt_required()
 def get_route_inventory(route_id):
     """Return inventory for a route. Accepts optional ?date=YYYY-MM-DD param."""
     if current_user.role != 'owner':
         return jsonify(message='Unauthorized'), 403
-
-    from App.controllers.van import get_route_daily_inventory
-    from datetime import date
 
     date_str = request.args.get('date')
     target_date = date.fromisoformat(date_str) if date_str else date.today()
@@ -762,17 +714,9 @@ def get_route_inventory(route_id):
 @index_views.route('/api/owner/routes/<int:route_id>/inventory', methods=['POST'])
 @jwt_required()
 def set_route_inventory(route_id):
-    """Set inventory for a route on a given date.
-
-    Van resolution is handled by set_route_inventory in the van controller,
-    which looks up vans via current_route_id first, then falls back to the
-    driver assigned to the route via driver_routes.
-    """
+    """Set inventory for a route on a given date."""
     if current_user.role != 'owner':
         return jsonify(message='Unauthorized'), 403
-
-    from App.controllers.van import set_route_inventory as set_inv
-    from datetime import date
 
     data = request.json or {}
     date_str = data.get('date')
@@ -788,7 +732,7 @@ def set_route_inventory(route_id):
 
     return jsonify(message='Route inventory updated successfully')
 
-# region management
+
 @index_views.route('/api/owner/regions', methods=['GET'])
 @jwt_required()
 def get_regions():
@@ -815,6 +759,7 @@ def create_region():
 
     return jsonify(region.get_json()), 201
 
+
 @index_views.route('/api/owner/route-region/<int:route_id>', methods=['GET'])
 @jwt_required()
 def get_route_region(route_id):
@@ -826,3 +771,17 @@ def get_route_region(route_id):
         return jsonify(message='No region assigned to this route'), 404
 
     return jsonify(region.get_json())
+
+
+@index_views.route('/api/owner/driver-van/<int:driver_id>', methods=['GET'])
+@jwt_required()
+def get_driver_van(driver_id):
+    if current_user.role != 'owner':
+        return jsonify(message='Unauthorized'), 403
+
+    van = get_van_by_driver(driver_id)
+
+    if not van:
+        return '', 404
+    else:
+        return jsonify(van.get_json()), 200
