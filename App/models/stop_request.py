@@ -7,8 +7,8 @@ UTC_MINUS_4 = timezone(timedelta(hours=-4))
 class StopRequest(MapStop):
     __tablename__ = "stop_request"
 
-    stop_request_id        = db.Column(db.Integer, db.ForeignKey("map_stops.stop_id"), primary_key=True)
-    route_id               = db.Column(db.Integer, db.ForeignKey("routes.route_id"),    nullable=False)
+    stop_request_id        = db.Column(db.Integer, db.ForeignKey("map_stops.stop_id", ondelete="CASCADE"), primary_key=True)
+    route_id               = db.Column(db.Integer, db.ForeignKey("routes.route_id", ondelete="CASCADE"),    nullable=False)
     customer_id            = db.Column(db.Integer, db.ForeignKey("customers.customer_id"), nullable=False)
     status_id              = db.Column(db.Integer, db.ForeignKey("statuses.status_id"),    nullable=False)
     fulfilled_time         = db.Column(db.DateTime(timezone=True), default=None, nullable=True)

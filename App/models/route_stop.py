@@ -7,9 +7,9 @@ UTC_MINUS_4 = timezone(timedelta(hours=-4))
 class RouteStop(MapStop):
     __tablename__ = "route_stops"
 
-    stop_id                = db.Column(db.Integer, db.ForeignKey("map_stops.stop_id"),  primary_key=True)
-    route_id               = db.Column(db.Integer, db.ForeignKey("routes.route_id"),    nullable=False)
-    owner_id               = db.Column(db.Integer, db.ForeignKey("owners.owner_id"),    nullable=False)
+    stop_id                = db.Column(db.Integer, db.ForeignKey("map_stops.stop_id", ondelete="CASCADE"),  primary_key=True)
+    route_id               = db.Column(db.Integer, db.ForeignKey("routes.route_id", ondelete="CASCADE"),    nullable=False)
+    owner_id               = db.Column(db.Integer, db.ForeignKey("owners.owner_id", ondelete="CASCADE"),    nullable=False)
     stop_order             = db.Column(db.Integer,     nullable=False)
 
     __mapper_args__ = {
